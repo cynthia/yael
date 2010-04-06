@@ -2,7 +2,6 @@
 
 # Customize makefile.inc
 
-
 # Detect architecture
 if [ `uname` == Darwin ] ; then
   conf=mac
@@ -39,15 +38,6 @@ lapackcflags="-DFINTEGER=int"
 usearpack=no
 arpackldflags=/usr/lib64/libarpack.so.2
 
-useff=no
-ffldflags='-lz -lavformat -lavcodec -lavdevice -lswscale -lavutil'
-ffcflags="-D_ISOC9X_SOURCE -I/usr/include/ffmpeg"
-
-
-usempi=no
-mpicflags=""
-mpildflags="-lmpi"
-
 useopenmp=""
 
 # dynamic libs: force an install path so that the user does not need
@@ -74,12 +64,7 @@ usage: $0
   [--lapack=ld_flags_for_lapack_and_blas]
   [--enable-arpack]
   [--arpack=ld_flags_for_arpack]
-  [--enable-ffmpeg]
-  [--ffmpeg=ffmpeg_install_prefix]
   [--python-cflags=flags_to_compile_with_python_c_api]
-  [--enable-mpi]
-  [--mpi=mpi_install_prefix]
-  [--enable-openmp]
   [--enable-numpy]
   [--numpy-swig-wrapper=path-to-numpy-dot-i]
   [--numpy-cflags=includes-for-numpy]
@@ -131,21 +116,10 @@ while [ $# -gt 0 ] ; do
 	--arpack=*) arpackldflags=${a#*=} ;;
 	--fortran-64bit-int) 
             lapackcflags="$lapackcflags -DFINTEGER=long" ;;       
-        --enable-ffmpeg) useff=yes ;;
-	--ffmpeg=*) ffprefix=${a#*=}
-	    ffldflags="-L$ffprefix/lib $ffldflags"
-	    ffcflags="-I$ffprefix/include $ffcflags" ;;
 
         --python-cflags=*)     
             pythoncflags=${a#*=}
             ;;        
-
-        --enable-mpi) usempi=yes ;;
-        --enable-openmp) useopenmp=yes ;;
-	--mpi=*) mpiprefix=${a#*=}
-	    mpildflags="-L$mpiprefix/lib $mpildflags"
-	    mpicflags="-I$mpiprefix/include $mpicflags" ;;
-        
 
         --enable-numpy) 
             usenumpy=yes
@@ -202,15 +176,6 @@ ARPACKLDFLAGS=$arpackldflags
 USETHREADS=yes
 THREADCFLAGS=-DHAVE_THREADS
 THREADLDFLAGS=-lpthread
-
-USEFF=$useff
-FFLDFLAGS=$ffldflags
-FFCFLAGS=$ffcflags
-
-USEMPI=$usempi
-MPILDFLAGS=$mpildflags
-MPICFLAGS=$mpicflags
-USEOPENMP=$useopenmp
 
 SHAREDEXT=$sharedext
 SHAREDFLAGS=$sharedflags
