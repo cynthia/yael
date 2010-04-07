@@ -5,6 +5,7 @@ CC=gcc
 
 all: yael4matlab.a yael_kmeans yael_nn
 
+include ../makefile.inc
 
 ifeq "$(YAELCONF)" "linux64"
     CFLAGS=-O3 -DFINTEGER=long -fPIC -m64 -I..

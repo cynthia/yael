@@ -13,7 +13,6 @@
 %{
 
 #include "nn.h"
-#include "clustering.h"
 #include "kmeans.h"
 #include "sorting.h"
 #include "vector.h"
@@ -178,9 +177,6 @@ PARALLEL_FUNCTION_PEEK(knn_full_thread)
 }
 
 
-
-
-%include "clustering.h"
 
 %include "kmeans.h"
 
