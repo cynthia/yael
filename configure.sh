@@ -161,6 +161,7 @@ LDFLAGS=$ldflags
 
 PYTHONCFLAGS = $pythoncflags
 
+YAELCONF=$conf
 YAELCFLAGS=-I$yaelinc
 YAELLDFLAGS=-L$yaellib -Wl,-rpath,$yaellib -lyael
 

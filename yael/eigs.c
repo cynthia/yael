@@ -27,7 +27,6 @@ int eigs_sym (int d, const float * m, float * eigval, float * eigvec)
     for (j = 0 ; j < d ; j++)
       md[i * d + j] = (float) m[i * d + j];
   }
-  printf ("--------------\n");
 
   /* variable for lapack function */
   double workopt = 0;
@@ -71,8 +70,6 @@ int geigs_sym (int d, const float * a, const float * b, float * eigval, float * 
       bd[i * d + j] = (float) b[i * d + j];
     }
   
-  printf ("--------------\n");
-
   /* variable for lapack function */
   double workopt = 0;
   int lwork = -1, info, itype = 1;
@@ -86,8 +83,6 @@ int geigs_sym (int d, const float * a, const float * b, float * eigval, float * 
   if (info > 0)
     fprintf (stderr, "# eigs_sym: problem while computing eigen-vectors/values\n");
 
-  fprintf (stderr, "1");
-
   /* normalize the eigenvectors, copy and free */
   double nr = 1;
   for (i = 0 ; i < d ; i++) {
@@ -96,8 +91,6 @@ int geigs_sym (int d, const float * a, const float * b, float * eigval, float * 
     for (j = 0 ; j < d ; j++) 
       eigvec[i * d + j] = (float) (ad[i * d + j] / nr);
   }
-
-  fprintf (stderr, "2");
 
   free (ad);
   free (bd);

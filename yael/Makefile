@@ -7,8 +7,6 @@ CC=gcc
 all: libyael.a libyael.$(SHAREDEXT) _yael.so
 
 
-
-
 ifeq "$(USEARPACK)" "yes"
   EXTRAYAELLDFLAG=$(ARPACKLDFLAGS)
   EXTRAMATRIXFLAG=-DHAVE_ARPACK
@@ -23,7 +21,7 @@ endif
 #############################
 # Various  
 
-LIBOBJ=matrix.o vector.o nn.o clustering.o kmeans.o gmm.o eigs.o \
+LIBOBJ=matrix.o vector.o nn.o kmeans.o gmm.o eigs.o \
 	spectral_clustering.o sorting.o binheap.o machinedeps.o vlad.o
 
 libyael.a: $(LIBOBJ)
@@ -38,8 +36,6 @@ libyael.$(SHAREDEXT): $(LIBOBJ)
 nn.o: EXTRACFLAGS=$(LAPACKCFLAGS) $(THREADCFLAGS)
 
 matrix.o: EXTRACFLAGS=$(LAPACKCFLAGS) $(THREADCFLAGS) $(EXTRAMATRIXFLAG)
-
-clustering.o: EXTRACFLAGS=$(THREADCFLAGS)
 
 kmeans.o: EXTRACFLAGS=$(THREADCFLAGS)
 
@@ -58,7 +54,7 @@ mmap_and_lock: mmap_and_lock.c
 # Python wrapper 
 
 
-yael_wrap.c : yael.swg common.swg nn.h clustering.h kmeans.h gmm.h eigs.h \
+yael_wrap.c : yael.swg common.swg nn.h kmeans.h gmm.h eigs.h \
 	sorting.h matrix.h vector.h machinedeps.h vlad.h
 	$(SWIG) -I.. $(NUMPYSWIGFLAGS) $< 
 
@@ -71,8 +67,6 @@ _yael.so: yael_wrap.o libyael.$(SHAREDEXT)
 # for i in *.c ; do cpp -I.. -MM $i; done
 
 binheap.o: binheap.c binheap.h sorting.h
-clustering.o: clustering.c clustering.h vector.h nn.h machinedeps.h \
-  sorting.h kmeans.h
 eigs.o: eigs.c vector.h sorting.h machinedeps.h
 gmm.o: gmm.c vector.h matrix.h kmeans.h nn.h gmm.h sorting.h
 kmeans.o: kmeans.c vector.h kmeans.h nn.h
