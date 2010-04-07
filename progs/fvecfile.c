@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
+#include <string.h>
 #include <assert.h>
+
 
 void display_help (const char * progname)
 {
@@ -52,10 +54,10 @@ int main (int argc, char **argv)
     ret = fread (v, sizeof (*v), d, fi);
     assert (ret == d);
     
-    printf ("[");
+    fprintf (fo, "[");
     for (j = 0 ; j < d ; j++)
-      printf ("%.5f ", v[j]);
-    printf ("]\n");
+      fprintf (fo, "%.5f ", v[j]);
+    fprintf (fo, "]\n");
     i++;
   }
 
