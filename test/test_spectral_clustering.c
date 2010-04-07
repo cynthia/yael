@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "spectral_clustering.h"
-#include "vector.h"
+#include <yael/spectral_clustering.h>
+#include <yael/vector.h>
 
 int main()
 {

@@ -5,9 +5,9 @@
 #include <stdio.h>
 #include <assert.h> 
 
-#include "vector.h"
-#include "machinedeps.h"
-#include "gmm.h"
+#include <yael/vector.h>
+#include <yael/machinedeps.h>
+#include <yael/gmm.h>
 
 #define FMT_FVEC  0
 #define FMT_TEXT  1

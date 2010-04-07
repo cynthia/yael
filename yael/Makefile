@@ -1,6 +1,6 @@
 .SUFFIXES: .c .o .swg 
 
-include makefile.inc
+include ../makefile.inc
 
 CC=gcc 
 

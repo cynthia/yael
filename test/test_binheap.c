@@ -2,7 +2,7 @@
 #include <limits.h>
 #include <stdio.h>
 
-#include "binheap.h"
+#include <yael/binheap.h>
 
 
 int main (int argc, char ** argv)

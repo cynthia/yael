@@ -3,8 +3,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "vector.h"
-#include "matrix.h"
+#include <yael/vector.h>
+#include <yael/matrix.h>
 
 
 /* 

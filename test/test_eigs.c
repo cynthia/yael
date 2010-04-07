@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "eigs.h"
-#include "vector.h"
+#include <yael/eigs.h>
+#include <yael/vector.h>
 
 int main()
 {

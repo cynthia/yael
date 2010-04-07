@@ -47,7 +47,7 @@ if [ $conf == mac ]; then
   wrapldflags="-Wl,-F. -bundle -undefined dynamic_lookup"
   sharedext=dylib
   sharedflags="-dynamiclib"
-  yaelsharedflags="$sharedflags -install_name $yaelprefix/libyael.dylib"
+  yaelsharedflags="$sharedflags -install_name $yaelprefix/yael/libyael.dylib"
 else
   wrapldflags="-shared"
   sharedflags="-shared"
@@ -139,8 +139,9 @@ while [ $# -gt 0 ] ; do
     esac
 done
 
-yaellib=${yaelprefix}
-yaelinc=${yaelprefix%/*}
+yaellib=${yaelprefix}/yael
+#yaelinc=${yaelprefix%/*}
+yaelinc=${yaelprefix}
 
 
 if [ -z "$swig" ]; then
