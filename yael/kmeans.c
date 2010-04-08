@@ -309,3 +309,57 @@ float kmeans (int di, int n, int k, int niter,
   return qerr_best / n; 
 }
 
+
+
+/*---------- Functions for forward compatibility ----------*/
+
+float *clustering_kmeans_assign_with_score (int n, int di,
+                                            const float *points, int k, int nb_iter_max, 
+                                            double normalize, 
+                                            int n_thread,
+                                            double *score, int **clust_assign_out)
+{
+
+  long d=di; /* to force 64-bit address computations */ 
+  float *centroids = fvec_new (k * d);
+  int *ca=clust_assign_out ? ivec_new(n) : NULL;
+  int nredo=1;
+  
+  if(nb_iter_max/100000!=0) {
+    nredo=nb_iter_max/100000;
+    nb_iter_max=nb_iter_max % 100000;    
+/*    printf("redo: %d iter: %d\n",nredo,nb_iter_max); */
+  }   
+
+  kmeans(di,n,k,nb_iter_max,points,n_thread,0,nredo,centroids,NULL,ca,NULL);
+
+  if(clust_assign_out) *clust_assign_out=ca;
+  
+  return centroids;
+
+}
+
+float *clustering_kmeans_assign (int n, int d,
+                                 const float *points, int k, int nb_iter_max,
+                                 double normalize, int **clust_assign_out)
+{
+   return clustering_kmeans_assign_with_score (n, d, points, k, nb_iter_max,
+                                               normalize, count_cpu(), NULL, clust_assign_out);
+}
+
+float *clustering_kmeans (int n, int d,
+                          const float *points, int k, int nb_iter_max,
+                          double normalize)
+{
+
+  int *clust_assign;
+
+  float *centroids = clustering_kmeans_assign_with_score (n, d, points, k, nb_iter_max,
+                                               normalize, count_cpu(), NULL, &clust_assign);
+  free (clust_assign);
+
+  return centroids;
+}
+
+
+

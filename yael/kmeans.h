@@ -69,4 +69,28 @@ float kmeans (int d, int n, int k, int niter,
 	      int * assign, int * nassign);
 
 
+/*----------- Following functions are used for forward compatibility -----------*/
+
+/*! @brief k-means clustering. All float arrays are allocated by malloc_ffq */
+float* clustering_kmeans (int n, int d,
+                          const float *points, int k, int nb_iter_max, 
+                          double normalize);
+
+/*! @brief Same as k-means clustering, but generate in addition the assignment
+ *  performed on the input set
+ */
+float* clustering_kmeans_assign (int n, int d,
+				 const float *points, int k, int nb_iter_max, 
+				 double normalize, 
+				 int ** clust_assign_out);
+
+
+
+float* clustering_kmeans_assign_with_score (int n, int d,
+                                            const float *points, int k, int nb_iter_max,
+                                            double normalize, int n_thread, double *score_out,
+                                            int ** clust_assign_out);
+
+
+
 #endif
