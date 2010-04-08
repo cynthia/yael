@@ -43,6 +43,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #include "vector.h"
 #include "kmeans.h"
 #include "nn.h"
+#include "machinedeps.h"
 
 
 static void nn_full (int d, int n, int nb, const float * v, const float *b, 
