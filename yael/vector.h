@@ -128,6 +128,14 @@ long ivec_count_gt(const int * v, long n, int val);
 /* I/O of a single vector is supported only if it is smaller than 2^31       */ 
 /*---------------------------------------------------------------------------*/
 
+
+/* Read the number of vectors in a file and their dimension (vectors of same size). 
+   Output the number of bytes of the file                                           */
+long fvecs_fsize (const char * fname, int *d_out, int *n_out);
+long ivecs_fsize (const char * fname, int *d_out, int *n_out);
+
+
+
 /*! @brief write a vector into an open file */
 int ivec_fwrite(FILE *f, const int *v, int d);
 int fvec_fwrite(FILE *f, const float *v, int d);
@@ -149,6 +157,7 @@ int fvecs_write_txt (const char * fname, int d, int n, const float *vf);
  *
  * Returns nb of vectors read, or <0 on error
  */
+
 int fvecs_new_read (const char *fname, int *d_out, float **vf);
 
 int fvecs_new_fread_max (FILE *f, int *d_out, float **vf, long nmax);

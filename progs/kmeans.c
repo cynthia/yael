@@ -59,8 +59,8 @@ int main (int argc, char ** argv)
 {
   int i;
   int k = 10;
-  int d = 10;
-  int n = 100;
+  int d = 0;
+  int n = 0;
   int niter = 40;
   int nredo = 1;
   int nt = count_cpu();
@@ -137,25 +137,37 @@ int main (int argc, char ** argv)
 	   (fmt_out == FMT_FVEC ? "fvec" : "txt"));
 
   /* read the input vectors */
-  
-
-  float * v = fvec_new (n * d);
-  float * centroids = fvec_new (k * d);
-  int * nassign = ivec_new (k);
+  float * v;
 
   /* read the vectors from the input file, and sanitize them if needed */
-  if (fmt_in == FMT_FVEC)
+  if (fmt_in == FMT_FVEC) {
+    if (d == 0 || n == 0) {/* automatically read the dimension */
+      int ret = fvecs_fsize (fi_name, &d, &n);
+      fprintf (stderr, "File %s contains (%d bytes) %d vectors of dimension %d\n", fi_name, ret, n, d);
+      assert (ret);    
+    }
+    v = fvec_new (n * d);
     ret = fvecs_read (fi_name, d, n, v);
-  else if (fmt_in == FMT_TEXT)
+  }
+  else if (fmt_in == FMT_TEXT) {
+    v = fvec_new (n * d);
     ret = fvecs_read_txt (fi_name, d, n, v);
+  }
   else exit (1);
+
+  //  fprintf ("
   assert (ret >= n);
 
-  fvec_purge_nans (v, n * d, 2);
+  /* Remove the Nan values */
+  int nNaN = fvec_purge_nans (v, n * d, 2);
+  if (nNaN > 0)
+    fprintf (stderr, "found %d NaN values\n", nNaN);
 
   /* k-means! */
-  double qerr = kmeans (d, n, k, niter, v, nt, seed, nredo, 
-			centroids, NULL, NULL, nassign);
+  float * centroids = fvec_new (k * d);
+  int * nassign = ivec_new (k);
+  kmeans (d, n, k, niter, v, nt, seed, nredo, centroids, NULL, NULL, nassign);
+
 
   /* write the output file */
   if (fmt_out == FMT_FVEC)
@@ -163,10 +175,10 @@ int main (int argc, char ** argv)
   else if (fmt_out == FMT_TEXT)
     ret = fvecs_write_txt (fo_name, d, k, centroids);
   else exit (2);
-  assert (ret == n);
+  assert (ret == k);
   
-
-  ivec_print (nassign, k);
-  fprintf (stderr, "qerr = %.3f\n", qerr);
+  free (centroids);
+  free (nassign);
+  free (v);
   return 0;
 }

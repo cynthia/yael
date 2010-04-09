@@ -48,9 +48,10 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <malloc.h>
 #else
 static void *memalign(size_t ignored,size_t nbytes) {
-  return malloc(nbytes);
+  return malloc(nbytes); 
 } 
 #endif
+
 
 
 float *fvec_new (long n)
@@ -315,6 +316,37 @@ void ivec_accumulate_slices(const int *v,int *sl,int n) {
 /*---------------------------------------------------------------------------*/
 /* Input/Output functions                                                    */
 /*---------------------------------------------------------------------------*/
+
+long fvecs_fsize (const char * fname, int *d_out, int *n_out)
+{
+  int d, ret; 
+  long nbytes;
+
+  FILE * f = fopen (fname, "r");
+  
+  /* read the dimension from the first vector */
+  ret = fread (&d, sizeof (d), 1, f);
+  if (ret == 0)
+    return ret;
+  
+  fseek (f, 0, SEEK_END);
+  nbytes = ftell (f);
+  fclose (f);
+  
+  assert (nbytes % (d + 1) == 0);   /* checksum */
+
+  *d_out = d;
+  *n_out = nbytes / (4 * d + 4);
+  return nbytes;
+}
+
+
+long ivecs_fsize (const char * fname, int *d_out, int *n_out)
+{
+  return fvecs_fsize (fname, d_out, n_out);
+}
+
+
 
 
 int fvec_fwrite (FILE *fo, const float *v, int d) 
@@ -939,7 +971,7 @@ void fvec_normalize (float * v, long n, double norm)
 }
 
 int fvec_purge_nans(float * v, long n, float replace_value) {
-  long i,count=0;
+  long i, count=0;
   
   for(i=0;i<n;i++) if(isnan(v[i])) {
     count++;
