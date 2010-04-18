@@ -49,11 +49,33 @@ knowledge of the CeCILL license and that you accept its terms.
 #define FMT_FVEC  0
 #define FMT_TEXT  1
 
+#define DEFAULT_NITER 40
+#define DEFAULT_NREDO 1
+
 void usage(const char * cmd)
 {
-  printf ("Usage: %s  [options]\n", cmd);
+  printf ("Usage: %s [options]\n", cmd);
+  
+  printf (
+	  "  Input\n"
+	  "    -i filename     input set of vectors to cluster (fvec file format)\n"
+	  "    -itxt filename  the same but for an input text file\n"
+	  "    -n #            use n points from the file. Default: all the vectors\n"
+          "    -d #            dimension of the vector (used with -itxt only)\n"
+	  "  Clustering parameters\n"                  
+	  "    -k #            number of centroids to produce\n"
+	  "    -niter #        maximum number of iterations. Default: %d\n"
+	  "    -nredo #        number of runs to perform. Default: %d\n"
+	  "    -seed #         initialize the random generate with a number\n"
+          "    -nt #           number of threads used. Default: nt=all\n"
+	  "  Ouput\n"                          
+	  "    -o clustfile    output cluster file (fvec format)\n"
+	  "    -otxt clustfile output cluster file (text format)\n", 
+	  DEFAULT_NITER, DEFAULT_NREDO);
   exit (0);
 }
+
+
 
 int main (int argc, char ** argv)
 {
@@ -61,8 +83,8 @@ int main (int argc, char ** argv)
   int k = 10;
   int d = 0;
   int n = 0;
-  int niter = 40;
-  int nredo = 1;
+  int niter = DEFAULT_NITER;
+  int nredo = DEFAULT_NREDO;
   int nt = count_cpu();
   int seed = 0;
   int ret;
