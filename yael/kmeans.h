@@ -39,6 +39,10 @@ knowledge of the CeCILL license and that you accept its terms.
 #define KMEANS_H_INCLUDED
 
 
+/*---------------------------------------------------------------------------*/
+/*! @addtogroup clustering
+ *  @{  */
+
 
 /* layout of flags: 
 
@@ -60,7 +64,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #define KMEANS_NORMALIZE_SOPHISTICATED 0x80000
 
 
-/* compute the k-means algorithm and return the quantization error. 
+/*! @brief compute the k-means algorithm and return the quantization error. 
    The centroids parameters must be allocated. 
    TThe other output vectors (dis, assign and nassign) are not used if NULL */
 float kmeans (int d, int n, int k, int niter, 
@@ -71,7 +75,7 @@ float kmeans (int d, int n, int k, int niter,
 
 /*----------- Following functions are used for forward compatibility -----------*/
 
-/*! @brief k-means clustering. All float arrays are allocated by malloc_ffq */
+/*! @brief k-means clustering. */
 float* clustering_kmeans (int n, int d,
                           const float *points, int k, int nb_iter_max, 
                           double normalize);
@@ -92,5 +96,5 @@ float* clustering_kmeans_assign_with_score (int n, int d,
                                             int ** clust_assign_out);
 
 
-
+/*! @} */
 #endif

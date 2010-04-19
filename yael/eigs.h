@@ -39,6 +39,10 @@ knowledge of the CeCILL license and that you accept its terms.
 #define __eigs_h
 
 
+/*---------------------------------------------------------------------------*/
+/*! @addtogroup linearalgebra
+ *  @{  */
+
 /* compute the eigenvalues and eigvectors of a symmetric matrix m
 
   eigval   the n eigenvalues
@@ -59,4 +63,5 @@ int geigs_sym (int d, const float * a, const float * b, float * eigval, float * 
 */
 void eigs_reorder (int d, float * eigval, float * eigvec, int criterion);
 
+/*! @} */
 #endif

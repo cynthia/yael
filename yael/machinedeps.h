@@ -48,6 +48,13 @@ knowledge of the CeCILL license and that you accept its terms.
 #define __thread 
 #endif
 
+/*---------------------------------------------------------------------------*/
+/*! @addtogroup machinedep
+ *  @{
+ */
+
+
+/*! @brief Return the number of CPU */
 int count_cpu(void);
 
 #ifndef __APPLE__
@@ -93,6 +100,7 @@ void malloc_stats_begin(void);
 
 malloc_stats_t malloc_stats_end(void);
 
+/*! @} */
 #endif
 
 

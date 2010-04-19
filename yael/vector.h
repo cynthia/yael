@@ -40,6 +40,14 @@ knowledge of the CeCILL license and that you accept its terms.
 
 #include <stdio.h>
 
+
+/*---------------------------------------------------------------------------*/
+/*! @addtogroup vector
+ *  @{
+ */
+
+
+
 /*---------------------------------------------------------------------------
  * Vectors are represented as C arrays of basic elements. Functions
  * operating on them are prefixed with:
@@ -420,5 +428,5 @@ void fvec_isplat_add(const float *a,int n,
                      const int *assign,float *accu); 
 
 
-
+/*! @} */
 #endif

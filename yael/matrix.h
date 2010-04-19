@@ -42,7 +42,6 @@ knowledge of the CeCILL license and that you accept its terms.
 /*! @addtogroup matrix
  *  @{
  */
-/*---------------------------------------------------------------------------*/
 
 
 /*---------------------------------------------------------------------------*/
@@ -65,6 +64,7 @@ float *fmat_new (int nrow, int ncol);
 void fmat_mul (const float *left, const float *right,
 	       int n, int m, int k, float *mout);
 
+/*! @brief Same as fmat_mul, but allocate the memory and return the corresponding pointer */
 float * fmat_new_mul (const float *left, const float *right,
 		      int n, int m, int k);
 
@@ -72,6 +72,7 @@ float * fmat_new_mul (const float *left, const float *right,
 void fmat_mul_tl (const float *left, const float *right,
 		  int n, int m, int k, float *mout);
 
+/*! @brief Same as fmat_mul_tl, but allocate the memory */
 float *fmat_new_mul_tl (const float *left, const float *right, 
 			int n, int m, int k);
 
@@ -79,6 +80,7 @@ float *fmat_new_mul_tl (const float *left, const float *right,
 void fmat_mul_tr (const float *left, const float *right,
 		  int n, int m, int k, float *mout);
 
+/*! @brief Same as fmat_mul_tr, but allocate the memory */
 float *fmat_new_mul_tr (const float *left, const float *right, 
 			int n, int m, int k);
 
@@ -87,6 +89,7 @@ float *fmat_new_mul_tr (const float *left, const float *right,
 void fmat_mul_tlr (const float *left, const float *right,
 		   int n, int m, int k, float *mout);
 
+/*! @brief Same as fmat_mul_tlr, but allocate the memory */
 float *fmat_new_mul_tlr (const float *left, const float *right, 
 			int n, int m, int k);
 
@@ -167,7 +170,7 @@ void fmat_rev_subtract_from_rows(int n,int d,float *m,const float *avg);
  * vector a low-dimension space, multiply by the d2 first lines of the matrix
  *
  */
-float *compute_pca(int n,int d,float *v);
+float *compute_pca(int n, int d, float *v);
 
 /* in covariance matrix, multiply of-block diagonal elements with
    weight (weight=1 => normal pca). bs=size of diagonal blocks */
@@ -175,12 +178,13 @@ float *compute_pca_with_weighted_blocks (int n, int d, float *v,
                                          int bs, double weight); 
 
 
-/* compute only a few (nev) PCA vectors for a */
+/*! @brief compute only a few (nev) PCA vectors */
 int partial_pca(int n,int d,const float *a,
                 int nev,float *pcamat_out);
 
 
-/* compute the nev first lines of U and V and S for a (row-major, m rows, n columns) 
+/*! @brief compute the nev first lines of U and V and S for a (row-major, m rows, n columns) 
+
    sout has size nev
    uout has size nev-by-m
    vout has size nev-by-m

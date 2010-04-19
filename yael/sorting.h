@@ -39,6 +39,10 @@ knowledge of the CeCILL license and that you accept its terms.
 #ifndef SORTING_H_INCLUDED
 #define SORTING_H_INCLUDED
 
+/*---------------------------------------------------------------------------*/
+/*! @addtogroup sorting
+ *  @{  */
+
 /* Various sorting functions + a few simple array functions that can
    be called from python efficiently */
 
@@ -171,4 +175,5 @@ of labels array */
 int compress_labels_by_disratio (int *labels, const float *vals, int n, float ratio); 
 
 
+/*! @} */
 #endif

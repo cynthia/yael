@@ -41,6 +41,11 @@ knowledge of the CeCILL license and that you accept its terms.
 #define NN_H_INCLUDED
 
 /*---------------------------------------------------------------------------*/
+/*! @addtogroup knearestneighbors
+ *  @{
+ */
+
+/*---------------------------------------------------------------------------*/
 /* Nearest-neighbor (NN) functions                                           */
 /*---------------------------------------------------------------------------*/
 
@@ -216,7 +221,7 @@ void compute_tasks (int n, int nthread,
                     void (*task_fun) (void *arg, int tid, int i),
                     void *task_arg);
 
-
+/*! @} */
 #endif
 
 /*---------------------------------------------------------------------------*/

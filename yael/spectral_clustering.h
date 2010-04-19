@@ -38,6 +38,9 @@ knowledge of the CeCILL license and that you accept its terms.
 #ifndef SPECTRAL_CLUSTERING_H_INCLUDED
 #define SPECTRAL_CLUSTERING_H_INCLUDED
 
+/*! @addtogroup clustering
+ *  @{  */
+
 
 /* perform a spectral clustering of the dataset v, 
    as proposed in [Ng Jordan Weiss 01]               */
@@ -46,4 +49,5 @@ double spectral_clustering (int d, int n, int k, double sigma, int niter,
 			    int * assign, int * nassign);
 
 
+/*! @} */
 #endif

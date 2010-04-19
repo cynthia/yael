@@ -51,6 +51,11 @@ knowledge of the CeCILL license and that you accept its terms.
  * 
  */
 
+/*---------------------------------------------------------------------------*/
+/*! @addtogroup gmm
+ *  @{
+ */
+
 
 /* GMM description */
 typedef struct gmm_s {
@@ -144,4 +149,5 @@ void gmm_compute_p_thread (int n, const float * v,
 void gmm_compute_fisher_simple(int n, const float *v, const gmm_t * g, int flags, float *desc);
 
 
+/*! @} */
 #endif

@@ -40,6 +40,12 @@ knowledge of the CeCILL license and that you accept its terms.
 
 #include <stdlib.h>
 
+/*---------------------------------------------------------------------------*/
+/*! @addtogroup binheap
+ *  @{
+ */
+
+
 /*********************************************************************
  * Binary heap used as a maxheap. May be used to find the maxk smallest
  * elements of a possibly unsized stream of values. 
@@ -97,6 +103,8 @@ void fbinheap_sort_per_labels (fbinheap_t * bh, int * labels, float *v);
 /* show the heap content */
 void fbinheap_display (fbinheap_t * bh);
 
+
+/*! @} */
 
 
 #endif
