@@ -196,7 +196,7 @@ float kmeans (int di, int n, int k, int niter,
       if(n>k*8 && n>8192) {
         nsubset=k*8;
         if(verbose) 
-          printf("Restricting k-means++ initialization to %d points\n", nsubset);
+          printf("Restricting k-means++ initialization to %d points\n",nsubset);
       }
       kmeanspp_init (d, nsubset, k, v, selected);
       
