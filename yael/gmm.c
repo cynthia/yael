@@ -183,7 +183,6 @@ static void gmm_compute_params (int n, const float * v, const float * p,
         fvec_add (g->mu + j * d, vtmp, d);
         
         /* contribution to the variance */
-        
         fvec_cpy (vtmp, v + i * d, d);
         fvec_sub (vtmp, mu_old + j * d, d);
         fvec_sqr (vtmp, d);
@@ -211,7 +210,7 @@ static void gmm_compute_params (int n, const float * v, const float * p,
     }
   } else if(0) { /* grouped sigmas, not useful */
     int group_sigma=2;
-    int *perm=ivec_new(d);
+    int *perm = ivec_new(d);
     for (j = 0 ; j < k ; j++) {
       float *sigma_j=g->sigma+j*d;
       fvec_sort_index (sigma_j,d,perm);
@@ -244,21 +243,12 @@ static void gmm_compute_params (int n, const float * v, const float * p,
     fvec_div_by (g->sigma + j * d, d, g->w[j]);
   }
 
-  //  fvec_mul_by (g->sigma, d * k, 10);
-
-
   fvec_normalize (g->w, k, 1);
 
   printf ("w = ");
   fvec_print (g->w, k);
   double imfac = k * fvec_sum_sqr (g->w, k);
   printf (" imfac = %.3f\n", imfac);
-
-  //  printf ("mu = \n");
-  //  fmat_print (g->mu, k, d);
-
-  //  printf ("sigma = \n");
-  //  fmat_print (g->sigma, k, d);
 
   free (vtmp);
   free (w_old);
@@ -275,13 +265,13 @@ double static inline sqr (double x)
 
 /* support function to compute log(a+b) from log(a) and log(b) 
    without loss of precision */
-static double log_sum(double log_a, double log_b)
+static double log_sum (double log_a, double log_b)
 {
   double log_s;
   if (log_a < log_b)
-    log_s=log_b + log (1 + exp(log_a - log_b));
+    log_s = log_b + log (1 + exp (log_a - log_b));
   else
-    log_s=log_a + log (1 + exp(log_b - log_a));
+    log_s = log_a + log (1 + exp (log_b - log_a));
   return log_s;
 }
 
@@ -458,7 +448,7 @@ void gmm_handle_empty(int n, const float *v, gmm_t *g, float *p) {
     } while(w[j2]==0);
     
     /* dimension to split: that with highest variance */
-    int split_dim=fvec_max_index(g->sigma+d*j2,d);
+    int split_dim = fvec_arg_max (g->sigma + d * j2, d);
 
     /* transfer half(?) of the points from j2 -> j */
     int nt=0,nnz=0;
@@ -668,7 +658,7 @@ void gmm_print(const gmm_t *g) {
 #define WRITEANDCHECK(a,n) if(fwrite(a,sizeof(*a),n,f)!=n) {perror("gmm_write"); abort(); }
 
 
-void gmm_write(const gmm_t *g,FILE *f) {
+void gmm_write(const gmm_t *g, FILE *f) {
   
   WRITEANDCHECK(&g->d,1);
   WRITEANDCHECK(&g->k,1);
@@ -698,8 +688,7 @@ gmm_t * gmm_read(FILE *f) {
 
 
 
-/****************************************************************************************************************
- ***************** threaded versions */
+/*********************** threaded versions **********************/
 
 
 

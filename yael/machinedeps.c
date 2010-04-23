@@ -126,11 +126,8 @@ int sgemm_bugfix (char *transa, char *transb, integer * pm, integer *
     for(k=0;k<d;k++) 
       accu+=a[k+lda*i]*b[k+ldb*j];
     c[i+j*ldc]=beta*c[i+j*ldc]+alpha*accu;
-  }
-  
+  }  
 }
-
-
 
 
 #endif

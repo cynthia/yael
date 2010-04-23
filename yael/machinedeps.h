@@ -68,7 +68,7 @@ double log2(double x);
 #else
 #include <stdlib.h>
 
-
+/*! @brief allocate memory such that the pointer is aligned*/
 void *memalign (size_t ignored, size_t nbytes);
 
 #endif
@@ -96,9 +96,9 @@ typedef struct {
 } malloc_stats_t;
 
 
-void malloc_stats_begin(void);
+void malloc_stats_begin (void);
 
-malloc_stats_t malloc_stats_end(void);
+malloc_stats_t malloc_stats_end (void);
 
 /*! @} */
 #endif

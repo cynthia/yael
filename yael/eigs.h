@@ -43,23 +43,24 @@ knowledge of the CeCILL license and that you accept its terms.
 /*! @addtogroup linearalgebra
  *  @{  */
 
-/* compute the eigenvalues and eigvectors of a symmetric matrix m
-
-  eigval   the n eigenvalues
-  eigvec   Eigenvector j is  eigvec[j*d] .. eigvec[j*(d+1)-1]
+/*! \brief compute the eigenvalues and eigvectors of a symmetric matrix m
+  @param d dimension of the square matrix m
+  @param the matrix (first elements are the first row)
+  @param eigval the n eigenvalues
+  @param eigvec Eigenvector j is  eigvec[j*d] .. eigvec[j*(d+1)-1]
 
   the vectors eigval and eigvec must be allocated externally
 */
 int eigs_sym (int d, const float * m, float * eigval, float * eigvec);
 
 
-/* generalized eigenvector problem */
-int geigs_sym (int d, const float * a, const float * b, float * eigval, float * eigvec);
+/*! \brief solve a generalized eigenvector problem */
+int geigs_sym (int d, const float * a, const float * b, float * eigval, 
+	       float * eigvec);
 
 
-/* re-ordering of the eigenvalues and eigenvectors for a given criterion
-   criterion=0    ascending order 
-   criterion=1    descending order 
+/*! \brief re-ordering of the eigenvalues and eigenvectors for a given criterion
+   @param criterion equal to 0 for ascending order, descending otherwise
 */
 void eigs_reorder (int d, float * eigval, float * eigvec, int criterion);
 

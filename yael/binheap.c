@@ -44,11 +44,14 @@ knowledge of the CeCILL license and that you accept its terms.
 #include "sorting.h"
 
 
-size_t fbinheap_sizeof(int maxk) {
+size_t fbinheap_sizeof (int maxk) 
+{
   return sizeof (fbinheap_t) + maxk * (sizeof (float) + sizeof (int));
 }
 
-void fbinheap_init(fbinheap_t *bh,int maxk) {
+
+void fbinheap_init (fbinheap_t *bh, int maxk) 
+{
   bh->k = 0;
   bh->maxk = maxk;
 
@@ -61,12 +64,9 @@ void fbinheap_init(fbinheap_t *bh,int maxk) {
 
 fbinheap_t * fbinheap_new (int maxk)
 {
-  int bhsize = fbinheap_sizeof(maxk);
-    
+  int bhsize = fbinheap_sizeof (maxk);
   fbinheap_t * bh = (fbinheap_t *) malloc (bhsize);
-  
-  fbinheap_init(bh,maxk);
-
+  fbinheap_init (bh,maxk);
   return bh;
 }
 

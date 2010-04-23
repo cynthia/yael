@@ -74,21 +74,25 @@ float * fvec_new (long n);
 /*! @brief Alloc an int array. To be de-allocated with free. */
 int *ivec_new (long n);
 
-/*! @brief initialized with 0's */
+/*! @brief create a vector initialized with 0's */
 float *fvec_new_0 (long n);
+
+/*! @brief create a vector initialized with 0's */
 int *ivec_new_0 (long n);
 
-/* initialized with NaN's to trace errors... */
+/*! @brief create a vector initialized with NaN (e.g., to trace errors...) */
 float *fvec_new_nan (long n);
 
-/*! @brief initialized with some value */
+/*! @brief create a vector initialized with a specified value */
 float *fvec_new_set (long n, float val);
+
+/*! @brief create a vector initialized with a specified value */
 int *ivec_new_set (long n, int val);
 
-/*! initialize with uniformly drawn nbs in [0,1) */
+/*! @brief create a vector initialized with uniformly drawn samples in [0,1) */
 float *fvec_new_rand (long n);
 
-/* @brief new vector [a,a+1,...b-1] */
+/*! @brief new vector [a,a+1,...b-1] */
 int * ivec_new_range (long a, long b);
 
 /*! @brief new vector initialized with another vector */
@@ -105,28 +109,27 @@ int *ivec_new_random_perm (int n);
 int *ivec_new_random_idx  (int n, int k);
 
 
-/*! count occurrences
-
-   k is the range of the values that may be encountered (assuming start at 0)
-   v is the vector of values to be histrogramized, of length n
+/*! @brief count occurrences
+   @param k is the range of the values that may be encountered (assuming start at 0)
+   @param v is the vector of values to be histrogramized, of length n
 */
 int * ivec_new_histogram (int k, int * v, long n);
 
-/*! compute a hash value for the vector */
-int ivec_hash(const int * v, long n);
+/*! @brief compute a hash value for the vector */
+int ivec_hash (const int * v, long n);
 
-void ivec_replace(int * v, long n,int val,int replace_val);
+/*! @brief all occurences of a value by another in a vector */
+void ivec_replace (int * v, long n, int val, int replace_val);
 
+/*! @brief count occurences of a value in the vector */
+long ivec_count_occurrences (const int * v, long n, int val);
+long fvec_count_occurrences (const float * v, long n, float val);
 
-/*! count occurences of a value in the vector */
-long ivec_count_occurrences(const int * v, long n, int val);
-long fvec_count_occurrences(const float * v, long n, float val);
-
-/* count number of values below a threshold */
+/*! @brief count the number of values below a threshold */
 long fvec_count_lt(const float * v, long n, float val);
 long ivec_count_lt(const int * v, long n, int val);
 
-/* count number of values above a threshold */
+/*! @brief count number of values above a threshold */
 long fvec_count_gt(const float * v, long n, float val);
 long ivec_count_gt(const int * v, long n, int val);
 
@@ -137,8 +140,8 @@ long ivec_count_gt(const int * v, long n, int val);
 /*---------------------------------------------------------------------------*/
 
 
-/* Read the number of vectors in a file and their dimension (vectors of same size). 
-   Output the number of bytes of the file                                           */
+/*! @brief Read the number of vectors in a file and their dimension 
+  (vectors of same size). Output the number of bytes of the file. */
 long fvecs_fsize (const char * fname, int *d_out, int *n_out);
 long ivecs_fsize (const char * fname, int *d_out, int *n_out);
 
@@ -148,15 +151,15 @@ long ivecs_fsize (const char * fname, int *d_out, int *n_out);
 int ivec_fwrite(FILE *f, const int *v, int d);
 int fvec_fwrite(FILE *f, const float *v, int d);
 
-/* write without header */
-int fvec_fwrite_raw(FILE *f, const float *v, long d);
+/*! @brief write a vector without the dimension header */
+int fvec_fwrite_raw (FILE *f, const float *v, long d);
 
 /*! @brief write a set of vectors into an open file */
 int ivecs_fwrite(FILE *f, int d, int n, const int *v);
 int fvecs_fwrite (FILE *fo, int d, int n, const float *vf);
 
-/*! @brief several integer vectors into an file */
-int ivecs_write(const char *fname, int d, int n, const int *v);
+/*! @brief several integer vectors of identifcal length into an file */
+int ivecs_write (const char *fname, int d, int n, const int *v);
 int fvecs_write (const char *fname, int d, int n, const float *vf);
 int fvecs_write_txt (const char * fname, int d, int n, const float *vf);
 
@@ -165,7 +168,6 @@ int fvecs_write_txt (const char * fname, int d, int n, const float *vf);
  *
  * Returns nb of vectors read, or <0 on error
  */
-
 int fvecs_new_read (const char *fname, int *d_out, float **vf);
 
 int fvecs_new_fread_max (FILE *f, int *d_out, float **vf, long nmax);
@@ -180,7 +182,7 @@ int fvecs_new_read_sparse (const char *fname, int d, float **vf);
  */
 int fvecs_read (const char *fname, int d, int n, float *v);
 
-/* read a vector in from a text file */
+/*! @brief read a vector from a text file (one line per vector) */
 int fvecs_read_txt (const char *fname, int d, int n, float *v);
 
 /*! @brief read a single vector from a file
@@ -218,8 +220,8 @@ void fvec_fprintf (FILE * f, const float *v, int n, const char *fmt);
 void ivec_print (const int * v, int n);
 void ivec_fprintf (FILE * f, const int *v, int n, const char *fmt);
 
-/* find first index of val (return -1 if not found) */
-long ivec_index(const int * v, long n,int val);
+/*! @brief find first index of val (return -1 if not found) */
+long ivec_index (const int * v, long n,int val);
 
 
 /*---------------------------------------------------------------------------*/
@@ -233,11 +235,11 @@ void ivec_0 (int * v, long n);
 void fvec_nan (float * v, long n);
 
 
-/*! are all values 0? */
+/*! @brief are all values 0? */
 int fvec_all_0 (float * v, long n);
 int ivec_all_0 (int * v, long n);
 
-/*! are all values finite? */
+/*! @brief are all values finite? */
 int fvec_all_finite (float * v, long n);
 
 /*! @brief Set all the components of the vector v to the value val */
@@ -265,8 +267,8 @@ void fvec_sub (float * v1, const float * v2, long n);
 /*! v1 := v2-v1 */
 void fvec_rev_sub (float * v1, const float * v2, long n);
 
-/* v1:= v2 * scal */
-void fvec_add_mul (float * v1, const float * v2, long n,double scal);
+/*! v1:= v2 * scal */
+void fvec_add_mul (float * v1, const float * v2, long n, double scal);
 
 /*! @brief Component-wise multiplication or division of two vectors (result in v1) */
 void fvec_mul (float * v1, const float * v2, long n);
@@ -276,14 +278,14 @@ void fvec_div (float * v1, const float * v2, long n);
   vector is all 0, it will be filled with NaNs. Bad luck! */
 void fvec_normalize (float * v, long n, double norm);
 
-/*! Standard functions: root square and square */
 void fvec_round (float * v, long n);
 void fvec_sqrt (float * v, long n);
 void fvec_sqr (float * v, long n);
 void fvec_exp (float * v, long n);
 void fvec_log (float * v, long n);
 void fvec_neg (float * v, long n);
-/* signed square-root: y = sign(x)*sqrt(abs(x)) */
+
+/*! @brief signed square-root: y = sign(x)*sqrt(abs(x)) */
 void fvec_ssqrt (float * v, long n);
 
 
@@ -298,11 +300,12 @@ void ivec_add_scalar (int * v, long n, int scal);
 int fvec_purge_nans(float * v, long n, float replace_value);
 
 
-/*! Shrink the vector, removing "Not a number" and inf values. Returns new size */
+/*! @brief Shrink the vector, removing "Not a number" and inf values. 
+  Returns new size */
 long fvec_shrink_nonfinite(float * v, long n);
 
-/* find 1st occurrence of a non-finite element */
-long fvec_index_nonfinite(float * v, long n);
+/*! @brief find 1st occurrence of a non-finite element */
+long fvec_index_nonfinite (float * v, long n);
 
 /*---------------------------------------------------------------------------*/
 /* Vector measures and statistics                                            */
@@ -315,7 +318,7 @@ long long ivec_sum (const int * v, long n);
 double fvec_product (const float * v, long n);
 long long ivec_product (const int * v, long n);
 
-/*! sum of squared components */
+/*! @brief sum of squared components */
 double fvec_sum_sqr (const float * v, long n);
 long long ivec_sum_sqr (const int * v, long n);
 
@@ -323,7 +326,7 @@ long long ivec_sum_sqr (const int * v, long n);
 /*! @brief compute the norm of a given vector */
 double fvec_norm (const float * v, long n, double norm);
 
-/*! compute squared norm 2 */
+/*! @brief compute squared norm 2 */
 double fvec_norm2sqr (const float * v, long n);
 
 /*! @brief count the number of non-zeros elements */
@@ -363,7 +366,7 @@ double fvec_distance_L1 (const float * v1, const float * v2, long n);
 /*! @brief Return the square L2 distance between vectors */
 double fvec_distance_L2sqr (const float * v1, const float * v2, long n);
 
-/*! @inner product between two vectors */
+/*! @brief inner product between two vectors */
 double fvec_inner_product (const float * v1, const float * v2, long n);
 
 /*---------------------------------------------------------------------------
@@ -407,10 +410,10 @@ for 0<i<n
 void ivec_accumulate_slices(const int *v,int *sl,int n); 
 
 
-/*! mapping operator: dest[i]:=src[map[i]] for i=0..n-1 */
-void fvec_map(const float *src,const int *map,int n,float *dest);
+/*! @brief mapping operator: dest[i]:=src[map[i]] for i=0..n-1 */
+void fvec_map (const float *src,const int *map,int n,float *dest);
 
-/*! inverse mapping operator: dest[imap[i]]:=src[i] for i=0..n-1 */
+/*! @brief inverse mapping operator: dest[imap[i]]:=src[i] for i=0..n-1 */
 void fvec_imap(const float *src,const int *imap,int n,float *dest);
 
 /*! 

@@ -671,22 +671,6 @@ int ivec_sorted_count_unique (const int *v, int n)
 }
 
 
-/*! computes the arg min of a float array */
-int fvec_arg_min (const float *f, int n)
-{
-  int i, idx_min = -1;
-  float min = 1e30;
-
-  for (i = 0 ; i < n ; i++)
-    if (f[i] < min) {
-      min = f[i];
-      idx_min = i;
-    }
-
-  return idx_min;  
-}
-
-
 
 float fvec_median (float *f, int n)
 {
@@ -726,7 +710,7 @@ float fvec_median_const (const float *f, int n)
 }
 
 
-float fvec_min(const float *f, long n) 
+float fvec_min (const float *f, long n) 
 {
   assert (n > 0);
   float m = f[0];
@@ -750,7 +734,7 @@ float fvec_max (const float *f, long n)
 }
 
 
-int fvec_max_index (const float *f, long n) 
+int fvec_arg_max (const float *f, long n) 
 {
   assert (n > 0);
   float m = f[0];
@@ -764,11 +748,11 @@ int fvec_max_index (const float *f, long n)
 }
 
 
-int fvec_min_index (const float *f, long n) 
+int fvec_arg_min (const float *f, long n) 
 {
   assert (n > 0);
   float m = f[0];
-  long i,i0 = 0;
+  long i, i0 = 0;
   for (i = 1 ; i < n ; i++) 
     if(f[i] < m) {
       m = f[i]; 
