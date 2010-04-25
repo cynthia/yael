@@ -94,7 +94,7 @@ knowledge of the CeCILL license and that you accept its terms.
 
 \chapter{What is this?}
 
-This is a tutorial for first steps with \yael. Most of the remarks and details here will be just but useless for skilled programmers, as the structure of the library should be clear enough. The documentation related to python should however interest any programmer wanting to use this interface. 
+This is a tutorial for first steps with \yael. Most of the remarks and details here will be just but useless for skilled programmers, as the structure of the library should be clear enough. The documentation related to Python should however interest any programmer wanting to use this interface. 
 \medskip
 
 \yael is a library for performing efficient basic operations, 
@@ -102,8 +102,8 @@ in particular kmeans and exhaustive nearest neighbor search function.
 It offers three interfaces: 
 \begin{itemize}
 \item C, 
-\item python, 
-\item matlab.
+\item Python, 
+\item Matlab.
 \end{itemize}
 
 The library has been tested under different architectures, in particular
@@ -113,7 +113,7 @@ The library has been tested under different architectures, in particular
 \end{itemize}
 The library has not been packaged nor tested for Microsoft Windows. 
 
-The C API is object-oriented in spirit whenever applicable, with constructors and destructors for each structure. Most functions are re-entrant, but unless otherwise specified, they are not threaded. Threading is assumed to occur at a higher level. 
+The C API is object-oriented in spirit whenever applicable, with constructors and destructors for each structure. All functions are re-entrant, but unless otherwise specified, they are not multi-threaded. Threading is assumed to occur at a higher level. 
 
 \chapter{Getting Started}
 \label{cha:gettingstarted}
@@ -123,6 +123,9 @@ The C API is object-oriented in spirit whenever applicable, with constructors an
 The latest version of yael can be retrieved from the SVN as follows:
 
 \code{svn checkout svn+ssh://mygforgelogin@scm.gforge.inria.fr/svn/yael/trunk yael}
+
+
+XXXX add anonymous access when available 
 
 This performs the installation of the regular \yael branch of the project into the directory \texttt{yael}. 
 This installation directory is referred to as~\yroot in the following. 
@@ -160,26 +163,26 @@ The \tc{LD\_LIBRARY\_PATH} environment variable should be set accordingly.
 
 \item [Python-dev.] This library is usually obtained the python-dev package. 
 Note that having python installed on your machine does not necessarily 
-means that the developpement kit is installed as well. 
+mean that the developpement kit is installed as well. 
 If only python is installed, not python-dev, you will get an error 
 saying that the file \tc{Python.h} can not be found. 
 
 \item [swig] 
 is required to create the python interface. 
 
-\item [Matlab] is required only if for the matlab \yael interface. 
+\item [Matlab] is required only for the matlab \yael interface. 
 It is not compiled by default. 
 
 
 \item [doxygen] is used to generate the reference manual (HTML) from the source files. 
 
-\item [pdflatex] is used to re-generate this getting started manual. 
+\item [pdflatex] is used to re-generate this ``getting started'' manual. 
 \end{description}
 
 
-These two last pre-requisites are required by the python interface 
+These two last pre-requisites are required by the Python interface 
 and are not strictly mandatory. If you are not interested by this 
-python interface and that you don't have python-dev and swig installed, 
+Python interface and that you don't have python-dev and swig installed, 
 you should remove the target \tc{\_yael.so} target in the Makefile of the 
 yael core directory. 
 
@@ -203,7 +206,7 @@ to adjust the variables defined in makefile.inc to fit your local configuration.
 \medskip
 
 At this point, only the core C and python library are compiled. 
-If you need the matlab interface, you have to compile the mex files:
+If you need the Matlab interface, you have to compile the mex files:
 \bigskip
 
 {\bf 4\,--} \tc{cd matlab ; make}
@@ -279,8 +282,8 @@ when using other python libraries jointly with \yael.
 
       \tc{a=IntArray(4)} constructs an array of 4 ints, accessible in Python with \tc{a[2]}. 
 
-      \tc{a.cast()} returns an int* usable as a C function argument
-      if x is a int* in C, ***RV: c'est pas automatiquement fait, ca? ***
+      \tc{a.cast()} returns an int* usable as a C function argument (most of the time, the cast is automatic, and \tc{a} can be used when a function expects an \tc{int *})
+      % if x is a int* in C, ***RV: c'est pas automatiquement fait, ca? ***
       
       \tc{b=IntArray.frompointer(x)} makes the Python \tc{a[i]} valid to access C's \tc{x[i]}.
 
