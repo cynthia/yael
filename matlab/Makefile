@@ -3,7 +3,7 @@
 
 CC=gcc 
 
-all: yael4matlab.a yael_kmeans yael_nn
+all: yael4matlab.a yael_kmeans yael_nn yael_kmin yael_fvecs_normalize
 
 include ../makefile.inc
 
@@ -36,5 +36,11 @@ yael_kmeans: yael_kmeans.c
 yael_nn: yael_nn.c
 	mex yael_nn.c -I.. yael4matlab.a $(LDFLAGS)
 
+yael_kmin: yael_kmin.c
+	mex yael_kmin.c -I.. yael4matlab.a $(LDFLAGS)
+
+yael_fvecs_normalize: yael_fvecs_normalize.c
+	mex yael_fvecs_normalize.c -I.. yael4matlab.a $(LDFLAGS)
+
 clean:
-	rm *.a *.mexa64 *.mex *.o
+	rm *.a *.mexa64 *.mexmaci64 *.mex *.o

@@ -20,7 +20,7 @@ if nargin < 2
   fseek (fid, 0, 1);
   n = ftell (fid) / (1 * 4 + d * 4);
 else
-  n = maxn
+  n = maxn;
 end
   
 fseek (fid, 0, -1);
