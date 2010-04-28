@@ -47,19 +47,17 @@ knowledge of the CeCILL license and that you accept its terms.
    be called from python efficiently */
 
 /*! 
- tab is a n-element table
- fills maxes such that
+ v is a n-element floating point array
+ The function fills maxes such that
 
- tab[maxes[0]] >= tab[maxes[1]] >= ... >= tab[maxes[k-1]] >= tab[i] 
+ v[maxes[0]] >= v[maxes[1]] >= ... >= v[maxes[k-1]] >= v[i] 
 
  for all i not in maxes.
 */
-void fvec_find_k_max(const float *tab,int n,
-		     int *maxes, int k);
+void fvec_k_max(const float *v, int n, int *maxes, int k);
 
 
-void fvec_find_k_min(const float *tab, int n,
-		     int *maxes, int k);
+void fvec_k_min(const float *v, int n, int *maxes, int k);
 
 
 /*! finds the ranks of vals[i] for i=0..nval-1 in tab if it was sorted

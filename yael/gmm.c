@@ -47,17 +47,10 @@ knowledge of the CeCILL license and that you accept its terms.
 #include "nn.h"
 #include "gmm.h"
 #include "sorting.h"
+#include "machinedeps.h"
 
 #include <sys/time.h>
 
-
-
-
-static double getmillisecs() {
-  struct timeval tv;
-  gettimeofday(&tv,NULL);
-  return tv.tv_sec*1e3 +tv.tv_usec*1e-3;
-}
 
 
 /* Estimation of a Gaussian mixture (diagonal covariance matrix)
@@ -514,21 +507,13 @@ gmm_t * gmm_learn (int di, int ni, int ki, int niter,
 
   for (iter = 1 ; iter <= niter ; iter++) {
     
-    double t0=getmillisecs();
-  
     gmm_compute_p_thread (n, v, g, p, flags, nt);
     fflush(stdout);
 
     gmm_handle_empty(n, v, g, p);
     
-    /* printf("gmm_compute_p: %.3f ms\n",getmillisecs()-t0); */
-
-    t0=getmillisecs();
-
     gmm_compute_params (n, v, p, g, flags, nt);
     fflush(stdout);
-
-    /*    printf("gmm_compute_params: %.3f ms\n",getmillisecs()-t0); */
 
     iter_tot++;
 
@@ -990,5 +975,4 @@ void gmm_compute_fisher_simple(int n, const float *v, const gmm_t * g, int flags
 
     free(assign);
   }
-
 }

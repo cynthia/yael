@@ -178,7 +178,7 @@ static void hoare_select_f (float *f, int i0, int i1, int q)
 /*--- Find k biggest elements of array val[n] and order them ---*/
 
 /* version based on the Hoare algorithm (also called qselect)*/
-static void fvec_find_k_max_hoare (const float *val, int n, int *idx, int k)
+static void fvec_k_max_hoare (const float *val, int n, int *idx, int k)
 {
 
   const float **idx_ptr = NEWA (const float *, n);
@@ -201,7 +201,7 @@ static void fvec_find_k_max_hoare (const float *val, int n, int *idx, int k)
 
 
 /* maxheap version */
-static void fvec_find_k_max_maxheap (const float *val, int n,
+static void fvec_k_max_maxheap (const float *val, int n,
                                        int *idx, int k)
 {
   fbinheap_t *mh = fbinheap_new (k);
@@ -215,7 +215,7 @@ static void fvec_find_k_max_maxheap (const float *val, int n,
 }
 
 
-void fvec_find_k_max (const float *val, int n, int *idx, int k)
+void fvec_k_max (const float *val, int n, int *idx, int k)
 {
   assert (k <= n);
 
@@ -223,10 +223,10 @@ void fvec_find_k_max (const float *val, int n, int *idx, int k)
     return;
 
   /* TODO: find out where the limit really is */
-  if (n > 3 * k)
-    fvec_find_k_max_maxheap (val, n, idx, k);
+  if (n > 4 * k)
+    fvec_k_max_maxheap (val, n, idx, k);
   else
-    fvec_find_k_max_hoare (val, n, idx, k);
+    fvec_k_max_hoare (val, n, idx, k);
 
   /* The 2 algorithms are not strictly equivalent because they order
      same-values differently:
@@ -244,7 +244,7 @@ void fvec_find_k_max (const float *val, int n, int *idx, int k)
 /*--- Idem for smallest ---*/
 
 /* Hoare version */
-static void fvec_find_k_min_hoare (const float *val, int n, int *idx, int k)
+static void fvec_k_min_hoare (const float *val, int n, int *idx, int k)
 {
 
   const float **idx_ptr = NEWA (const float *, n);
@@ -267,7 +267,7 @@ static void fvec_find_k_min_hoare (const float *val, int n, int *idx, int k)
 
 
 /* maxheap version */
-static void fvec_find_k_min_maxheap (const float *val, int n,
+static void fvec_k_min_maxheap (const float *val, int n,
                                      int *idx, int k)
 {
   fbinheap_t *mh = fbinheap_new (k);
@@ -281,7 +281,7 @@ static void fvec_find_k_min_maxheap (const float *val, int n,
 }
 
 
-void fvec_find_k_min (const float *val, int n, int *idx, int k)
+void fvec_k_min (const float *val, int n, int *idx, int k)
 {
   assert (k <= n);
 
@@ -295,9 +295,9 @@ void fvec_find_k_min (const float *val, int n, int *idx, int k)
 
   /* TODO: find out where the limit really is */
   if (n > 3 * k)
-    fvec_find_k_min_maxheap (val, n, idx, k); 
+    fvec_k_min_maxheap (val, n, idx, k); 
   else
-    fvec_find_k_min_hoare (val, n, idx, k);
+    fvec_k_min_hoare (val, n, idx, k);
 }
 
 

@@ -697,15 +697,6 @@ void fmat_mul_tv(int m,int n,const float*a,int lda,
 
 
 
-
-static double getmillisecs() {
-  struct timeval tv;
-  gettimeofday(&tv,NULL);
-  return tv.tv_sec*1e3 +tv.tv_usec*1e-3;
-}
-
-
-
 int partial_svd(int m,int n,const float *a,
                 int nev,
                 float *sout,
@@ -735,14 +726,14 @@ int partial_svd(int m,int n,const float *a,
   i=0;
   for(;;) {
 
-    double t0=getmillisecs();
+    /*     double t0=getmillisecs(); */
 
     ssaupd_(&ido, bmat, &n, which, &nev, 
             &tol, resid, &ncv, v, &n, 
             iparam, ipntr, workd, workl, &lworkl,
             &info);
 
-    double t1=getmillisecs();
+    /*     double t1=getmillisecs(); */
     
     if(ido==-1 || ido==1) {
       
@@ -768,12 +759,11 @@ int partial_svd(int m,int n,const float *a,
 
     } else break;   
 
-    double t2=getmillisecs();
-
-    dt0+=t1-t0;
-    dt1+=t2-t1;
-
+    /*     double t2=getmillisecs(); */
+    /*     dt0+=t1-t0; */
+    /*     dt1+=t2-t1; */
     /*     printf("ssaupd eval %d (dt0=%.3f dt1=%.3f) \r",i++,dt0,dt1); fflush(stdout); */
+
     printf("ssaupd eval %d\r",i++); fflush(stdout);
   }
   

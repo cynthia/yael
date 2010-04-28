@@ -708,6 +708,7 @@ void compute_cross_distances_thread (int d, int na, int nb,
   } 
 }
 
+
 void compute_cross_distances_alt_thread (int distance_type,int d, int na, int nb,
                                          const float *a,
                                          const float *b, float *dist2,
@@ -723,76 +724,3 @@ void compute_cross_distances_alt_thread (int distance_type,int d, int na, int nb
     compute_tasks(nt,nt,&compute_cross_distances_task,&t);
   } 
 }
-
-/***********************************************************************
- *           Implementation of the threading part
- *
- * generic thread stuff */
-
-typedef struct {
-  pthread_mutex_t mutex;
-  int i, n, tid;
-  void (*task_fun) (void *arg, int tid, int i);
-  void *task_arg;
-} context_t;
-
-
-
-static void *start_routine (void *cp)
-{
-  context_t *context = cp;
-  int tid;
-  pthread_mutex_lock (&context->mutex);
-  tid = context->tid++;
-  pthread_mutex_unlock (&context->mutex);
-
-  for (;;) {
-    int item;
-    pthread_mutex_lock (&context->mutex);
-    item = context->i++;
-    pthread_mutex_unlock (&context->mutex);
-    if (item >= context->n)
-      break;
-    else
-      context->task_fun (context->task_arg, tid, item);
-  }
-
-  return NULL;
-}
-
-void compute_tasks (int n, int nthread,
-                    void (*task_fun) (void *arg, int tid, int i),
-                    void *task_arg)
-{
-  int i;
-  context_t context;
-
-  assert(nthread>0 || !"sombody has to do the job");
-
-  context.i = 0;
-  context.n = n;
-  context.tid = 0;
-  context.task_fun = task_fun;
-  context.task_arg = task_arg;
-
-  pthread_mutex_init (&context.mutex, NULL);
-
-  if(nthread==1) 
-    start_routine(&context);    
-  else {
-    pthread_t *threads = malloc (sizeof (pthread_t) * n);
-      
-    for (i = 0; i < nthread; i++) 
-      pthread_create (&threads[i], NULL, &start_routine, &context);
-      
-    /* all computing */
-      
-    for (i = 0; i < nthread; i++)
-      pthread_join (threads[i], NULL);
-    
-    free (threads);
-  }
-
-}
-
-

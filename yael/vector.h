@@ -274,9 +274,16 @@ void fvec_add_mul (float * v1, const float * v2, long n, double scal);
 void fvec_mul (float * v1, const float * v2, long n);
 void fvec_div (float * v1, const float * v2, long n);
 
-/*! @brief Normalize the vector for the given Minkowski norm. If the
-  vector is all 0, it will be filled with NaNs. Bad luck! */
-void fvec_normalize (float * v, long n, double norm);
+/*! @brief Normalize the vector for the given Minkowski norm. 
+  The function return the norm of the original vector. 
+  If the vector is all 0, it will be filled with NaNs. 
+  This case can be identified when the return value is 0. */
+double fvec_normalize (float * v, long n, double norm);
+
+/*! @brief This function normalize a set of n d-dimensional vectors. 
+  It returns the number of vectors whose norms was 0 (for which 
+  the normalization has put some NaN values). */
+int fvecs_normalize (float * v, long n, long d, double norm);
 
 void fvec_round (float * v, long n);
 void fvec_sqrt (float * v, long n);

@@ -209,19 +209,8 @@ void compute_distances_1_nonpacked (int d, int nb,
 
 
 
-
-/* compute_tasks creates nthread threads that call task_fun n times 
- * with arguments:
- *   arg=task_arg
- *   tid=identifier of the thread in 0..nthread-1
- *   i=call number in 0..n-1
- */
-
-void compute_tasks (int n, int nthread,
-                    void (*task_fun) (void *arg, int tid, int i),
-                    void *task_arg);
-
 /*! @} */
+
 #endif
 
 /*---------------------------------------------------------------------------*/

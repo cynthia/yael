@@ -248,7 +248,16 @@ The whole interface is documented (more or less) in the reference manual, which 
 The best thing to do to have an operational Makefile and program 
 is probably to look at the test files included in the 
 \tc{\yroot/test/} subdirectory. 
+\bigskip
 
+\section{Multi-threading in \yael}
+
+*** explain the count_cpu function ***
+
+*** explain how to use the multi-threading function ***
+
+*** maybe add the simpliest example as possible in the test directory, 
+or even in this documentation  *** 
 
 \chapter{Python}
 
@@ -385,6 +394,9 @@ MacOS       & \tc{libyael.dylib} & \tc{DYLD\_LIBRARY\_PATH} \\
 point to \tc{YAELROOT}. 
 
 \end{description}
+
+ldd libyael 
+otool -L libyael.dylib
 
 
 \appendix                     % Les annexes

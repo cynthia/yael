@@ -100,7 +100,20 @@ void malloc_stats_begin (void);
 
 malloc_stats_t malloc_stats_end (void);
 
+
+
+/*! @brief return a timestamp, which is useful to measure elapsed time */
+double getmillisecs();
+
+/*! @brief compute_tasks creates nthread threads that call task_fun n times 
+   arg=task_arg
+   tid=identifier of the thread in 0..nthread-1
+   i=call number in 0..n-1
+*/
+void compute_tasks (int n, int nthread,
+                    void (*task_fun) (void *arg, int tid, int i),
+                    void *task_arg);
+
+
 /*! @} */
 #endif
-
-

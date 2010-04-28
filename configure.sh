@@ -48,6 +48,8 @@ if [ $conf == mac ]; then
   sharedext=dylib
   sharedflags="-dynamiclib"
   yaelsharedflags="$sharedflags -install_name $yaelprefix/yael/libyael.dylib"
+  cflags="$cflags" 
+  ldflags="$ldflags" 
 else
   wrapldflags="-shared"
   sharedflags="-shared"

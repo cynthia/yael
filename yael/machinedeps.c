@@ -127,6 +127,7 @@ int sgemm_bugfix (char *transa, char *transb, integer * pm, integer *
       accu+=a[k+lda*i]*b[k+ldb*j];
     c[i+j*ldc]=beta*c[i+j*ldc]+alpha*accu;
   }  
+  return 0;
 }
 
 
@@ -326,3 +327,84 @@ malloc_stats_t malloc_stats_end() {
 
 #endif 
 
+
+double getmillisecs() 
+{
+  struct timeval tv;
+  gettimeofday (&tv,NULL);
+  return tv.tv_sec*1e3 +tv.tv_usec*1e-3;
+}
+
+
+/***********************************************************************
+ *           Implementation of the threading part
+ *
+ * generic thread stuff */
+
+#include <pthread.h>
+
+typedef struct {
+  pthread_mutex_t mutex;
+  int i, n, tid;
+  void (*task_fun) (void *arg, int tid, int i);
+  void *task_arg;
+} context_t;
+
+
+
+static void *start_routine (void *cp)
+{
+  context_t *context = cp;
+  int tid;
+  pthread_mutex_lock (&context->mutex);
+  tid = context->tid++;
+  pthread_mutex_unlock (&context->mutex);
+
+  for (;;) {
+    int item;
+    pthread_mutex_lock (&context->mutex);
+    item = context->i++;
+    pthread_mutex_unlock (&context->mutex);
+    if (item >= context->n)
+      break;
+    else
+      context->task_fun (context->task_arg, tid, item);
+  }
+
+  return NULL;
+}
+
+
+void compute_tasks (int n, int nthread,
+                    void (*task_fun) (void *arg, int tid, int i),
+                    void *task_arg)
+{
+  int i;
+  context_t context;
+
+  assert(nthread>0 || !"sombody has to do the job");
+
+  context.i = 0;
+  context.n = n;
+  context.tid = 0;
+  context.task_fun = task_fun;
+  context.task_arg = task_arg;
+
+  pthread_mutex_init (&context.mutex, NULL);
+
+  if(nthread==1) 
+    start_routine(&context);    
+  else {
+    pthread_t *threads = malloc (sizeof (pthread_t) * n);
+      
+    for (i = 0; i < nthread; i++) 
+      pthread_create (&threads[i], NULL, &start_routine, &context);
+      
+    /* all computing */
+      
+    for (i = 0; i < nthread; i++)
+      pthread_join (threads[i], NULL);
+    
+    free (threads);
+  }
+}

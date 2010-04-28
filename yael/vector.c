@@ -959,16 +959,36 @@ void fvec_div (float * v1, const float * v2, long n)
 }
 
 
-void fvec_normalize (float * v, long n, double norm)
+double fvec_normalize (float * v, long n, double norm)
 {
-  if(norm==0) return;
+  if(norm==0) 
+    return 0;
 
   double nr = fvec_norm (v, n, norm);
 
   /*  if(nr!=0)*/
   fvec_mul_by (v, n, 1 / nr);
-  
+  return nr;
 }
+
+
+int fvecs_normalize (float * v, long n, long d, double norm)
+{
+  int i, nNaN = 0;
+  if (norm == 0) 
+    return 0;
+
+  for (i = 0 ; i < n ; i++) {
+    double nr = fvec_norm (v + i * d, d, norm);
+    if (nr == 0)
+      nNaN++;
+
+    fvec_mul_by (v + i * d, d, 1 / nr);
+  }
+
+  return nNaN;
+}
+
 
 int fvec_purge_nans(float * v, long n, float replace_value) {
   long i, count=0;
