@@ -152,6 +152,7 @@ int ivec_fwrite(FILE *f, const int *v, int d);
 int fvec_fwrite(FILE *f, const float *v, int d);
 
 /*! @brief write a vector without the dimension header */
+int ivec_fwrite_raw (FILE *f, const int *v, long d);
 int fvec_fwrite_raw (FILE *f, const float *v, long d);
 
 /*! @brief write a set of vectors into an open file */

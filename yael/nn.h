@@ -49,28 +49,34 @@ knowledge of the CeCILL license and that you accept its terms.
 /* Nearest-neighbor (NN) functions                                           */
 /*---------------------------------------------------------------------------*/
 
+/*
+ * All matrices are stored in column-major order (like Fortran) and
+ * indexed from 0 (like C, unlike Fortran). The declaration:
+ *
+ *     a(m, n) 
+ * 
+ * means that element a(i,j) is accessed with a[ i * m + j ] where
+ *
+ *     0 <= i < m and 0 <= j < n
+ *
+ */
+
 
 /*  Finds nearest neighbours of vectors in a base 
  * 
- *     distance_type: 2=L2 distance
- *     n:            number of vectors to assign 
- *     nb:           number of base vectors to assign to
- *     k:            number of neighbors to return
- *     v(n,d):       vectors
- *     b(nb,d):      base
- *     assign(n,k):  NNs of vector i are assign(i,0) to assign(i,k-1)
+ *     distance_type: 2 = L2 distance
+ *     n:             number of vectors to assign 
+ *     nb:            number of base vectors to assign to
+ *     k:             number of neighbors to return
+ *     v(d, n):       query vectors
+ *     b(d, nb):      base vectors
+ *     assign(k, n):  on output, NNs of vector i are assign(:, i) (not sorted!)
  *     b_weights(nb):  multiply squared distances by this for each base vector (may be NULL)
- *     dis(n,k):     distances of i to its NNs are dis(i,0) to dis(i,k-1)
+ *     dis(k, n):     distances of i to its NNs are dis(0, i) to dis(k-1, i). The output is not sorted.
+ *     peek_fun, peek_arg: the function calls peek_fun with frac set
+ *                    to the fraction of the computation performed so far (for
+ *                    progress bars), peek_fun needs not to be reentrant. 
  * 
- * all matrices are stored in row-major order. The declaration: 
- *
- *     a(n,m) 
- * 
- * means that element a(i,j) is accessed with a[i*m+j] and that
- *
- *     0<=i<n and 0<=j<m
- *
- * peek_fun needs not to be reentrant 
  */
 
 void knn_full (int distance_type,
@@ -131,16 +137,16 @@ float* knn_thread (int n, int nb, int d, int k,
                    void *peek_arg);
 
 
-/* computes a subset of L2 distances between b and v. 
-
-   assign[i*k]..assign[i*k+k-1] , for i=0..n-1
-
-  contains the indices in nb that must be reordered. On output, 
-
-   dists[i*k]..dists[i*k+k-1] 
- 
-  contains the associated distances  
-*/
+/* 
+ * Computes a subset of L2 distances between b and v. 
+ *   n:                  nb of vectors in v
+ *   nb:                 nb of vectors in b
+ *   k:                  nb of distances per v vector
+ *   assign(k, n):       assign(:, i) is the set of vectors of b for 
+ *                       which we have to compute distances to v(:,i). 
+ *                       On output, assign(:,i) is reordered
+ *   dists(k,n):         On output, distances corresponding to the assign array.
+ */
 
 void knn_reorder_shortlist(int n, int nb, int d, int k,
                            const float *b, const float *v,
@@ -153,15 +159,18 @@ void knn_reorder_shortlist(int n, int nb, int d, int k,
  */
 
 /* 
+ *  a(d, na)       set of vectors  
+ *  b(d, nb)       set of vectors
+ *  dist2(na, nb)  distances between all vectors of a and b
  *
- *  a is na*d \n
- *  b is nb*d \n
- *  dist2[i+na*j] = || a(i,:)-b(j,:) ||^2 \n
- *  uses BLAS if available
+ *       dist2(i,j) = || a(:,i)-b(:,j) ||^2 = dist2[i+na*j]
+ *
  */
 void compute_cross_distances (int d, int na, int nb,
                               const float *a,
                               const float *b, float *dist2);
+
+/* idem, if the matrices are not packed */
 
 void compute_cross_distances_nonpacked (int d, int na, int nb,
                                         const float *a, int lda,
@@ -172,8 +181,6 @@ void compute_cross_distances_thread (int d, int na, int nb,
                                      const float *a,
                                      const float *b, float *dist2,
                                      int nt);
-
-
 
 
 

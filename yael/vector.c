@@ -367,10 +367,20 @@ int fvec_fwrite (FILE *fo, const float *v, int d)
 
 
 
+
 int fvec_fwrite_raw(FILE *fo, const float *v, long d) {
   long ret = fwrite (v, sizeof (float), d, fo);
   if (ret != d) {
-    perror ("fvec_fwrite: write error 2");
+    perror ("fvec_fwrite_raw: write error 2");
+    return -1;
+  }  
+  return 0;
+}
+
+int ivec_fwrite_raw(FILE *fo, const int *v, long d) {
+  long ret = fwrite (v, sizeof (int), d, fo);
+  if (ret != d) {
+    perror ("ivec_fwrite_raw: write error 2");
     return -1;
   }  
   return 0;
