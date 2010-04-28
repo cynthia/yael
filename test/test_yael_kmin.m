@@ -1,12 +1,12 @@
 % Test program for function test_yael_kmin, and timings comparison
-d = 1000000;
+d = 100000;
 n = 100; 
-k = 10;
+k = 100;
 
 a = single (rand (d, n)); 
 
 % Just the minimal value
-tic ; [v,i] = min(a) ; tmin = toc ;
+tic ; [v, i] = min(a) ; tmin = toc ;
 
 % use the yael function to find the minimum only
 tic; [val,idx] = yael_kmin (a, 1) ; tymin = toc;
