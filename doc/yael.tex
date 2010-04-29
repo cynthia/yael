@@ -123,9 +123,9 @@ The C API is object-oriented in spirit whenever applicable, with constructors an
 The latest version of yael can be retrieved from the SVN as follows:
 
 \code{svn checkout svn+ssh://mygforgelogin@scm.gforge.inria.fr/svn/yael/trunk yael}
+*** add anonymous access when available ***
+\medskip
 
-
-XXXX add anonymous access when available 
 
 This performs the installation of the regular \yael branch of the project into the directory \texttt{yael}. 
 This installation directory is referred to as~\yroot in the following. 
@@ -252,7 +252,7 @@ is probably to look at the test files included in the
 
 \section{Multi-threading in \yael}
 
-*** explain the count_cpu function ***
+*** explain the count\_cpu function ***
 
 *** explain how to use the multi-threading function ***
 
@@ -395,32 +395,57 @@ point to \tc{YAELROOT}.
 
 \end{description}
 
-ldd libyael 
-otool -L libyael.dylib
+To check the dependancies for the library, you can use the following commands:
+\begin{itemize}
+\item Linux: \tc{ldd libyael}
+\item MacOS: \tc{otool -L libyael.dylib}
+\end{itemize}
 
 
 \appendix                     % Les annexes
 
 \chapter{File exchange format}               % Annexe A
 
-\yael uses a home-made file format to store vectors and matrices. 
-We find th
+\yael uses a home-made file format to store integer or floating point vectors. 
+Each vector is stored by
+\begin{itemize}
+\item writing its length $d$ as an integer
+\item and writing its $d$ components in binary format. 
+\end{itemize}
+We only store single-precision floating point number\footnote{For double precision you need to use the standard I/O functions. But do you really need double precision ?}. Therefore the size of storing a vector of integer or a vector of floating point numbers is always \tc{sizeof(int)+4*d}$=4(d+1)$, as both the dimension and the components require 4 bytes each.  
+\medskip
 
-checksum when we know by advances that 
+By convention we will call a file containing several vectors of the same kind ``fvecfile'' and ``ivecfile''. 
+Some particular high-level functions are defined for these files. 
+\bigskip
 
-structure 
+{\it Remarks:} 
+\begin{itemize}
+\item Since there use no header, several fvecfiles or ivecfiles can be concatenated using regular the \tc{cat} Unix command to produce a file containing the concatenation of the vector. 
+\item the front-ends \tc{fvecfile} and \tc{ivecfile} receive a fvecfile (resp., ivecfile) on standard input and produce a text output. Usage:
+\code{
+cat myfile.fvecs | fvecfile
+}
+or, equivalently, 
+\code{
+fvecfile < myfile.fvecs
+}
+They are provided in the prog directory. 
+\end{itemize}
 
-fvecfile and ivecfile
 
-
-operation: cat, fvecfile
-
+One can see below the set of \yael functions used to read these files:
 \begin{tabular}{lll}
-C         & & \\
+C         &*** & \\
           & & \\
 matlab    & & \\
 python    & & \\
 \end{tabular}
+
+
+Recall that these functions should be used only for files containing vectors of same type and dimension. 
+However, thanks to the fact that the dimension is stored for each vector, variable length vectors 
+can also be used, but in that case vectors must be accessed one by one. 
 
 % \listoffigures              % Table des figures
 
