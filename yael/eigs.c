@@ -54,6 +54,7 @@ extern void dsygv_(FINTEGER * itype, char *jobz, char *uplo, FINTEGER *n, double
 
 
 
+
 int eigs_sym (int d, const float * m, float * eigval, float * eigvec)
 {
   int i, j;
@@ -167,3 +168,158 @@ void eigs_reorder (int d, float * eigval, float * eigvec, int criterion)
   free (eigvecst);
   free (perm);
 }
+
+
+
+
+#ifdef HAVE_ARPACK
+
+typedef FINTEGER integer;
+typedef FINTEGER logical;
+typedef float real;
+
+extern void ssaupd_ (integer *ido,const char*bmat,integer *n, const char*which,integer *nev,
+                     float* tol, float*resid, integer *ncv, float *v, integer *ldv, 
+                     integer *iparam, integer * ipntr, float *workd, float *workl, 
+                     integer *lworkl, integer *info );
+
+
+extern void sseupd_ (logical *rvec, const char *howmny, logical *select, float *d    ,
+                     float *z     ,integer *ldz   , float *sigma , const char*bmat,
+                     integer *n       , const char*which,integer *nev, float* tol, 
+                     float*resid, integer *ncv, float *v, integer *ldv, 
+                     integer *iparam, integer * ipntr, float *workd, float *workl, 
+                     integer *lworkl, integer *info );
+
+extern void sgemv_(const char *trans, integer *m, integer *n, real *alpha, 
+                   const real *a, integer *lda, const real *x, integer *incx, real *beta, real *y, 
+                   integer *incy);
+
+#define NEWA(type,n) (type*)malloc(sizeof(type)*(n))
+
+
+int eigs_sym_part (int n, const float * a, int nev, float * sout, float * vout) {
+
+  int ncv=2*nev;  /* should be enough (see remark 4 of ssaupd doc) */
+
+  float *s=NEWA(float,ncv*2);
+  int i,j;
+  const char *bmat="I",*which="LM";
+  float tol=0;
+  int info=0;
+  int ido=0;
+  int lworkl = ncv*(ncv+8);
+  float *resid=NEWA(float,n),*workd=NEWA(float,3*n),*workl=NEWA(float,lworkl);
+  float *v=NEWA(float,n*(long)ncv);
+  int *iparam=NEWA(int,11),*ipntr=NEWA(int,11);
+
+  iparam[0]=1;
+  iparam[2]=n;
+  iparam[6]=1;
+
+  double dt0=0,dt1=0;
+  
+  i=0;
+  for(;;) {
+
+    /*     double t0=getmillisecs(); */
+
+    ssaupd_(&ido, bmat, &n, which, &nev, 
+            &tol, resid, &ncv, v, &n, 
+            iparam, ipntr, workd, workl, &lworkl,
+            &info);
+
+    /*     double t1=getmillisecs(); */
+    
+    if(ido==-1 || ido==1) {
+      
+      float *x=workd+ipntr[0]-1;
+      float *y=workd+ipntr[1]-1;
+
+      float zero=0,one=1;
+      int ione=1;
+      
+      
+      sgemv_("Trans",&n,&n,&one,a,&n,x,&ione,&zero,y,&ione);
+
+    } else break;   
+
+    /*     double t2=getmillisecs(); */
+    /*     dt0+=t1-t0; */
+    /*     dt1+=t2-t1; */
+    /*     printf("ssaupd eval %d (dt0=%.3f dt1=%.3f) \r",i++,dt0,dt1); fflush(stdout); */
+
+    printf("ssaupd eval %d\r",i++); fflush(stdout);
+  }
+  
+  printf("\n ssaupd -> sseupd\n");
+
+  if(info<0) {
+    printf("eigs_sym_part: ssaupd_ error info=%d\n",info);
+    return info;
+  } 
+
+  {
+    logical *select=NEWA(logical,ncv);
+    int ierr;
+    logical rvec=1;
+    float sigma;
+
+    sseupd_(&rvec,"All",select,s,
+            v,&n, &sigma, bmat, &n, which, &nev, 
+            &tol, resid, &ncv, v, &n, 
+            iparam, ipntr, workd, workl, &lworkl,&ierr);
+
+    if(ierr!=0) {
+      printf("eigs_sym_part: sseupd_ error: %d\n",ierr);
+      return ierr;     
+    }
+    int nconv=iparam[4];
+
+    if(nconv<nev) {
+      printf("eigs_sym_part: nev=%d, nconv=%d, increase ncv=%d\n",nev,nconv,ncv);
+      return 0xdeadbeef;     
+    }
+
+    for(j=0;j<nconv;j++) {
+      s[j]=sqrt(s[j]);
+    } 
+
+    free(select); 
+  }
+
+  free(resid); 
+  free(workl);
+  free(workd);
+  free(iparam);
+  free(ipntr);
+
+  /* order v by s */
+  
+  int *perm=NEWA(int,nev);
+  fvec_sort_index(s,nev,perm); 
+  
+  if(vout) 
+    for(i=0;i<nev;i++) 
+      memcpy(vout+n*i,v+n*perm[nev-1-i],sizeof(float)*n);
+
+  if(sout) 
+    for(i=0;i<nev;i++) 
+      sout[i]=s[perm[nev-1-i]];
+
+  free(perm); 
+  free(v);
+  free(s);
+
+  return 0;
+}
+
+
+#else
+
+int eigs_sym_part (int d, int const float * m, int nev, float * eigval, float * eigvec) {
+  fprintf(stderr,"eigs_sym_part: ERROR Yael not compiled with arpack\n");
+  return -1;
+}
+
+#endif

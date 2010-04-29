@@ -44,10 +44,10 @@ knowledge of the CeCILL license and that you accept its terms.
  *  @{  */
 
 /*! Compute the eigenvalues and eigvectors of a symmetric matrix m
-  @param d dimension of the square matrix m
-  @param the matrix (first elements are the first row)
-  @param eigval the n eigenvalues
-  @param eigvec Eigenvector j is  eigvec[j*d] .. eigvec[j*(d+1)-1]
+  @param d           dimension of the square matrix m
+  @param m(d,d)      the matrix (first elements are the first row)
+  @param eigval(d)   the eigenvalues
+  @param eigvec(d,d) Eigenvector j is eigvec(:,j)
 
   the vectors eigval and eigvec must be allocated externally
 */
@@ -63,6 +63,18 @@ int geigs_sym (int d, const float * a, const float * b, float * eigval,
    @param criterion equal to 0 for ascending order, descending otherwise
 */
 void eigs_reorder (int d, float * eigval, float * eigvec, int criterion);
+
+
+/*! same as eigs_sym, but returns only part of the vectors 
+ * 
+ * @param nev           nb of eigenvectors/values to return
+ * @param eigval(nev)   the n eigenvalues
+ * @param eigvec(d,nev) eigenvector j is eigvec(:,j)
+ *
+ * @return non-zero on error (0 is ok!)
+ */
+int eigs_sym_part (int d, const float * m, int nev, float * eigval, float * eigvec);
+
 
 /*! @} */
 #endif

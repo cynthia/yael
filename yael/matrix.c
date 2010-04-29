@@ -234,7 +234,7 @@ void fmat_print (const float *a, int nrow, int ncol)
   printf ("[");
   for (i = 0; i < nrow; i++) {
     for (j = 0; j < ncol; j++)
-      printf ("%.5g ", a[i * ncol + j]);
+      printf ("%.5g ", a[i + ncol * j]);
     if (i == nrow - 1)
       printf ("]\n");
     else
@@ -400,7 +400,7 @@ float *hadamard (int d)
 /* Statistical matrix operations                                             */
 /*---------------------------------------------------------------------------*/
 
-float *fmat_center_rows(int n,int d,float *v) {
+float *fmat_center_columns(int d,int n,float *v) {
   assert(n>0);
 
   float *accu=fvec_new_cpy(v,d);
@@ -417,13 +417,13 @@ float *fmat_center_rows(int n,int d,float *v) {
   return accu;  
 }
 
-void fmat_subtract_from_rows(int n,int d,float *v,const float *avg) {
+void fmat_subtract_from_columns(int d,int n,float *v,const float *avg) {
   long i;
   for(i=0;i<n;i++) 
     fvec_sub(v+i*d,avg,d);
 }
 
-void fmat_rev_subtract_from_rows(int n,int d,float *v,const float *avg) {
+void fmat_rev_subtract_from_columns(int d,int n,float *v,const float *avg) {
   long i;
   for(i=0;i<n;i++) 
     fvec_rev_sub(v+i*d,avg,d);

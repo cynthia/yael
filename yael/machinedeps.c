@@ -41,6 +41,8 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <sys/types.h>
 #include <assert.h>
 
+#include <sys/time.h>
+
 
 #include "machinedeps.h"
 

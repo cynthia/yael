@@ -71,7 +71,7 @@ float *fmat_new (int nrow, int ncol);
 
 /*!  Matrix multiplication
  *
- * WARNING all matrix multiplication functions assume row-major storage!
+ * WARNING some matrix multiplication functions assume row-major storage! (noted with RM) 
  * 
  * computes mout = left * right
  * where 
@@ -83,36 +83,36 @@ float *fmat_new (int nrow, int ncol);
 void fmat_mul (const float *left, const float *right,
 	       int n, int m, int k, float *mout);
 
-/*! Same as fmat_mul, but allocate the memory and return the corresponding pointer */
+/*! RM Same as fmat_mul, but allocate the memory and return the corresponding pointer */
 float * fmat_new_mul (const float *left, const float *right,
 		      int n, int m, int k);
 
-/*! Same as fmat_mul, but transpose left matrix (left of size m x n) */
+/*! RM Same as fmat_mul, but transpose left matrix (left of size m x n) */
 void fmat_mul_tl (const float *left, const float *right,
 		  int n, int m, int k, float *mout);
 
-/*! Same as fmat_mul_tl, but allocate the memory */
+/*! RM Same as fmat_mul_tl, but allocate the memory */
 float *fmat_new_mul_tl (const float *left, const float *right, 
 			int n, int m, int k);
 
-/*! Same as fmat_mul, but transpose right matrix (right of size k x m) */
+/*! RM Same as fmat_mul, but transpose right matrix (right of size k x m) */
 void fmat_mul_tr (const float *left, const float *right,
 		  int n, int m, int k, float *mout);
 
-/*! Same as fmat_mul_tr, but allocate the memory */
+/*! RM Same as fmat_mul_tr, but allocate the memory */
 float *fmat_new_mul_tr (const float *left, const float *right, 
 			int n, int m, int k);
 
-/*! Same as fmat_mul, but transpose both left and right matrices
+/*! RM Same as fmat_mul, but transpose both left and right matrices
   left is of size m * n and right of size k x m */
 void fmat_mul_tlr (const float *left, const float *right,
 		   int n, int m, int k, float *mout);
 
-/*! Same as fmat_mul_tlr, but allocate the memory */
+/*! RM Same as fmat_mul_tlr, but allocate the memory */
 float *fmat_new_mul_tlr (const float *left, const float *right, 
 			int n, int m, int k);
 
-/*! Multiply a matrix by a vector */
+/*! RM Multiply a matrix by a vector */
 float * fmat_mul_fvec (const float * a, const float * v, int nrow, int ncol);
 
 /*! display the matrix in matlab-like format */
@@ -124,20 +124,20 @@ void fmat_print (const float *a, int nrow, int ncol);
 /* Matrix manipulation functions                                             */
 /*---------------------------------------------------------------------------*/
 
-/*! @brief return the submatrix defined by left-upper corner (included) 
+/*! RM  return the submatrix defined by left-upper corner (included) 
   and top-down corner (not included) */
 float *fmat_get_submatrix (const float *a, int ncola, int r1, int c1, int r2, int c2);
 
-/* return the submatrix defined by a list of columns  */
+/* RM return the submatrix defined by a list of columns  */
 float *fmat_get_columns (const float *a, int ncola, int nrow, int ncolout, const int *cols);
 
-/*! @brief produce a matrix composed of the rows indicated by the vector rows */
+/*! RM  produce a matrix composed of the rows indicated by the vector rows */
 float *fmat_get_rows (const float *a, int ncol, int nrowout, const int *rows);
 
-/*! per-column sum of matrix elements */
+/*! RM  per-column sum of matrix elements */
 float *fmat_sum_columns (const float *a, int ncol, int nrow);
 
-/*! 
+/*! RM 
  * a is ncol-by-nrow
  * accu is k-by-k
  *
@@ -157,13 +157,13 @@ int *imat_joint_histogram(int n,int k,int *row_assign,int *col_assign);
 /*---------------------------------------------------------------------------*/
 
 
-/*! @brief produce a new matrix of size nrow x ncol, filled with gaussian values */
+/*! RM  produce a new matrix of size nrow x ncol, filled with gaussian values */
 float * fmat_new_rand_gauss (int nrow, int ncol);
 
-/*! @brief produce a random orthogonal basis matrix of size d*d */
+/*! produce a random orthogonal basis matrix of size d*d */
 float *random_orthogonal_basis (int d);
 
-/*! @brief Construct a Hadamard matrix of dimension d using the Sylvester construction.
+/*! Construct a Hadamard matrix of dimension d using the Sylvester construction.
    d should be a power of 2 */
 float * hadamard (int d);
 
@@ -172,17 +172,17 @@ float * hadamard (int d);
 /* Statistical matrix operations                                             */
 /*---------------------------------------------------------------------------*/
 
-/* compute average of v matrix rows, subtract it to v and return average */
-float *fmat_center_rows(int n,int d,float *v);
+/* compute average of v matrix columns, subtract it to v and return average */
+float *fmat_center_columns(int d,int n,float *v);
 
-/* subtract a vector from all rows of a matrix m_i := m_i - avg*/
-void fmat_subtract_from_rows(int n,int d,float *m,const float *avg);
+/* subtract a vector from all columns of a matrix m_i := m_i - avg*/
+void fmat_subtract_from_columns(int d,int n,float *m,const float *avg);
 
 /* reverse: m_i := avg - m_i */
-void fmat_rev_subtract_from_rows(int n,int d,float *m,const float *avg);
+void fmat_rev_subtract_from_columns(int d,int n,float *m,const float *avg);
 
 
-/*! @brief Perform the Principal Component Analysis of a set of vectors,
+/*! DEPRECATED Perform the Principal Component Analysis of a set of vectors,
  * v(n,d) stored per row
  *
  * return d*d matrix of eigenvectors, stored by row. To transform a
@@ -191,18 +191,18 @@ void fmat_rev_subtract_from_rows(int n,int d,float *m,const float *avg);
  */
 float *compute_pca(int n, int d, float *v);
 
-/* in covariance matrix, multiply of-block diagonal elements with
+/* DEPRECATED in covariance matrix, multiply of-block diagonal elements with
    weight (weight=1 => normal pca). bs=size of diagonal blocks */
 float *compute_pca_with_weighted_blocks (int n, int d, float *v,
                                          int bs, double weight); 
 
 
-/*! @brief compute only a few (nev) PCA vectors */
+/*! DEPRECATED compute only a few (nev) PCA vectors */
 int partial_pca(int n,int d,const float *a,
                 int nev,float *pcamat_out);
 
 
-/*! @brief compute the nev first lines of U and V and S for a (row-major, m rows, n columns) 
+/*! DEPRECATED compute the nev first lines of U and V and S for a (row-major, m rows, n columns) 
 
    sout has size nev
    uout has size nev-by-m
