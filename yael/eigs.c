@@ -317,7 +317,9 @@ int eigs_sym_part (int n, const float * a, int nev, float * sout, float * vout) 
 
 #else
 
-int eigs_sym_part (int d, int const float * m, int nev, float * eigval, float * eigvec) {
+
+int eigs_sym_part (int d, const float * m, int nev, float * eigval, float * eigvec) 
+{
   fprintf(stderr,"eigs_sym_part: ERROR Yael not compiled with arpack\n");
   return -1;
 }
