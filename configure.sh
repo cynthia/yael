@@ -18,8 +18,11 @@ ldflags="-g -fPIC $LDFLAGS"
 
 yaelprefix=$PWD
 
-
 lapackldflags='-lblas -llapack'
+
+# for some reason, the atlas libs are not accessible via -lblas
+# -llapack on Ubuntu and Fedora Core Linux.
+
 if [ -e /usr/lib/libblas.so.3gf ]; then
    # special names for libs on ubuntu
    lapackldflags="/usr/lib/libblas.so.3gf /usr/lib/liblapack.so.3gf"
@@ -48,8 +51,6 @@ if [ $conf == mac ]; then
   sharedext=dylib
   sharedflags="-dynamiclib"
   yaelsharedflags="$sharedflags -install_name $yaelprefix/yael/libyael.dylib"
-  cflags="$cflags" 
-  ldflags="$ldflags" 
 else
   wrapldflags="-shared"
   sharedflags="-shared"
@@ -142,7 +143,6 @@ while [ $# -gt 0 ] ; do
 done
 
 yaellib=${yaelprefix}/yael
-#yaelinc=${yaelprefix%/*}
 yaelinc=${yaelprefix}
 
 
