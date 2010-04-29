@@ -54,7 +54,7 @@ knowledge of the CeCILL license and that you accept its terms.
  */
 
 
-/*! @brief Return the number of CPU */
+/*! Return the number of cores. */
 int count_cpu(void);
 
 #ifndef __APPLE__
@@ -68,7 +68,7 @@ double log2(double x);
 #else
 #include <stdlib.h>
 
-/*! @brief allocate memory such that the pointer is aligned*/
+/*! allocate memory such that the pointer is aligned*/
 void *memalign (size_t ignored, size_t nbytes);
 
 #endif
@@ -81,7 +81,7 @@ void *memalign (size_t ignored, size_t nbytes);
 #endif
 
 
-/* trace all mallocs between two function calls. Intended to replace
+/*! trace all mallocs between two function calls. Intended to replace
  * struct mallinfo that does not seem to work. Implemented only for
  * Linux. Includes inefficient code that should not be relied on while
  * profiling. */
@@ -102,13 +102,17 @@ malloc_stats_t malloc_stats_end (void);
 
 
 
-/*! @brief return a timestamp, which is useful to measure elapsed time */
+/*! return a timestamp, which is useful to measure elapsed time */
 double getmillisecs();
 
-/*! @brief compute_tasks creates nthread threads that call task_fun n times 
-   arg=task_arg
-   tid=identifier of the thread in 0..nthread-1
-   i=call number in 0..n-1
+/*! exectutes a set of tasks in parallel using a thread pool 
+ *
+ * @param n            number of tasks to execute
+ * @param nthread      number of threads that will run the tasks
+ * @param task_fun     this callback will be called with 
+ *              -  arg = task_arg
+ *              -  tid = identifier of the thread in 0..nthread-1
+ *              -  i = call number in 0..n-1
 */
 void compute_tasks (int n, int nthread,
                     void (*task_fun) (void *arg, int tid, int i),

@@ -39,32 +39,26 @@ knowledge of the CeCILL license and that you accept its terms.
 #define GMM_H_INCLUDED
 
 
-/********************************************************************************
- * Gaussian Mixture Model implementation and Fisher Kernels, main ref: 
-
- @INPROCEEDINGS{PerDa06,
-   author = {F Perronnin and C Dance},
-   title = {Fisher kernels on visual vocabularies for image categorization},
-   booktitle = {CVPR},
-   year = {2006},
- }
-*/ 
 
 /*---------------------------------------------------------------------------*/
 /*! @addtogroup gmm
  *  @{
  */
 
+/*! @defgroup gmm 
+ *
+ * Gaussian Mixture Model implementation and Fisher Kernels, as
+ * defined in: F. Perronnin and C. Dance, Fisher kernels on visual
+ * vocabularies for image categorization, CVPR 2006.
+ */ 
 
-/*! @brief Gaussian Mixture Model (GMM) implementation
-
-*/
+/*! Gaussian Mixture Model (GMM) implementation */
 typedef struct gmm_s {
   int d;          /*!< vector dimension */
   int k;          /*!< number of mixtures */
   float * w;      /*!< weights of the mixture elements (size k) */
   float * mu;     /*!< centroids (k-by-d) */
-  float * sigma;  /*!< diagonal of the covariance matrix (k-by-d) */
+  float * sigma;  /*!< diagonal of the covariance matrix (d-by-k) */
 } gmm_t;
 
 /*! during computation of probabilities: take weights into account */
@@ -84,45 +78,56 @@ typedef struct gmm_s {
 #define GMM_FLAGS_MU 16
 
 
-/*! @brief Estimate the Gaussian mixture in two stages: 
-  1. standard kmeans, 
-  2. EM to find parameters.
-  
-  @param d,k    see gmm_t structure
-  @param n      nb of learning points
-  @param niter  nb of iterations (the same for both stages)
-  @param v      v[i*d]..v[i*d+d-1] contains point i for i=0..n-1
-  @param nt     nb of threads 
-  @param seed   usedd by kmeans to initialize random number generator
-  @param nredo  number of "redo"  (launch several kmeans)
-  @param flags  see the GMM_* flags 
+/*! Estimate the Gaussian mixture in two stages: 
+ * - standard kmeans, 
+ * - EM to find parameters.
+ * 
+ * @param d,k    see gmm_t structure
+ * @param n      nb of learning points
+ * @param niter  nb of iterations (same for both stages)
+ * @param v(d,n) input vectors
+ * @param nt     nb of threads 
+ * @param seed   usedd by kmeans to initialize random number generator
+ * @param nredo  number of "redo"  (launch several kmeans)
+ * @param flags  see GMM_* flags 
  */
 gmm_t * gmm_learn (int d, int n, int k, int niter,
                    const float * v, int nt, int seed, int nredo,
                    int flags);
 
 
-/*! @brief Describe to stdout */
+/*! Describe to stdout */
 void gmm_print(const gmm_t *g);
 
-/*! @brief free a GMM structure */
+/*! free a GMM structure */
 void gmm_delete (gmm_t * g);
 
 
-/*! @brief compute p(c_i|x).
-  @param v n-by-d matrix with c_i values i=0..n-1
-  @param p n-by-k matrix of probability values
+/*!  compute probabilities of centroids for each vector p(c_i|x).
+ *
+ * @param v(d,n)  v(:,i) is c_i
+ * @param p(k,n)  output probability values
  */
 void gmm_compute_p (int n, const float * v, 
                     const gmm_t * g, 
                     float * p,
                     int flags);
 
-/*! @brief Fisher descriptor: 
- compute \nabla_\lambda p(x,\lambda) 
- where \lambda = (w, mu, sqrt(sigma))
- size of db_dlambda depends on flags, call gmm_dp_dlambda_sizeof to find out
-*/
+/*! Fisher descriptor. 
+ *
+ * Compute 
+ *
+ *   nabla_lambda p(x, lambda) 
+ *
+ * where 
+ *
+ *   lambda = (w, mu, sqrt(sigma))
+ *
+ * @param v(d,n)           vectors where to compute descriptor 
+ * @param flags            combination of GMM_FLAGS_*. 
+ * @param dp_dlambda(dd,n) ouput descriptor. The output descriptor size dd is given by gmm_dp_dlambda_sizeof(flags)
+ *
+ */
 void gmm_compute_dp_dlambda (int n, const float *v, const gmm_t * g, 
 			    int flags, float *dp_dlambda);
 
@@ -130,25 +135,19 @@ size_t gmm_dp_dlambda_sizeof (const gmm_t * g, int flags);
 
 
 
-/*! @brief write the GMM structure parameter into a file */
+/*! write the GMM structure parameter into a file */
 void gmm_write(const gmm_t *g, FILE *f); 
 
-/*! @brief read the GMM from a file */
+/*! read the GMM from a file */
 gmm_t * gmm_read (FILE *f); 
 
 
-/*! @brief threaded version of gmm_compute_p */
+/*! Threaded version of gmm_compute_p */
 void gmm_compute_p_thread (int n, const float * v, 
                            const gmm_t * g, 
                            float * p, 
                            int flags,
                            int n_thread);
-
-
-/*! @brief deprectated implementation of the VLAD descriptor. flags==0 gives
-  the standard VLAD, flags==15 gives the one with sigma derivatives */
-void gmm_compute_fisher_simple(int n, const float *v, const gmm_t * g, 
-			       int flags, float *desc);
 
 
 /*! @} */

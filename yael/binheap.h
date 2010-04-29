@@ -45,9 +45,13 @@ knowledge of the CeCILL license and that you accept its terms.
  *  @{
  */
 
-/*! @brief Binary heap used as a maxheap. 
+
+/*! @defgroup binheap
   This structure is used, in particular, to find the maxk smallest
   elements of a possibly unsized stream of values. 
+*/
+
+/*! Binary heap used as a maxheap. 
   Element (label[1],val[1]) always contains the maximum value of the binheap. 
 */
 struct fbinheap_s {
@@ -59,29 +63,29 @@ struct fbinheap_s {
 
 typedef struct fbinheap_s fbinheap_t;
 
-/*! @brief create the maxheap structure for maxk elements (maximum)
+/*! create the maxheap structure for maxk elements (maximum)
  @param maxk maximum number of elements to be stored in the heap*/
 struct fbinheap_s * fbinheap_new (int maxk);
 
-/*! @brief return the size of a maxheap structure 
+/*! return the size of a maxheap structure 
  @param maxk the maximum number of elements that the structure will receive */
 size_t fbinheap_sizeof (int maxk); 
 
-/*! @brief A binheap can be stored in an externally allocated memory area 
+/*! A binheap can be stored in an externally allocated memory area 
   of fbinheap_sizeof(maxk) bytes. The fbinheap_init() function is used 
   to initialize this memory area */
 void fbinheap_init (fbinheap_t *bh, int maxk);
 
-/*! @brief free allocated memory */
+/*! free allocated memory */
 void fbinheap_delete (fbinheap_t * bh);
 
-/*! @brief insert an element on the heap (if the value val is small enough) */
+/*! insert an element on the heap (if the value val is small enough) */
 void fbinheap_add (fbinheap_t * bh, int label, float val);
 
-/*! @brief remove largest value from binheap (low-level access!) */
+/*! remove largest value from binheap (low-level access!) */
 void fbinheap_pop (fbinheap_t * bh);
 
-/*! @brief add n elements on the heap (the values are added only if they 
+/*! add n elements on the heap (the values are added only if they 
 are small enough compared to the other elements)
 
   @param bh the maxheap structure
@@ -91,25 +95,25 @@ are small enough compared to the other elements)
  */
 void fbinheap_addn (fbinheap_t * bh, int n, const int * labels, const float * v);
 
-/*! @brief add n elements on the heap, using the set of labels starting at label0  */
+/*! add n elements on the heap, using the set of labels starting at label0  */
 void fbinheap_addn_label_range (fbinheap_t * bh, int n, int label0, const float * v);
 
-/*! @brief output the labels in increasing order of associated values 
+/*! output the labels in increasing order of associated values 
   @param bh the maxheap structure
   @pram perm the array that receive the output permutation order (pre-allocated)
 */
 void fbinheap_sort_labels (fbinheap_t * bh, int * perm);
 
-/*! @brief output the sorted values */
+/*! output the sorted values */
 void fbinheap_sort_values (fbinheap_t * bh, float * v);
 
-/*! @brief output both sorted results: labels and corresponding values  */
+/*! output both sorted results: labels and corresponding values  */
 void fbinheap_sort (fbinheap_t * bh, int * labels, float *v);
 
-/*! @brief sort by increasing labels, ouptput sorted labels & associated values */
+/*! sort by increasing labels, ouptput sorted labels & associated values */
 void fbinheap_sort_per_labels (fbinheap_t * bh, int * labels, float *v);
 
-/*! @brief show the heap content */
+/*! show the heap content */
 void fbinheap_display (fbinheap_t * bh);
 
 

@@ -306,7 +306,7 @@ void fvec_k_min (const float *val, int n, int *idx, int k)
  * Simple functions 
  *********************************************************************/
 
-void find_labels (int *labels, int nres, int *ilabels, int nilabels)
+void find_labels (const int *labels, int nres, int *ilabels, int nilabels)
 {
   int aux[nilabels];
   int i, j, left = nilabels;

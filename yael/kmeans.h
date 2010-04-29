@@ -44,29 +44,31 @@ knowledge of the CeCILL license and that you accept its terms.
  *  @{  */
 
 
-/* layout of flags: 
-
- flags & 0xffff : use this many threads to compute 
-
- flags & KMEANS_QUIET: suppress kmeans output
-
- flags & KMEANS_INIT_RANDOM: random initialization 
-
- flags & KMEANS_NORMALIZE_CENTS: normalize centroids to L2=1 after they are computed
-
- flags & KMEANS_NORMALIZE_SOPHISTICATED: ditto, more sophisticated
-
-*/
-
+/* flags for kmeans */
 #define KMEANS_QUIET           0x10000
 #define KMEANS_INIT_RANDOM     0x20000
 #define KMEANS_NORMALIZE_CENTS 0x40000
 #define KMEANS_NORMALIZE_SOPHISTICATED 0x80000
 
 
-/*! @brief compute the k-means algorithm and return the quantization error. 
-   The centroids parameters must be allocated. 
-   TThe other output vectors (dis, assign and nassign) are not used if NULL */
+/*! Compute the k-means centroids. 
+ *
+ * @param v(d, n)           vectors to cluster
+ * @param centroids(d, k)   output centroids
+ * @param flags             a set of computation parameters: 
+ *                     - flags & 0xffff : use this many threads to compute 
+ *                     - flags & KMEANS_QUIET: suppress kmeans output
+ *                     - flags & KMEANS_INIT_RANDOM: random initialization 
+ *                     - flags & KMEANS_NORMALIZE_CENTS: normalize centroids to L2=1 after they are computed
+ *                     - flags & KMEANS_NORMALIZE_SOPHISTICATED: ditto, more sophisticated
+ * @param seed              random seed for intialization
+ * @param redo              perform clustering this many times and keep clusters with smallest quantization error
+ * @param dis(n)            squared distance to assigned centroid of each input vector (may be NULL)
+ * @param assign(n)         index of assigned centroid in 0..k-1 (may be NULL) 
+ * @param nassign(k)        nb of vectors assigned to each centroid (may be NULL)
+ *
+ * @return final quantization error 
+ */
 float kmeans (int d, int n, int k, int niter, 
 	      const float * v, int flags, int seed, int redo, 
 	      float * centroids, float * dis, 
@@ -75,12 +77,12 @@ float kmeans (int d, int n, int k, int niter,
 
 /*----------- Following functions are used for forward compatibility -----------*/
 
-/*! @brief k-means clustering. */
+/*! simplified call */
 float* clustering_kmeans (int n, int d,
                           const float *points, int k, int nb_iter_max, 
                           double normalize);
 
-/*! @brief Same as k-means clustering, but generate in addition the assignment
+/*! Same as kmeans, but generate in addition the assignment
  *  performed on the input set
  */
 float* clustering_kmeans_assign (int n, int d,
