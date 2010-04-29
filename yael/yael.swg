@@ -287,43 +287,112 @@ void free(void*);
 
 
 %{
-
 #define SWIG_FILE_WITH_INIT
 
-void fvec_to_numpy(const float *src,float* dest, long n) {
-  memcpy(dest,src,sizeof(*dest)*n);
+#include <numpy/arrayobject.h>
+
+
+PyObject *fvec_to_numpy(const float *src,long di) {
+  npy_intp d=di;
+  PyObject* ob=PyArray_SimpleNew(1,&d,NPY_FLOAT);
+  float *dest=PyArray_DATA(ob);
+  memcpy(dest,src,sizeof(float)*d);
+  return ob;
 }
 
-float *numpy_to_fvec(const float* x, long n) {
-  float *ret=malloc(sizeof(*x)*n);
-  memcpy(ret,x,sizeof(*x)*n);
+PyObject *ivec_to_numpy(const int *src,long di) {
+  npy_intp d=di;
+  PyObject* ob=PyArray_SimpleNew(1,&d,NPY_INT);
+  int *dest=PyArray_DATA(ob);
+  memcpy(dest,src,sizeof(int)*d);
+  return ob;
+}
+
+PyObject *fvec_to_numpy_ref(float *src,long di) {
+  npy_intp d=di;
+  return PyArray_SimpleNewFromData(1,&d,NPY_FLOAT,src);
+}
+
+PyObject *ivec_to_numpy_ref(int *src,long di) {
+  npy_intp d=di;
+  return PyArray_SimpleNewFromData(1,&d,NPY_INT,src);
+}
+
+
+#define CHECK_NUMPY_ARRAY(expected_npy)                                 \
+  if(!a) {                                                              \
+    fprintf(stderr,"%s: NULL input\n",__PRETTY_FUNCTION__);             \
+    return NULL;                                                        \
+  }                                                                     \
+  if(!PyArray_Check(a)) {                                               \
+    fprintf(stderr,"%s: input not numpy array\n",__PRETTY_FUNCTION__);  \
+    return NULL;                                                        \
+  }                                                                     \
+  if(PyArray_TYPE(a)!=expected_npy) {                                   \
+    fprintf(stderr,"%s: input has bad type (type id %d != %d)\n",__PRETTY_FUNCTION__, \
+            PyArray_TYPE(a),expected_npy);                              \
+    return NULL;                                                        \
+  }                                                                     \
+  if(((PyArrayObject *)a)->nd!=1) {                                     \
+    fprintf(stderr,"%s: input in %d D (expected 1D)\n",__PRETTY_FUNCTION__, \
+            ((PyArrayObject *)a)->nd);                  \
+    return NULL;                                                        \
+  }
+
+float *numpy_to_fvec(PyObject *a) {
+  CHECK_NUMPY_ARRAY(NPY_FLOAT)
+  size_t sz=PyArray_SIZE(a)*PyArray_ITEMSIZE(a);
+  void *ret=malloc(sz);
+  memcpy(ret,PyArray_DATA(a),sz);
   return ret;
 }
 
-void ivec_to_numpy(const int *src,int* dest, long n) {
-  memcpy(dest,src,sizeof(*dest)*n);
+float *numpy_to_fvec_ref(PyObject *a) {
+  CHECK_NUMPY_ARRAY(NPY_FLOAT)
+  return PyArray_DATA(a);
 }
 
-int *numpy_to_ivec(const int* x, long n) {
-  int *ret=malloc(sizeof(*x)*n);
-  memcpy(ret,x,sizeof(*x)*n);
+int *numpy_to_ivec(PyObject *a) {
+  CHECK_NUMPY_ARRAY(NPY_INT)
+  size_t sz=PyArray_SIZE(a)*PyArray_ITEMSIZE(a);
+  void *ret=malloc(sz);
+  memcpy(ret,PyArray_DATA(a),sz);
   return ret;
+}
+
+int *numpy_to_ivec_ref(PyObject *a) {
+  CHECK_NUMPY_ARRAY(NPY_INT)
+  return PyArray_DATA(a);
 }
 
 
 %}
 
-%include "numpy.i"
 
 %init %{
+/* needed, else crash at runtime */
     import_array();
 %}
 
-void fvec_to_numpy(const float *fv,float* ARGOUT_ARRAY1, int DIM1);
-float *numpy_to_fvec(float* INPLACE_ARRAY1, int DIM1);
 
-void ivec_to_numpy(const int *fv,int* ARGOUT_ARRAY1, int DIM1);
-int *numpy_to_ivec(int* INPLACE_ARRAY1, int DIM1);
+
+/* yael -> numpy */
+
+PyObject *fvec_to_numpy(const float *fv,int n);
+PyObject *ivec_to_numpy(const int *fv,int n);
+
+/* numpy -> yael */
+
+float *numpy_to_fvec(PyObject *numpyarray);
+int *numpy_to_ivec(PyObject *a);
+
+/* Ditto, without copying data */
+
+PyObject *fvec_to_numpy_ref(float *fv,int n);
+PyObject *ivec_to_numpy_ref(int *fv,int n);
+
+float *numpy_to_fvec_ref(PyObject *numpyarray);
+int *numpy_to_ivec_ref(PyObject *a);
 
 
 #endif

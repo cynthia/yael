@@ -69,7 +69,6 @@ usage: $0
   [--arpack=ld_flags_for_arpack]
   [--python-cflags=flags_to_compile_with_python_c_api]
   [--enable-numpy]
-  [--numpy-swig-wrapper=path-to-numpy-dot-i]
   [--numpy-cflags=includes-for-numpy]
 
 Examples that work: 
@@ -127,11 +126,7 @@ while [ $# -gt 0 ] ; do
         --enable-numpy) 
             usenumpy=yes
             numpycflags="-I$( python -c 'import numpy; print numpy.get_include()' )"
-            numpyswigflags="-DHAVE_NUMPY  -I/home/lear/douze/c/py/numpy_swig"
-            ;;
-
-        --numpy-swig-wrapper) 
-            numpyswigflags="-DHAVE_NUMPY -I${a#*=}"
+            numpyswigflags="-DHAVE_NUMPY"
             ;;
 
         --numpy-cflags) 

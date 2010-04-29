@@ -44,16 +44,35 @@ knowledge of the CeCILL license and that you accept its terms.
  */
 
 
+/*! @defgroup matrix
+ * Matrix functions
+ *
+ * All matrices are stored in column-major order (like Fortran) and
+ * indexed from 0 (like C, unlike Fortran). The declaration:
+ *
+ *     a(m, n) 
+ * 
+ * means that element a(i, j) is accessed with a[ i * m + j ] where
+ *
+ *     0 <= i < m and 0 <= j < n
+ *
+ */
+
+
+
 /*---------------------------------------------------------------------------*/
 /* Standard operations                                                       */
 /*---------------------------------------------------------------------------*/
 
-/*! @brief Allocate a new nrow x ncol matrix */
+/*! Allocate a new nrow x ncol matrix */
 float *fmat_new (int nrow, int ncol);
 
 
-/*! @brief Matrix multiplication
+
+/*!  Matrix multiplication
  *
+ * WARNING all matrix multiplication functions assume row-major storage!
+ * 
  * computes mout = left * right
  * where 
  *   mout     is n-by-k 
@@ -64,39 +83,39 @@ float *fmat_new (int nrow, int ncol);
 void fmat_mul (const float *left, const float *right,
 	       int n, int m, int k, float *mout);
 
-/*! @brief Same as fmat_mul, but allocate the memory and return the corresponding pointer */
+/*! Same as fmat_mul, but allocate the memory and return the corresponding pointer */
 float * fmat_new_mul (const float *left, const float *right,
 		      int n, int m, int k);
 
-/*! @brief Same as fmat_mul, but transpose left matrix (left of size m x n) */
+/*! Same as fmat_mul, but transpose left matrix (left of size m x n) */
 void fmat_mul_tl (const float *left, const float *right,
 		  int n, int m, int k, float *mout);
 
-/*! @brief Same as fmat_mul_tl, but allocate the memory */
+/*! Same as fmat_mul_tl, but allocate the memory */
 float *fmat_new_mul_tl (const float *left, const float *right, 
 			int n, int m, int k);
 
-/*! @brief Same as fmat_mul, but transpose right matrix (right of size k x m) */
+/*! Same as fmat_mul, but transpose right matrix (right of size k x m) */
 void fmat_mul_tr (const float *left, const float *right,
 		  int n, int m, int k, float *mout);
 
-/*! @brief Same as fmat_mul_tr, but allocate the memory */
+/*! Same as fmat_mul_tr, but allocate the memory */
 float *fmat_new_mul_tr (const float *left, const float *right, 
 			int n, int m, int k);
 
-/*! @brief Same as fmat_mul, but transpose both left and right matrices
+/*! Same as fmat_mul, but transpose both left and right matrices
   left is of size m * n and right of size k x m */
 void fmat_mul_tlr (const float *left, const float *right,
 		   int n, int m, int k, float *mout);
 
-/*! @brief Same as fmat_mul_tlr, but allocate the memory */
+/*! Same as fmat_mul_tlr, but allocate the memory */
 float *fmat_new_mul_tlr (const float *left, const float *right, 
 			int n, int m, int k);
 
-/*! @brief Multiply a matrix by a vector */
+/*! Multiply a matrix by a vector */
 float * fmat_mul_fvec (const float * a, const float * v, int nrow, int ncol);
 
-/*! @brief display the matrix in matlab-like format */
+/*! display the matrix in matlab-like format */
 void fmat_print (const float *a, int nrow, int ncol);
 
 
