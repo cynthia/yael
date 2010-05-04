@@ -283,10 +283,6 @@ for (i = 0 ; i < 1000 ; i++)
 
 it is more efficient (and often easier) to define a task as one outer loop. This reduces the number of synchronization barriers. 
 
-*** nt=count\_cpu() ***
-
-*** maybe add the simpliest example as possible in the test directory, 
-or even in this documentation  *** 
 
 \chapter{Python}
 
@@ -333,7 +329,7 @@ variable name: \tc{x=IntArray.acquirepointer(x)}
 
 \item Any function that may last long must be wrapped with the macro \tc{PARALLEL\_FUNCTION} in the SWIG code, or it will block other threads from executing. 
 
-\item output arguments in the C code (marked with \tc{\_out}) are returned as Python tuples. *** say a bit more ***
+\item output arguments in the C code (marked with \tc{\_out}) are returned as Python tuples. 
 \end{itemize}
 
 
