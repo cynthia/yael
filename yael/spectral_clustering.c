@@ -99,7 +99,7 @@ double spectral_clustering (int d, int n, int k, double sigma, int niter,
   int ret = eigs_sym (n, ker, eigval, eigvec); 
   free (deg);
   free (ker);
-  assert (ret);
+  assert (ret==0);
   
 
   /* keep only the first eigenvectors */

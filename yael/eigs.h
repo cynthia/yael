@@ -49,6 +49,8 @@ knowledge of the CeCILL license and that you accept its terms.
   @param eigval(d)   the eigenvalues
   @param eigvec(d,d) Eigenvector j is eigvec(:,j)
 
+  @return            =0 for success, else an error code (see info in lapack's dsygv documentation)
+  
   the vectors eigval and eigvec must be allocated externally
 */
 int eigs_sym (int d, const float * m, float * eigval, float * eigvec);
@@ -71,7 +73,7 @@ void eigs_reorder (int d, float * eigval, float * eigvec, int criterion);
  * @param eigval(nev)   the n eigenvalues
  * @param eigvec(d,nev) eigenvector j is eigvec(:,j)
  *
- * @return non-zero on error (0 is ok!)
+ * @return =0 for success, else an error code (see info in ssaupd or ierr in sseupd from arpack's documentation)
  */
 int eigs_sym_part (int d, const float * m, int nev, float * eigval, float * eigvec);
 

@@ -76,9 +76,10 @@ int eigs_sym (int d, const float * m, float * eigval, float * eigvec)
   double * work = (double *) memalign (16, lwork * sizeof (*work));
   dsyev_( "V", "L", &d, md, &d, lambda, work, &lwork, &info );
   
-  if (info > 0)
-    fprintf (stderr, "# eigs_sym: problem while computing eigen-vectors/values\n");
-
+  if (info > 0) {
+    fprintf (stderr, "# eigs_sym: problem while computing eigen-vectors/values info=%d\n",info);
+    goto error;
+  }
   /* normalize the eigenvectors, copy and free */
   double nr = 1;
   for (i = 0 ; i < d ; i++) {
@@ -87,11 +88,11 @@ int eigs_sym (int d, const float * m, float * eigval, float * eigvec)
     for (j = 0 ; j < d ; j++) 
       eigvec[i * d + j] = (float) (md[i * d + j] / nr);
   }
-
+ error:
   free (md);
   free (lambda);
   free (work);
-  return info <= 0;
+  return info;
 }
 
 
@@ -118,8 +119,10 @@ int geigs_sym (int d, const float * a, const float * b, float * eigval, float * 
   double * work = (double *) memalign (16, lwork * sizeof (*work));
   dsygv_ (&itype, "V", "L", &d, ad, &d, bd, &d, lambda, work, &lwork, &info );
   
-  if (info > 0)
-    fprintf (stderr, "# eigs_sym: problem while computing eigen-vectors/values\n");
+  if (info != 0) {
+    fprintf (stderr, "# eigs_sym: problem while computing eigen-vectors/values info=%d\n",info);
+    goto error;
+  }
 
   /* normalize the eigenvectors, copy and free */
   double nr = 1;
@@ -130,11 +133,12 @@ int geigs_sym (int d, const float * a, const float * b, float * eigval, float * 
       eigvec[i * d + j] = (float) (ad[i * d + j] / nr);
   }
 
+ error:
   free (ad);
   free (bd);
   free (lambda);
   free (work);
-  return info <= 0;
+  return info;
 }
 
 
@@ -212,25 +216,21 @@ int eigs_sym_part (int n, const float * a, int nev, float * sout, float * vout) 
   float *resid=NEWA(float,n),*workd=NEWA(float,3*n),*workl=NEWA(float,lworkl);
   float *v=NEWA(float,n*(long)ncv);
   int *iparam=NEWA(int,11),*ipntr=NEWA(int,11);
+  logical *select=NEWA(logical,ncv);
+  int ret=0;
 
   iparam[0]=1;
   iparam[2]=n;
   iparam[6]=1;
 
-  double dt0=0,dt1=0;
-  
   i=0;
   for(;;) {
-
-    /*     double t0=getmillisecs(); */
 
     ssaupd_(&ido, bmat, &n, which, &nev, 
             &tol, resid, &ncv, v, &n, 
             iparam, ipntr, workd, workl, &lworkl,
             &info);
 
-    /*     double t1=getmillisecs(); */
-    
     if(ido==-1 || ido==1) {
       
       float *x=workd+ipntr[0]-1;
@@ -238,16 +238,10 @@ int eigs_sym_part (int n, const float * a, int nev, float * sout, float * vout) 
 
       float zero=0,one=1;
       int ione=1;
-      
-      
+            
       sgemv_("Trans",&n,&n,&one,a,&n,x,&ione,&zero,y,&ione);
 
     } else break;   
-
-    /*     double t2=getmillisecs(); */
-    /*     dt0+=t1-t0; */
-    /*     dt1+=t2-t1; */
-    /*     printf("ssaupd eval %d (dt0=%.3f dt1=%.3f) \r",i++,dt0,dt1); fflush(stdout); */
 
     printf("ssaupd eval %d\r",i++); fflush(stdout);
   }
@@ -256,11 +250,11 @@ int eigs_sym_part (int n, const float * a, int nev, float * sout, float * vout) 
 
   if(info<0) {
     printf("eigs_sym_part: ssaupd_ error info=%d\n",info);
-    return info;
+    ret=info;
+    goto error;
   } 
 
   {
-    logical *select=NEWA(logical,ncv);
     int ierr;
     logical rvec=1;
     float sigma;
@@ -272,27 +266,19 @@ int eigs_sym_part (int n, const float * a, int nev, float * sout, float * vout) 
 
     if(ierr!=0) {
       printf("eigs_sym_part: sseupd_ error: %d\n",ierr);
-      return ierr;     
+      ret=ierr;     
+      goto error;
     }
     int nconv=iparam[4];
 
     if(nconv<nev) {
       printf("eigs_sym_part: nev=%d, nconv=%d, increase ncv=%d\n",nev,nconv,ncv);
-      return 0xdeadbeef;     
+      ret=0xdeadbeef; 
+      goto error;
     }
 
-    for(j=0;j<nconv;j++) {
-      s[j]=sqrt(s[j]);
-    } 
-
-    free(select); 
   }
 
-  free(resid); 
-  free(workl);
-  free(workd);
-  free(iparam);
-  free(ipntr);
 
   /* order v by s */
   
@@ -307,11 +293,19 @@ int eigs_sym_part (int n, const float * a, int nev, float * sout, float * vout) 
     for(i=0;i<nev;i++) 
       sout[i]=s[perm[nev-1-i]];
 
+ error: 
+  free(select); 
+  free(resid); 
+  free(workl);
+  free(workd);
+  free(iparam);
+  free(ipntr);
+
   free(perm); 
   free(v);
   free(s);
 
-  return 0;
+  return ret;
 }
 
 

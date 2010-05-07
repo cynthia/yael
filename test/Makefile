@@ -46,7 +46,7 @@ test_spectral_clustering: test_spectral_clustering.o
 
 # for i in *.c ; do cpp -I.. -MM $i; done
 test_binheap.o: test_binheap.c ../yael/binheap.h
-test_eigs.o: test_eigs.c ../yael/eigs.h ../yael/vector.h
+test_eigs.o: test_eigs.c ../yael/eigs.h ../yael/vector.h ../yael/matrix.h
 test_gmm.o: test_gmm.c ../yael/vector.h ../yael/machinedeps.h \
   ../yael/gmm.h
 test_pca.o: test_pca.c ../yael/vector.h ../yael/matrix.h

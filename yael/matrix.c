@@ -234,7 +234,7 @@ void fmat_print (const float *a, int nrow, int ncol)
   printf ("[");
   for (i = 0; i < nrow; i++) {
     for (j = 0; j < ncol; j++)
-      printf ("%.5g ", a[i + ncol * j]);
+      printf ("%.5g ", a[i + nrow * j]);
     if (i == nrow - 1)
       printf ("]\n");
     else
