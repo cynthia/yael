@@ -182,19 +182,64 @@ void fmat_subtract_from_columns(int d,int n,float *m,const float *avg);
 void fmat_rev_subtract_from_columns(int d,int n,float *m,const float *avg);
 
 
-/*! DEPRECATED Perform the Principal Component Analysis of a set of vectors,
- * v(n,d) stored per row
- *
- * return d*d matrix of eigenvectors, stored by row. To transform a
- * vector a low-dimension space, multiply by the d2 first lines of the matrix
- *
- */
-float *compute_pca(int n, int d, float *v);
 
-/* DEPRECATED in covariance matrix, multiply of-block diagonal elements with
-   weight (weight=1 => normal pca). bs=size of diagonal blocks */
-float *compute_pca_with_weighted_blocks (int n, int d, float *v,
-                                         int bs, double weight); 
+
+
+
+
+
+/*! Perform the Principal Component Analysis of a set of vectors
+ *
+ * @param v(d,n)   vectors to perform the PCA on 
+ *
+ * @return (d,d) matrix of eigenvectors. To transform a
+ *               vector a low-dimension space, multiply by the d2 first lines of the matrix
+ */
+float *fmat_pca(int d,int n,const float *v); 
+
+
+/*! Compute covariance of a set of vectors
+ * 
+ * @param v(d,n)  vectors to compute covariance
+ * @param avg(d)  on output, average vector (can be NULL)
+ * 
+ * @return (d,d)  covariance matrix
+ */
+float *fmat_covariance (int d, int n, const float *v,
+                        float *avg);
+
+/*! same as fmat_covariance, threaded 
+ * 
+ * @param nt      nb of computing threads
+ */
+float *fmat_covariance_thread (int d, int n, const float *v,
+                               float *avg, int nt);
+
+
+/*! Perform the Principal Component Analysis from a covariance matrix 
+ *
+ * @param cov(d,d)     covariance to compute the PCA on
+ * @param singvals(d)  on output, associated singular values (can be NULL)
+ *
+ * @return (d,d) matrix of eigenvectors. To transform a
+ *               vector a low-dimension space, multiply by the d2 first lines of the matrix
+ */
+float *fmat_pca_from_covariance(int d,const float *cov,
+                                float *singvals); 
+
+/*! same as fmat_pca_from_covariance, but return only part of the vectors 
+ *
+ * @param cov(d,d)     covariance to compute the PCA on
+ * @param singvals(nv)  on output, associated singular values (can be NULL)
+ *
+ * @return (d,nv) matrix of eigenvectors. 
+ */
+float *fmat_pca_part_from_covariance(int d,int nv,const float *cov,
+                                     float *singvals); 
+
+
+
+
 
 
 /*! DEPRECATED compute only a few (nev) PCA vectors */

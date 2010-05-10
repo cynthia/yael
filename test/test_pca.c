@@ -10,11 +10,13 @@
 /* 
 Copy/paste the points matrix into octave and compare:
 
-[n,d]=size(points)
+[d,n]=size(points)
 
-centered_points=points-repmat(mean(points),n,1);
+avg=sum(points,2)/n;
 
-cov=centered_points' * centered_points;
+centered_points=points-avg*ones(1,n);
+
+cov=centered_points * centered_points';
 
 [cov_eigenvectors,cov_eigenvalues]=eig(cov);
 
@@ -46,32 +48,15 @@ int main (int argc, char **argv)
   
   for(i=0;i<n*d;i++) points[i]=drand48()*2-1;
 
-  {
-    const char*pf="points=[";
+  printf("points=");
+  fmat_print(points,d,n);
 
-    for(i=0;i<n;i++) {
-      for(j=0;j<d;j++) {
-        printf("%s%g",pf,points[i*d+j]);
-        pf=" ";
-      }
-      pf=";\n";
-    }
-    printf("]\n");
-  }  
-  float *eig_f=compute_pca(n,d,points);
+  float *eig_f=fmat_pca(d,n,points);
+  
+  
+  printf("eig_f=");
+  fmat_print(eig_f,d,d);
 
-  {
-    const char*pf="eigs_f=[";
-    
-    for(i=0;i<d;i++) {
-      for(j=0;j<d;j++) {
-        printf("%s%g",pf,eig_f[i*d+j]);
-        pf=" ";
-    }
-      pf=";\n";
-    }
-    printf("]\n");
-  }
 
   free(points);
   free(eig_f);

@@ -46,8 +46,8 @@ knowledge of the CeCILL license and that you accept its terms.
 /*! Compute the eigenvalues and eigvectors of a symmetric matrix m
   @param d           dimension of the square matrix m
   @param m(d,d)      the matrix (first elements are the first row)
-  @param eigval(d)   the eigenvalues
-  @param eigvec(d,d) Eigenvector j is eigvec(:,j)
+  @param eigval(d)   on output the eigenvalues (unsorted)
+  @param eigvec(d,d) on output, eigenvector j is eigvec(:,j)
 
   @return            =0 for success, else an error code (see info in lapack's dsygv documentation)
   

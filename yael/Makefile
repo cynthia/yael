@@ -68,11 +68,11 @@ _yael.so: yael_wrap.o libyael.$(SHAREDEXT)
 # for i in *.c ; do cpp -I.. -MM $i; done
 
 binheap.o: binheap.c binheap.h sorting.h
-eigs.o: eigs.c vector.h sorting.h machinedeps.h
+eigs.o: eigs.c vector.h sorting.h machinedeps.h 
 gmm.o: gmm.c vector.h matrix.h kmeans.h nn.h gmm.h sorting.h
 kmeans.o: kmeans.c vector.h kmeans.h nn.h
 machinedeps.o: machinedeps.c machinedeps.h
-matrix.o: matrix.c vector.h matrix.h sorting.h machinedeps.h
+matrix.o: matrix.c vector.h matrix.h sorting.h machinedeps.h eigs.h
 nn.o: nn.c machinedeps.h vector.h nn.h binheap.h sorting.h
 sorting.o: sorting.c sorting.h machinedeps.h binheap.h vector.h
 spectral_clustering.o: spectral_clustering.c nn.h eigs.h vector.h \

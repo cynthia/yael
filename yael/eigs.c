@@ -83,10 +83,12 @@ int eigs_sym (int d, const float * m, float * eigval, float * eigvec)
   /* normalize the eigenvectors, copy and free */
   double nr = 1;
   for (i = 0 ; i < d ; i++) {
-    eigval[i] = (float) lambda[i];
+    if(eigval)
+      eigval[i] = (float) lambda[i];
     
-    for (j = 0 ; j < d ; j++) 
-      eigvec[i * d + j] = (float) (md[i * d + j] / nr);
+    if(eigvec) 
+      for (j = 0 ; j < d ; j++) 
+        eigvec[i * d + j] = (float) (md[i * d + j] / nr);
   }
  error:
   free (md);
@@ -127,10 +129,13 @@ int geigs_sym (int d, const float * a, const float * b, float * eigval, float * 
   /* normalize the eigenvectors, copy and free */
   double nr = 1;
   for (i = 0 ; i < d ; i++) {
-    eigval[i] = (float) lambda[i];
+
+    if(eigval)
+      eigval[i] = (float) lambda[i];
     
-    for (j = 0 ; j < d ; j++) 
-      eigvec[i * d + j] = (float) (ad[i * d + j] / nr);
+    if(eigvec) 
+      for (j = 0 ; j < d ; j++) 
+        eigvec[i * d + j] = (float) (ad[i * d + j] / nr);
   }
 
  error:
@@ -218,6 +223,7 @@ int eigs_sym_part (int n, const float * a, int nev, float * sout, float * vout) 
   int *iparam=NEWA(int,11),*ipntr=NEWA(int,11);
   logical *select=NEWA(logical,ncv);
   int ret=0;
+  int *perm=NEWA(int,nev);
 
   iparam[0]=1;
   iparam[2]=n;
@@ -282,16 +288,15 @@ int eigs_sym_part (int n, const float * a, int nev, float * sout, float * vout) 
 
   /* order v by s */
   
-  int *perm=NEWA(int,nev);
   fvec_sort_index(s,nev,perm); 
   
   if(vout) 
     for(i=0;i<nev;i++) 
-      memcpy(vout+n*i,v+n*perm[nev-1-i],sizeof(float)*n);
+      memcpy(vout+n*i,v+n*perm[i],sizeof(float)*n);
 
   if(sout) 
     for(i=0;i<nev;i++) 
-      sout[i]=s[perm[nev-1-i]];
+      sout[i]=s[perm[i]];
 
  error: 
   free(select); 

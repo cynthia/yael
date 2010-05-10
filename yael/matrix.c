@@ -46,6 +46,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #include "matrix.h"
 #include "sorting.h"
 #include "machinedeps.h"
+#include "eigs.h"
 
 #define NEWA(type,n) (type*)malloc(sizeof(type)*(n))
 #define NEWAC(type,n) (type*)calloc(sizeof(type),(n))
@@ -77,6 +78,10 @@ int slarfb_ (char *side, char *trans, char *direct, char *storev, integer * m,
              integer * n, integer * k, real * v, integer * ldv, real * t,
              integer * ldt, real * c__, integer * ldc, real * work,
              integer * ldwork);
+
+int ssyrk_(char *uplo, char *trans, integer *n, integer *k, 
+           real *alpha, real *a, integer *lda, real *beta, real *c__, integer *
+           ldc);
 
 
 extern void sgemv_(const char *trans, integer *m, integer *n, real *alpha, 
@@ -430,7 +435,12 @@ void fmat_rev_subtract_from_columns(int d,int n,float *v,const float *avg) {
 
 }
 
-/* Input matrix: v(n,d) stored by rows.
+
+/******************************************************************
+ * Covariance and PCA computation
+ *****************************************************************/
+
+/* Input matrix: v(d,n) stored by rows.
 
    x is v data centered for each dimension 0<=j<n
    x = v - (1/n) * u * m 
@@ -449,29 +459,34 @@ void fmat_rev_subtract_from_columns(int d,int n,float *v,const float *avg) {
 
 
 
-float *compute_covariance (int n, int d, float *v)
+float *fmat_covariance (int d, int n, const float *v, float *avg)
 {
   
-  double *sums = NEWAC (double, d);
+  float *sums = avg ? avg : fvec_new(d);
   long i, j;
 
   for (i = 0; i < n; i++)
     for (j = 0; j < d; j++)
       sums[j] += v[i * d + j];
 
-  float *cov = fvec_new (d * d);
+  float *cov = fvec_new_nan (d * d);
 
   for (i = 0; i < d; i++)
     for (j = 0; j < d; j++)
       cov[i + j * d] = sums[i] * sums[j];
 
-  free (sums);
+  if(avg)
+    for(i=0;i<d;i++) avg[i]/=n;
+  else
+    free (sums);
 
+
+  FINTEGER di=d,ni=n;
 
   if(0)  {
     float alpha = 1.0 / n, beta = -1.0 / (n * n);
-    sgemm_ ("N", "T", &d, &d, &n, &alpha, v, &d, v, &d, &beta, cov, &d);
-  } else {
+    sgemm_ ("N", "T", &di, &di, &ni, &alpha, v, &di, v, &di, &beta, cov, &di);
+  } else if(1) {
     /* transpose input matrix */
     float *vt=fvec_new(n*d);
     for(i=0;i<d;i++) 
@@ -479,89 +494,155 @@ float *compute_covariance (int n, int d, float *v)
         vt[i*n+j]=v[j*d+i];
     float alpha = 1.0 / n, beta = -1.0 / (n * n);
     
-    sgemm_ ("T", "N", &d, &d, &n, &alpha, vt, &n, vt, &n, &beta, cov, &d);
+    sgemm_ ("T", "N", &di, &di, &ni, &alpha, vt, &ni, vt, &ni, &beta, cov, &di);
     
     free(vt);
+  } else {
+    float alpha = 1.0 / n, beta = -1.0 / (n * n);
+    ssyrk_("L","N", &di, &ni, &alpha,v,&di,&beta,cov,&di);
+
+    /* copy lower triangle to upper */
+
+    for(i=0;i<d;i++)
+      for(j=i+1;j<d;j++) 
+        cov[i+j*d]=cov[j+i*d];
+
   }
 
   return cov;
 }
 
-static int covariance_to_pca(int d,float *cov) {
-  /* computes PCA from a covariance matrix */
+
+
+
+
+float *fmat_pca(int d,int n,const float *v) {
+
+  float *cov=fmat_covariance(d,n,v,NULL);
   
-  {
-    int lwork = -1;
-    float optimal_lwork;
-    int info;
-
-    /* query work size */
-    ssyev_ ("V", "U", &d, NULL, &d, NULL, &optimal_lwork, &lwork, &info);
-    assert (info == 0);
-    lwork = (int) optimal_lwork;
-
-    float *work = NEWA (float, lwork);
-    float *eigenvals = NEWA (float, d);
-
-    ssyev_ ("V", "U", &d, cov, &d, eigenvals, work, &lwork, &info);
-
-    free (work);
-    free (eigenvals);
-
-    if (info != 0) {
-      fprintf(stderr,"ssyev_ returned error, info=%d\n",info);
-      return info;
-    }
-
-  }
-
-  /* revert order of vectors to get vectors corresponding to the
-     biggest eigenvalues first */
-  int i,j;
-  for (i = 0; i < d / 2; i++) {
-    int i2 = d - 1 - i;
-    for (j = 0; j < d; j++) {
-      float tmp = cov[i * d + j];
-      cov[i * d + j] = cov[i2 * d + j];
-      cov[i2 * d + j] = tmp;
-    }
-  }
-
-  return 0;
-}
-
-
-float *compute_pca (int n, int d, float *v) {
-  float *cov=compute_covariance(n,d,v);
-
-  if(covariance_to_pca(d,cov)!=0) {
-    free(cov);
-    cov=NULL;
-  }
-  return cov;
-
-}
-
-float *compute_pca_with_weighted_blocks (int n, int d, float *v,
-                                         int bs, double weight) {
-  float *cov=compute_covariance(n,d,v);
-
-  if(weight!=1) {
-    int i,j;
-    for(i=0;i<d;i++) {
-      j=i/bs;
-      fvec_mul_by(cov+i*d,j*bs,weight);
-      fvec_mul_by(cov+i*d+(j+1)*bs,d-(j+1)*bs,weight);
-    }
-  }
-
-  if(covariance_to_pca(d,cov)!=0) {
-    free(cov);
-    cov=NULL;
-  }
+  float *ret=fmat_pca_from_covariance(d,cov,NULL);
+    
+  free(cov);  
   
-  return cov;
+  return ret;
 }
+
+
+float *fmat_pca_from_covariance(int d,const float *cov,
+                                float *singvals) {
+
+  float *pcamat=fvec_new(d*d);
+  float *evals=singvals;
+
+  if(!singvals) evals=fvec_new(d);
+
+  if(eigs_sym(d,cov,evals,pcamat)!=0) {
+    free(pcamat);
+    pcamat=NULL;
+    goto error;
+  }
+  eigs_reorder(d,evals,pcamat,1); /* 1 = descending */
+
+ error:
+  if(!singvals) free(evals);
+
+  return pcamat;
+}
+
+float *fmat_pca_part_from_covariance(int d,int nv,const float *cov,
+                                     float *singvals) {
+  float *pcamat=fvec_new(d*nv);
+  float *evals=singvals;
+
+  if(!singvals) evals=fvec_new(nv);
+
+  if(eigs_sym_part(d,cov,nv,evals,pcamat)!=0) {
+    free(pcamat);
+    pcamat=NULL;
+    goto error;
+  }
+  eigs_reorder(d,evals,pcamat,1); /* 1 = descending */
+
+ error:
+  if(!singvals) free(evals);
+
+  return pcamat;
+  
+}
+
+
+#if 0
+
+
+/* to accumulate covariances */
+typedef struct {
+  int n,d;  
+  float *cov; /*< (d,d) covariance matrix */
+  float *sum; /*< (d) sum of points */
+} covariance_accu_t;
+
+void covariance_accu_init(covariance_accu_t *ca, int d) {
+  ca->cov=fvec_new_0(d*d);
+  ca->sum=fvec_new_0(d);
+}
+
+void covariance_accu_add(covariance_accu_t *ca,int n,const float* points) {
+  int i,d=ca->d;
+  
+  for(i=0;i<n;i++) fvec_add(ca->sum,points+i*d,d);
+  
+  float alpha = 1.0, beta = 0;
+  FINTEGER di=ca->d;  
+  FINTEGER ni=n;
+
+  sgemm_ ("N", "T", &di, &di, &ni, &alpha, points, &di, points, &di, &beta, ca->cov, &di);
+  
+}
+
+void covariance_accu_merge(covariance_accu_t *ca,const covariance_accu_t * other) {
+  int d=ca->d;
+  fvec_add(ca->cov,other->cov,d*d);
+  fvec_add(ca->sum,other->sum,d);
+}
+
+void covariance_accu_to_cov(covariance_accu_t *ca) {
+  
+
+}
+
+void covariance_accu_delete(covariance_accu_t *ca) {
+  free(ca->sum);
+  free(ca->cov);
+}
+
+
+
+
+
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void fmat_splat_separable(const float *a,int nrow,int ncol,
                           const int *row_assign,const int *col_assign,
