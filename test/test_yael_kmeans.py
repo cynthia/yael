@@ -1,11 +1,12 @@
 from yael import yael
+import time
 
-k = 1024                          # number of cluster to create
+k = 1000                          # number of cluster to create
 d = 128                           # dimensionality of the vectors
-n = 100000                        # number of vectors
-nt = 2                            # number of threads to use
+n = 1000000                       # number of vectors
+nt = 4                            # number of threads to use
 v = yael.fvec_new_rand (d * n)    # random set of vectors 
-niter = 25                        # number of iterations
+niter = 30                        # number of iterations
 redo = 1                          # number of redo
 
 #[centroids, dis, assign] = yael_kmeans (v, 100, 'nt', 2, 'niter', 25);
@@ -17,8 +18,9 @@ nassign = yael.ivec_new (k)       # output: number of vectors assigned to each c
 
 nassign = yael.IntArray.acquirepointer (nassign)
 
-
-for j in xrange (100):
-    yael.kmeans (d, n, k, niter, v, nt, 0, redo, centroids, dis, assign, nassign)
+t1 = time.time()
+yael.kmeans (d, n, k, niter, v, nt, 0, redo, centroids, dis, assign, nassign)
+t2 = time.time()
 
 print [nassign[i] for i in xrange(k)]
+print 'kmeans performed in %.3fs' % (t2 - t1)

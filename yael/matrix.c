@@ -515,6 +515,14 @@ float *fmat_covariance (int d, int n, const float *v, float *avg)
 
 
 
+float *fmat_covariance_thread (int d, int n, const float *v, float *avg, int nt)
+{
+  fprintf (stderr, "# function fmat_covariance_thread is currently not implemented\n");
+  exit (1);
+}
+
+
+
 
 float *fmat_pca(int d,int n,const float *v) {
 
