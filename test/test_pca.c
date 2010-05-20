@@ -43,7 +43,7 @@ int main (int argc, char **argv)
   }
 
 
-  int i,j;
+  int i;
   float *points=fvec_new(n*d);
   
   for(i=0;i<n*d;i++) points[i]=drand48()*2-1;
