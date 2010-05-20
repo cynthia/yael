@@ -4,8 +4,8 @@
 
 addpath ('../matlab')
 
-n = 100000;              % number of database vectors
-nq = 100;                % number of queries
+n = 20000;              % number of database vectors
+nq = 1000;                % number of queries
 d = 128;                 % dimension of the vectors
 k = 5;                   % number of nearest neighbors to retrieve
 nt = 2;                  % number of processor cores to be used
