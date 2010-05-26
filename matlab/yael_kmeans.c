@@ -82,9 +82,5 @@ void mexFunction (int nlhs, mxArray *plhs[],
   
   int *assign = (int*) mxGetPr (plhs[2]);
   
-  fprintf (stderr, "sizeof(int) = %d\n", sizeof(int));
-
-  fprintf (stderr, "toto\n");
   kmeans (d, n, k, niter, v, nt, 0, redo, centroids, dis, assign, NULL);
-  fprintf (stderr, "tata\n");
 }
