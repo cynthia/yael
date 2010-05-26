@@ -4,7 +4,7 @@ include ../makefile.inc
 
 CC=gcc 
 
-all: kmeans fvecfile
+all: kmeans fvecfile ivecfile bvecfile
 
 
 
@@ -28,6 +28,12 @@ kmeans: kmeans.o
 fvecfile: fvecfile.o 
 	$(CC) -o $@ $^ $(LDFLAGS) $(LAPACKLDFLAGS) $(THREADLDFLAGS) 
 
+ivecfile: ivecfile.o 
+	$(CC) -o $@ $^ $(LDFLAGS) $(LAPACKLDFLAGS) $(THREADLDFLAGS) 
+
+bvecfile: bvecfile.o 
+	$(CC) -o $@ $^ $(LDFLAGS) $(LAPACKLDFLAGS) $(THREADLDFLAGS) 
+
 
 
 #############################
@@ -36,6 +42,8 @@ fvecfile: fvecfile.o
 # for i in *.c ; do cpp -I.. -MM $i; done
 
 fvecfile.o: fvecfile.c
+ivecfile.o: bvecfile.c
+bvecfile.o: bvecfile.c
 kmeans.o: kmeans.c ../yael/vector.h ../yael/machinedeps.h \
   ../yael/kmeans.h
 clean:

@@ -4,11 +4,11 @@
 
 addpath ('../matlab')
 
-n = 20000;              % number of database vectors
+n = 1000000;              % number of database vectors
 nq = 1000;                % number of queries
 d = 128;                 % dimension of the vectors
-k = 5;                   % number of nearest neighbors to retrieve
-nt = 2;                  % number of processor cores to be used
+k = 100;                   % number of nearest neighbors to retrieve
+nt = 8;                  % number of processor cores to be used
 v = single (rand(d,n));  % base vectors
 q = single (rand(d,nq)); % query vectors
 
