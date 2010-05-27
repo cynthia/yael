@@ -1,5 +1,7 @@
 % This function returns the k largest values of a vector 
 % 
+% Usage: [val, idx] = yael_kmax (v,k)
+%
 % Parameters:
 %   v     the vector to be normalized. If v is a matrix, then the k largest values
 %         of each column are returned (similar to the min function)
