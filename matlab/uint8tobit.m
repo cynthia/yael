@@ -1,5 +1,6 @@
-% This function takes a uint8 vector as input and construct a binary vector in output
-% The vectors are line-stored
+% This function translates a uint8 vector into a binary vector
+% Usage: b = uint8tobit (v)
+% The vectors are column-stored
 function b = uint8tobit (v)
 
 n = size (v, 2);
