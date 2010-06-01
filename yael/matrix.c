@@ -129,13 +129,14 @@ float *fmat_new (int nrow, int ncol)
 }
 
 
-void fmat_mul(const float *left, const float *right,
-              float *result,                
-              int m, int n, int k,
-              unsigned char *transp) {
+void fmat_mul_full(const float *left, const float *right,
+                   int mi, int ni, int ki,
+                   char *transp,
+                   float *result) {
 
   float alpha = 1;
   float beta = 0;
+  FINTEGER m=mi,n=ni,k=ki;
   FINTEGER lda=transp[0]=='N' ? m : k;
   FINTEGER ldb=transp[1]=='N' ? k : n;
   
@@ -144,15 +145,50 @@ void fmat_mul(const float *left, const float *right,
 
 }
 
-float* fmat_new_mul(const float *left, const float *right,
-                    int m, int n, int k,
-                    char *transp) {
+float* fmat_new_mul_full(const float *left, const float *right,
+                         int m, int n, int k,
+                         char *transp) {
   float *result=fmat_new(m,n);
 
-  fmat_mul(left, right, result, m, n, k, transp);
+  fmat_mul_full(left, right, m, n, k, transp, result);
 
   return result;
 }
+
+
+
+void fmat_mul (const float *left, const float *right, int m, int n, int k, float *mout) {
+  fmat_mul_full(left,right,m,n,k,"NN",mout);
+}
+
+void fmat_mul_tl (const float *left, const float *right, int m, int n, int k, float *mout) {
+  fmat_mul_full(left,right,m,n,k,"TN",mout);
+}
+
+void fmat_mul_tr (const float *left, const float *right, int m, int n, int k, float *mout) {
+  fmat_mul_full(left,right,m,n,k,"NT",mout);
+}
+
+void fmat_mul_tlr (const float *left, const float *right, int m, int n, int k, float *mout) {
+  fmat_mul_full(left,right,m,n,k,"TT",mout);
+}
+
+float* fmat_new_mul (const float *left, const float *right, int m, int n, int k) {
+  return fmat_new_mul_full(left,right,m,n,k,"NN");
+}
+
+float* fmat_new_mul_tl (const float *left, const float *right, int m, int n, int k) {
+  return fmat_new_mul_full(left,right,m,n,k,"TN");
+}
+
+float* fmat_new_mul_tr (const float *left, const float *right, int m, int n, int k) {
+  return fmat_new_mul_full(left,right,m,n,k,"NT");
+}
+
+float* fmat_new_mul_tlr (const float *left, const float *right, int m, int n, int k) {
+  return fmat_new_mul_full(left,right,m,n,k,"TT");
+}
+
 
 
 void fmat_print (const float *a, int nrow, int ncol)

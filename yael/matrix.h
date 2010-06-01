@@ -86,18 +86,37 @@ float *fmat_new (int nrow, int ncol);
  *               The result is always in column-major order
  */
 
-void fmat_mul(const float *left, const float *right,
-              float *result,                
-              int m, int n, int k,
-              unsigned char *transp);
+void fmat_mul_full(const float *left, const float *right,
+                   int m, int n, int k,
+                   char *transp,
+                   float *result);
 
 
 /*!  same as fmat_mul, allocates result
- * 
  */
-float* fmat_new_mul(const float *left, const float *right,
-                    int m, int n, int k,
-                    char *transp);
+float* fmat_new_mul_full(const float *left, const float *right,
+                         int m, int n, int k,
+                         char *transp);
+
+/*! same as fmat_mul_full, all in standard order */
+void fmat_mul (const float *left, const float *right, int m, int n, int k, float *mout);
+
+/*! same as fmat_mul_full, left(k,m) transposed */
+void fmat_mul_tl (const float *left, const float *right, int m, int n, int k, float *mout);
+
+/*! same as fmat_mul_full, right(n,k) transposed */
+void fmat_mul_tr (const float *left, const float *right, int m, int n, int k, float *mout);
+
+/*! same as fmat_mul_full, left(k,m) and right(n,k) transposed */
+void fmat_mul_tlr (const float *left, const float *right, int m, int n, int k, float *mout);
+
+
+float* fmat_new_mul (const float *left, const float *right, int m, int n, int k);
+float* fmat_new_mul_tl (const float *left, const float *right, int m, int n, int k);
+float* fmat_new_mul_tr (const float *left, const float *right, int m, int n, int k);
+float* fmat_new_mul_tlr (const float *left, const float *right, int m, int n, int k);
+
+
 
 
 

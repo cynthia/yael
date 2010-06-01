@@ -12,7 +12,6 @@ b=yael.FloatArray.acquirepointer(yael.fvec_new_rand(k*n))
 
 for transp in ['NN','NT','TN','TT']: 
 
-
   print "=====================",transp
 
   print "a=",
@@ -23,7 +22,7 @@ for transp in ['NN','NT','TN','TT']:
   if transp[1]=='N': yael.fmat_print(b,k,n)
   else:              yael.fmat_print_tranposed(b,k,n)
 
-  res=yael.FloatArray.acquirepointer(yael.fmat_new_mul(a,b,m,n,k,transp))
+  res=yael.FloatArray.acquirepointer(yael.fmat_new_mul_full(a,b,m,n,k,transp))
 
   print "a*b=",
   yael.fmat_print(res,m,n)
