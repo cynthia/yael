@@ -129,106 +129,29 @@ float *fmat_new (int nrow, int ncol)
 }
 
 
-void fmat_mul (const float *left, const float *right,
-               int n, int m, int k, float *mout)
-{
+void fmat_mul(const float *left, const float *right,
+              float *result,                
+              int m, int n, int k,
+              unsigned char *transp) {
 
   float alpha = 1;
   float beta = 0;
-  char trans = 'N';
+  FINTEGER lda=transp[0]=='N' ? m : k;
+  FINTEGER ldb=transp[1]=='N' ? k : n;
+  
+  sgemm_ (transp, transp+1, &m, &n, &k,
+          &alpha, left, &lda, right, &ldb, &beta, result, &m);
 
-  sgemm_ (&trans, &trans, &k, &n, &m,
-          &alpha, right, &k, left, &m, &beta, mout, &k);
 }
 
+float* fmat_new_mul(const float *left, const float *right,
+                    int m, int n, int k,
+                    char *transp) {
+  float *result=fmat_new(m,n);
 
-float *fmat_new_mul (const float *left, const float *right, int n, int m,
-                     int k)
-{
-  float *a = fmat_new (k, n);
-  fmat_mul (left, right, n, m, k, a);
-  return a;
-}
+  fmat_mul(left, right, result, m, n, k, transp);
 
-
-void fmat_mul_tl (const float *left, const float *right,
-                  int n, int m, int k, float *mout)
-{
-
-  float alpha = 1;
-  float beta = 0;
-  char transleft = 't';
-  char transright = 'n';
-
-  sgemm_ (&transright, &transleft, &k, &n, &m,
-          &alpha, right, &k, left, &n, &beta, mout, &k);
-}
-
-
-float *fmat_new_mul_tl (const float *left, const float *right,
-                        int n, int m, int k)
-{
-  float *a = fmat_new (k, n);
-  fmat_mul_tl (left, right, n, m, k, a);
-  return a;
-}
-
-
-void fmat_mul_tr (const float *left, const float *right,
-                  int n, int m, int k, float *mout)
-{
-
-  float alpha = 1;
-  float beta = 0;
-  char transleft = 'n';
-  char transright = 't';
-
-  sgemm_ (&transright, &transleft, &k, &n, &m,
-          &alpha, right, &m, left, &m, &beta, mout, &k);
-}
-
-
-float *fmat_new_mul_tr (const float *left, const float *right,
-                        int n, int m, int k)
-{
-  float *a = fmat_new (k, n);
-  fmat_mul_tr (left, right, n, m, k, a);
-  return a;
-}
-
-
-void fmat_mul_tlr (const float *left, const float *right,
-                   int n, int m, int k, float *mout)
-{
-
-  float alpha = 1;
-  float beta = 0;
-  char transleft = 't';
-  char transright = 't';
-
-  sgemm_ (&transright, &transleft, &k, &n, &m,
-          &alpha, right, &m, left, &n, &beta, mout, &k);
-}
-
-
-float *fmat_new_mul_tlr (const float *left, const float *right,
-                         int n, int m, int k)
-{
-  float *a = fmat_new (k, n);
-  fmat_mul_tlr (left, right, n, m, k, a);
-  return a;
-}
-
-
-/*! @brief Multiply a matrix by a vector */
-float * fmat_mul_fvec (const float * a, const float * v, int nrow, int ncol)
-{
-  int i;
-  float * res = malloc (nrow * sizeof (*res));
-  for (i = 0 ; i < nrow ; i++)
-    res[i] = fvec_inner_product (a + i * ncol, v, ncol);
-
-  return res;
+  return result;
 }
 
 
@@ -240,6 +163,21 @@ void fmat_print (const float *a, int nrow, int ncol)
   for (i = 0; i < nrow; i++) {
     for (j = 0; j < ncol; j++)
       printf ("%.5g ", a[i + nrow * j]);
+    if (i == nrow - 1)
+      printf ("]\n");
+    else
+      printf (";\n");
+  }
+}
+
+void fmat_print_tranposed(const float *a, int nrow, int ncol)
+{
+  int i, j;
+
+  printf ("[");
+  for (i = 0; i < nrow; i++) {
+    for (j = 0; j < ncol; j++)
+      printf ("%.5g ", a[i * ncol + j]);
     if (i == nrow - 1)
       printf ("]\n");
     else

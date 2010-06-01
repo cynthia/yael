@@ -47,7 +47,7 @@ knowledge of the CeCILL license and that you accept its terms.
 /*! @defgroup matrix
  * Matrix functions
  *
- * All matrices are stored in column-major order (like Fortran) and
+ * All matrices are stored in column-major order (like Fortran and Matlab) and
  * indexed from 0 (like C, unlike Fortran). The declaration:
  *
  *     a(m, n) 
@@ -56,6 +56,7 @@ knowledge of the CeCILL license and that you accept its terms.
  *
  *     0 <= i < m and 0 <= j < n
  *
+ * WARNING some matrix functions assume row-major storage! (noted with RM) 
  */
 
 
@@ -69,54 +70,43 @@ float *fmat_new (int nrow, int ncol);
 
 
 
-/*!  Matrix multiplication
- *
- * WARNING some matrix multiplication functions assume row-major storage! (noted with RM) 
+/*!  Matrix multiplication. 
  * 
- * computes mout = left * right
- * where 
- *   mout     is n-by-k 
- *   left     is n-by-m
- *   right    is m-by-k
- * (all matrices stored by lines, like in C, and packed)
+ * This function maps to the BLAS sgemm, assuming all matrices are packed
+ * 
+ * @param left(m,k)   left operand
+ * @param right(k,n)  right perand
+ * @param result(m,n) result matrix
+ * @param m           nb of rows of left matrix and of result
+ * @param n           nb of columns of right matrix and of result
+ * @param k           nb of columns of left matrix and nb of rows of right matrix
+ * @param transp transp[0] (resp. transp[1]) should be set to 'N' if
+ *               the left (resp. right) matrix is in column-major (Fortran) 
+ *               order and to 'T' if it is row-major order (C order). 
+ *               The result is always in column-major order
  */
-void fmat_mul (const float *left, const float *right,
-	       int n, int m, int k, float *mout);
 
-/*! RM Same as fmat_mul, but allocate the memory and return the corresponding pointer */
-float * fmat_new_mul (const float *left, const float *right,
-		      int n, int m, int k);
+void fmat_mul(const float *left, const float *right,
+              float *result,                
+              int m, int n, int k,
+              unsigned char *transp);
 
-/*! RM Same as fmat_mul, but transpose left matrix (left of size m x n) */
-void fmat_mul_tl (const float *left, const float *right,
-		  int n, int m, int k, float *mout);
 
-/*! RM Same as fmat_mul_tl, but allocate the memory */
-float *fmat_new_mul_tl (const float *left, const float *right, 
-			int n, int m, int k);
+/*!  same as fmat_mul, allocates result
+ * 
+ */
+float* fmat_new_mul(const float *left, const float *right,
+                    int m, int n, int k,
+                    char *transp);
 
-/*! RM Same as fmat_mul, but transpose right matrix (right of size k x m) */
-void fmat_mul_tr (const float *left, const float *right,
-		  int n, int m, int k, float *mout);
 
-/*! RM Same as fmat_mul_tr, but allocate the memory */
-float *fmat_new_mul_tr (const float *left, const float *right, 
-			int n, int m, int k);
 
-/*! RM Same as fmat_mul, but transpose both left and right matrices
-  left is of size m * n and right of size k x m */
-void fmat_mul_tlr (const float *left, const float *right,
-		   int n, int m, int k, float *mout);
-
-/*! RM Same as fmat_mul_tlr, but allocate the memory */
-float *fmat_new_mul_tlr (const float *left, const float *right, 
-			int n, int m, int k);
-
-/*! RM Multiply a matrix by a vector */
-float * fmat_mul_fvec (const float * a, const float * v, int nrow, int ncol);
-
-/*! display the matrix in matlab-like format */
+/*! display the matrix in matlab-parsable format */
 void fmat_print (const float *a, int nrow, int ncol);
+
+
+/*! same as fmat_print but matrix is in row-major order */
+void fmat_print_tranposed (const float *a, int nrow, int ncol);
 
 
 
@@ -208,6 +198,8 @@ float *fmat_pca(int d,int n,const float *v);
 float *fmat_covariance (int d, int n, const float *v,
                         float *avg);
 
+
+#if 0
 /*! same as fmat_covariance, threaded 
  * 
  * @param nt      nb of computing threads
@@ -215,6 +207,7 @@ float *fmat_covariance (int d, int n, const float *v,
 float *fmat_covariance_thread (int d, int n, const float *v,
                                float *avg, int nt);
 
+#endif
 
 /*! Perform the Principal Component Analysis from a covariance matrix 
  *
