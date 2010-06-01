@@ -35,7 +35,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   float *b = (float*) mxGetPr (prhs[0]);  /* database vectors */
   float *v = (float*) mxGetPr (prhs[1]);  /* query vectors */
   int k = 1; 
-  int nt = 0;
+  int nt = 1;
 
   if (nrhs >= 3)
     k = (int) mxGetScalar(prhs[2]);

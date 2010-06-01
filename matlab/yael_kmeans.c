@@ -35,7 +35,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   float *v = (float*) mxGetPr (prhs[0]);
   int k = (int) mxGetScalar (prhs[1]);
 
-  int niter = 50, redo = 1, nt = 0;
+  int niter = 50, redo = 1, nt = 1;
 
   {
     int i;

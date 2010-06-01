@@ -121,17 +121,30 @@ The C API is object-oriented in spirit whenever applicable, with constructors an
 
 \section{\yael: getting SVN version and content}
 
-The latest version of yael can be retrieved from the SVN as follows:
-
-\code{svn checkout svn+ssh://mygforgelogin@scm.gforge.inria.fr/svn/yael/trunk yael}
-*** add anonymous access when available ***
+Retrieve the last archive file on the gforge INRIA web server. 
+Windows users should probably use an older version, as we do not support Windows (existing 
+versions are external contributions which are not maintained). 
 \medskip
 
+You may be interested in the last in obtaining the latest version of \yael. 
+For registered users, it can be retrieved from the SVN as follows:
+
+\code{svn checkout svn+ssh://mygforgelogin@scm.gforge.inria.fr/svn/yael/trunk yael}
 
 This performs the installation of the regular \yael branch of the project into the directory \texttt{yael}. 
 This installation directory is referred to as~\yroot in the following. 
-The library is organized as follows: 
+There is also an anonymous access, which is provided by using one of the following commands:
+
+\code{svn checkout svn://scm.gforge.inria.fr/svn/yael \\
+svn checkout --username anonsvn https://scm.gforge.inria.fr/svn/yael
+}
+
+The password for anonymous login is 'anonsvn'. 
 \medskip
+
+
+The library is organized as follows: 
+\smallskip
 
 \begin{tabular}{ll}
 \tc{\yroot/}         & root directory \\

@@ -34,10 +34,10 @@ void mexFunction (int nlhs, mxArray *plhs[],
 
   float *a = (float*) mxGetPr (prhs[0]);  
   float *b = (float*) mxGetPr (prhs[1]); 
-  int nt = 0;
+  int nt = 1;
 
   if (nrhs >= 3)
-    nt = (int) mxGetScalar(prhs[3]);
+    nt = (int) mxGetScalar(prhs[2]);
 
   if (nt == 0)
     nt = count_cpu();
@@ -46,5 +46,5 @@ void mexFunction (int nlhs, mxArray *plhs[],
   plhs[0] = mxCreateNumericMatrix (na, nb, mxSINGLE_CLASS, mxREAL);
   float *dis = (float*) mxGetPr (plhs[0]);
 
-  compute_cross_distances_thread (d, na, nb, a, b, dis, nt);
+  compute_cross_distances (d, na, nb, a, b, dis);
 }
