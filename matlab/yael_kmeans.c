@@ -7,6 +7,7 @@
 #include <sys/time.h>
 
 #include <yael/kmeans.h>
+#include <yael/machinedeps.h>
 
 #include "mex.h"
 
@@ -34,7 +35,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   float *v = (float*) mxGetPr (prhs[0]);
   int k = (int) mxGetScalar (prhs[1]);
 
-  int niter = 50, nt = 1, redo = 1;
+  int niter = 50, redo = 1, nt = 0;
 
   {
     int i;
@@ -60,6 +61,10 @@ void mexFunction (int nlhs, mxArray *plhs[],
     }
   }
   
+  /* default: use all the processor cores */
+  if (nt == 0)
+    nt = count_cpu();
+
   printf("input array of %d*%d k=%d niter=%d nt=%d ar=[%g %g ... ; %g %g... ]\n",
          n, d, k, niter, nt, v[0], v[d], v[1], v[d+1]); 
 

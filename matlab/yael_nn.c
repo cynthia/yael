@@ -35,13 +35,16 @@ void mexFunction (int nlhs, mxArray *plhs[],
   float *b = (float*) mxGetPr (prhs[0]);  /* database vectors */
   float *v = (float*) mxGetPr (prhs[1]);  /* query vectors */
   int k = 1; 
-  int nt = 1;
+  int nt = 0;
 
   if (nrhs >= 3)
     k = (int) mxGetScalar(prhs[2]);
 
   if (nrhs >= 4)
     nt = (int) mxGetScalar(prhs[3]);
+
+  if (nt == 0)
+    nt = count_cpu();
 
   if (n < k) 
     mexErrMsgTxt("fewer vectors than number to be returned");    
