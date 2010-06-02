@@ -38,7 +38,7 @@
 
 \vfill
 
-\includegraphics[width=3cm]{./figs/logoinria}
+\includegraphics[width=3cm]{./figs/logoinria} \hfill \includegraphics[width=3cm]{./figs/logoinria} 
 
 
 \newpage
@@ -399,7 +399,7 @@ export MATLABPATH=\$MATLABPATH:\yroot/matlab
 
 in your shell configuration files (e.g., \tc{.bash\_profile} for bash) 
 where \yroot should be set to fit your local configuration 
-(see Section~\ref{cha:gettingstarted}). 
+(see Chapter~\ref{cha:gettingstarted}). 
 \bigskip
 
 Similar to Fortran convention, all vectors are assumed stored in column. 
@@ -440,13 +440,17 @@ MacOS       & \tc{libyael.dylib} & \tc{DYLD\_LIBRARY\_PATH} \\
 \item [Python.] The \tc{PYTHONPATH} environment variable should 
 point to \tc{YAELROOT}. 
 
-\end{description}
 
 To check the dependencies for the library, you can use the following commands:
 \begin{itemize}
 \item Linux: \tc{ldd libyael}
 \item MacOS: \tc{otool -L libyael.dylib}
 \end{itemize}
+
+\item [Segfault in Mexfile: MacOS 64 bits.] If you have a 64 bits Matlab version with MacOS, 
+then you should choose modify the Makefile in the matlab subdirectory so that 
+the base type for integer is ``long'', similar to the Linux64 configuration. 
+\end{description}
 
 
 \appendix                     % Les annexes

@@ -4,6 +4,7 @@ all:yael.pdf reference
 
 yael.pdf: yael.tex
 	pdflatex yael
+	pdflatex yael
 
 reference: 
 	doxygen Doxyfile
