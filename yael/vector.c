@@ -1076,6 +1076,12 @@ void fvec_ssqrt (float * v, long n) {
 
 }
 
+void fvec_spow (float * v, long n, double scal) {
+  long i;
+  for (i = 0 ; i < n ; i++)
+    v[i] = v[i]>0 ? pow(v[i],scal) : -pow(-v[i],scal);
+}
+
 void ivec_add (int * v1, const int * v2, long n) {
   long i = 0;
   for (i = 0 ; i < n ; i++)

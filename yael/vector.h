@@ -306,6 +306,9 @@ void fvec_neg (float * v, long n);
 /*!  signed square-root: y = sign(x)*sqrt(abs(x)) */
 void fvec_ssqrt (float * v, long n);
 
+/*! signed power: y = sign(x) * pow(abs(x), scal) */
+void fvec_spow (float * v, long n, double scal);
+
 
 void ivec_add (int * v1, const int * v2, long n);
 void ivec_sub (int * v1, const int * v2, long n);

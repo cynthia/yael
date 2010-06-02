@@ -549,7 +549,7 @@ void gmm_compute_dp_dlambda(int n, const float *v, const gmm_t * g, int flags, f
   long i,j,l;
   long ii=0;
 
-  gmm_compute_p(n,v,g,p,flags);
+  gmm_compute_p(n,v,g,p,flags | GMM_FLAGS_W);
 
 #define P(j,i) p[(i)*k+(j)]
 #define V(i,l) v[(i)*d+(l)]
