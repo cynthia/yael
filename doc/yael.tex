@@ -43,7 +43,7 @@
 
 \newpage
 
-\chapter*{Licence}
+\chapter*{License}
 
 \thispagestyle{empty}
 
@@ -110,7 +110,7 @@ The library has been tested under different architectures, in particular
 \begin{itemize}
 \item Linux 32 bits: Fedora Core 11
 \item Linux 64 bits: Fedora Core 10, Fedora Core 11, Ubuntu Karmic, Debian 4.1.2-25
-\item Mac OS X 64 bits. 
+\item Mac OS X. 
 \end{itemize}
 The library has not been packaged nor tested for Microsoft Windows. 
 
@@ -177,7 +177,7 @@ The \tc{LD\_LIBRARY\_PATH} environment variable may also need to be set accordin
 
 \item [Python-dev.] This package contains the include files of the Python-C API. 
 Note that having python installed on your machine does not necessarily 
-mean that the developpement kit is installed as well. 
+mean that the development kit is installed as well. 
 If only python is installed, not python-dev, you will get an error 
 saying that the file \tc{Python.h} can not be found. 
 
@@ -256,7 +256,7 @@ For instance, including the primitive for vectors is performed by
 }
 \medskip
 
-The documentation of the functions and data strcutures is in the header files. It can be extracted and formatted by \texttt{doxygen}, run by invoking \texttt{make} in the \texttt{doc} subdirectory. 
+The documentation of the functions and data structures is in the header files. It can be extracted and formatted by \texttt{doxygen}, run by invoking \texttt{make} in the \texttt{doc} subdirectory. 
 \medskip
 
 The best thing to do to have an operational Makefile and program 
@@ -322,7 +322,7 @@ when using other python libraries jointly with \yael.
 \section{Guidelines for the wrapping process}
 
 \begin{itemize}
-\item for most of the objects, memory is not managed by Python. They must be free'd explicitly. The main exception is for vectors, which can be expicitely acquired by Python so that they are garbage-collected like a Python object;
+\item for most of the objects, memory is not managed by Python. They must be free explicitly. The main exception is for vectors, which can be explicitly acquired by Python so that they are garbage-collected like a Python object;
 \item arrays for simple types are wrapped with IntArray, FloatArray, etc. 
 
   Usage:
@@ -348,6 +348,7 @@ variable name: \tc{x=IntArray.acquirepointer(x)}
 
 \section{NumPy interface}
 
+See the \tc{test\_numpy.py} program. 
 
 \chapter{Matlab}
 
@@ -369,8 +370,16 @@ to the Euclidean distance. Although for $k=1$ matlab makes a good job,
 finding $k>1$ neighbors requires to use the \tc{sort} 
 function, which is very inefficient when $k$ is small compared to the number 
 of vectors. 
+\item [yael\_L2sqr] computes all the square distances between two sets of vectors. 
+Therefore, it computes $n_1\times n_2$ distances. 
+\item [yael\_kmin and yael\_kmax] compute the $k$ smallest (respectively largest) 
+values of a set of scalar. It is more efficient than sorting the data. 
+\item [yael\_fvecs\_normalize] normalizes a set of vectors. 
+
+
 \end{description}
 
+There are also several I/O functions, see Chapter~\ref{cha:I/O}. 
 
 \section{Using the \yael interface}
 
@@ -433,7 +442,7 @@ point to \tc{YAELROOT}.
 
 \end{description}
 
-To check the dependancies for the library, you can use the following commands:
+To check the dependencies for the library, you can use the following commands:
 \begin{itemize}
 \item Linux: \tc{ldd libyael}
 \item MacOS: \tc{otool -L libyael.dylib}
@@ -443,24 +452,32 @@ To check the dependancies for the library, you can use the following commands:
 \appendix                     % Les annexes
 
 \chapter{File exchange format}               % Annexe A
+\label{cha:I/O}
 
-\yael uses a home-made file format to store integer or floating point vectors. 
+\yael uses a home-made file format to store byte, integer or floating point vectors. 
 Each vector is stored by
 \begin{itemize}
 \item writing its length $d$ as an integer
 \item and writing its $d$ components in binary format. 
 \end{itemize}
-We only store single-precision floating point number\footnote{For double precision you need to use the standard I/O functions. But do you really need double precision ?}. Therefore the size of storing a vector of integer or a vector of floating point numbers is always \tc{sizeof(int)+4*d}$=4(d+1)$, as both the dimension and the components require 4 bytes each.  
-\medskip
+We only store single-precision floating point number\footnote{For
+  double precision you need to use the standard I/O functions. But do
+  you really need double precision ?}. Therefore the size of storing a
+vector of integer or a vector of floating point numbers is always
+\tc{sizeof(int)+4*d}$=4(d+1)$, as both the dimension and the
+components require 4 bytes each. 
+For byte vectors, it is similarly equal to $4+d$. 
+ \medskip
 
-By convention we will call a file containing several vectors of the same kind ``fvecfile'' and ``ivecfile''. 
+By convention we will call a file containing several vectors of the same kind ``fvecfile'', ``ivecfile'' 
+and 'bvecfile'. 
 Some particular high-level functions are defined for these files. 
 \bigskip
 
 {\it Remarks:} 
 \begin{itemize}
-\item Since there use no header, several fvecfiles or ivecfiles can be concatenated using regular the \tc{cat} Unix command to produce a file containing the concatenation of the vector. 
-\item the front-ends \tc{fvecfile} and \tc{ivecfile} receive a fvecfile (resp., ivecfile) on standard input and produce a text output. Usage:
+\item Since there use no header, several files of same type can be concatenated using regular the \tc{cat} Unix command to produce a file containing the concatenation of the vector. 
+\item the front-ends \tc{xvecfile} (x='f','i' or 'b') receive a xvecfile on standard input and produce a text output. Usage:
 \code{
 cat myfile.fvecs | fvecfile
 }
@@ -472,18 +489,27 @@ They are provided in the prog directory.
 \end{itemize}
 
 
-One can see below the set of \yael functions used to read these files:
+One can see below the set of \yael functions used to read these files in C, Python 
+and matlab:
+\begin{center}
 \begin{tabular}{lll}
-C         &*** & \\
-          & & \\
-matlab    & & \\
-python    & & \\
+\hline
+file type & read        & write \\
+\hline
+.fvecs    & fvecs\_read & fvecs\_write \\
+.ivecs    & ivecs\_read & ivecs\_write \\
+.bvecs    & bvecs\_read & bvecs\_write \\
+\hline
 \end{tabular}
+\end{center}
+
+The prototype of the function depends on whether you call it from C, Python or Matlab. 
 
 
 Recall that these functions should be used only for files containing vectors of same type and dimension. 
 However, thanks to the fact that the dimension is stored for each vector, variable length vectors 
 can also be used, but in that case vectors must be accessed one by one. 
+See the I/O interface in vector.h 
 
 % \listoffigures              % Table des figures
 

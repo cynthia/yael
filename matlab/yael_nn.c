@@ -59,7 +59,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   float *dis = (float*) mxGetPr (plhs[1]);
 
   
-  knn_full_thread (2, nq, n, d, k, b, v, NULL, assign, dis, nt, NULL, NULL);
+  knn_full (2, nq, n, d, k, b, v, NULL, assign, dis, NULL, NULL);
 
   /* post-processing: convert to matlab indices, and enforce full sort */
   int i, j;
