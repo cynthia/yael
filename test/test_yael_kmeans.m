@@ -1,10 +1,10 @@
 addpath ('../matlab')
 
 k = 100;                   % number of cluster to create
-d = 128;                    % dimensionality of the vectors
+d = 128;                   % dimensionality of the vectors
 n = 100000;                % number of vectors
-nt = 1;                     % number of threads to use
-v = rand (d, n, 'single');  % random set of vectors 
+nt = 1;                    % number of threads to use
+v = single(rand (d, n));   % random set of vectors 
 niter = 30;
 
 tic

@@ -54,6 +54,9 @@ If you need the matlab interface, you have to compile the mex files:
 
 The mex executable should be in the PATH. 
 
+It is also possible to compile an version that works with Octave (see
+the Makefile and octave_mex.sh)
+
 
 Remarks
 =============
