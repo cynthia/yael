@@ -9,8 +9,8 @@ include ../makefile.inc
 
 # Here you can chose between Matlab and Octave
 
-# TARGET=matlab
-TARGET=octave
+TARGET=matlab
+#TARGET=octave
 
 
 ifeq "$(TARGET)" "matlab"
