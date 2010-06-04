@@ -247,11 +247,11 @@ void fvec_nan (float * v, long n);
 
 
 /*!  are all values 0? */
-int fvec_all_0 (float * v, long n);
-int ivec_all_0 (int * v, long n);
+int fvec_all_0 (const float * v, long n);
+int ivec_all_0 (const int * v, long n);
 
 /*!  are all values finite? */
-int fvec_all_finite (float * v, long n);
+int fvec_all_finite (const float * v, long n);
 
 /*!  Set all the components of the vector v to the value val */
 void fvec_set (float * v, long n, float val);

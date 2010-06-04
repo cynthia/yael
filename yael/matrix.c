@@ -439,6 +439,8 @@ float *fmat_covariance (int d, int n, const float *v, float *avg)
   float *sums = avg ? avg : fvec_new(d);
   long i, j;
 
+  fvec_0(sums,d);
+
   for (i = 0; i < n; i++)
     for (j = 0; j < d; j++)
       sums[j] += v[i * d + j];
@@ -448,6 +450,7 @@ float *fmat_covariance (int d, int n, const float *v, float *avg)
   for (i = 0; i < d; i++)
     for (j = 0; j < d; j++)
       cov[i + j * d] = sums[i] * sums[j];
+
 
   if(avg)
     for(i=0;i<d;i++) avg[i]/=n;
@@ -501,6 +504,8 @@ float *fmat_covariance_thread (int d, int n, const float *v, float *avg, int nt)
 float *fmat_pca(int d,int n,const float *v) {
 
   float *cov=fmat_covariance(d,n,v,NULL);
+  
+  assert(fvec_all_finite(cov,d*d));
   
   float *ret=fmat_pca_from_covariance(d,cov,NULL);
     

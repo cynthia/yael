@@ -359,7 +359,7 @@ void gmm_compute_p (int n, const float * v,
     compute_mahalanobis_sqr(n,k,d,g->mu,g->sigma,v,p); 
   }
 
-  /* convert distances to probabilities, staying in the log domain as
+  /* convert distances to probabilities, staying in the log domain 
      until the very end */
   for (i = 0 ; i < n ; i++) {
 
@@ -367,9 +367,6 @@ void gmm_compute_p (int n, const float * v,
       p[i * k + j] = logdetnr[j] - 0.5 * p[i * k + j];
       CHECKFINITE(p[i * k + j]);
     }
-
-    //    printf ("p[%d] = ", i);
-    //    fvec_print (p + i * k, k);
 
     /* at this point, we have p(x|ci) -> we want p(ci|x) */
     
@@ -572,20 +569,48 @@ void gmm_compute_dp_dlambda(int n, const float *v, const gmm_t * g, int flags, f
   } 
   
   if(flags & GMM_FLAGS_MU) {
+    float *dp_dmu=dp_dlambda+ii;
 
-    for(j=0;j<k;j++) {
-      for(l=0;l<d;l++) {
-        double accu=0;
+#define DP_DMU(l,j) dp_dmu[(j)*d+(l)]
+    
+    if(0) { /* simple and slow */
+    
+      for(j=0;j<k;j++) {
+        for(l=0;l<d;l++) {
+          double accu=0;
+          
+          for(i=0;i<n;i++) 
+            accu += P(j,i) * (V(i,l)-MU(j,l)) / SIGMA(j,l);
+          
+          DP_DMU(l,j)=accu;
+        }
+      }
+      
+    } else { /* complicated and fast */
+
+      fmat_mul_tr(v,p,d,k,n,dp_dmu);
+
+      for(j=0;j<k;j++) {
+        double sum_pj=0;
         
         for(i=0;i<n;i++) 
-          accu += P(j,i) * (V(i,l)-MU(j,l)) / SIGMA(j,l);
-        
-        double f=flags & GMM_FLAGS_NO_NORM ? 1.0 : n*g->w[j]/SIGMA(j,l);
-        
-        dp_dlambda[ii++]=accu/sqrt(f);
-                
+          sum_pj += P(j,i);        
+
+        for(l=0;l<d;l++) 
+          DP_DMU(l,j) = (DP_DMU(l,j) - MU(j,l) * sum_pj) / SIGMA(j,l);
+
       }
+
     }
+    /* normalization */
+    if(!(flags & GMM_FLAGS_NO_NORM)) {
+      for(j=0;j<k;j++) 
+        for(l=0;l<d;l++)           
+          DP_DMU(l,j) /= sqrt(n*g->w[j]/SIGMA(j,l));                
+        
+    }
+#undef DP_DMU
+    ii+=d*k;
   }
 
 

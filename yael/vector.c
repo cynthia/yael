@@ -851,17 +851,17 @@ void ivec_0(int * v, long n)
   memset (v, 0, n * sizeof (*v));
 }
 
-int fvec_all_0 (float * v, long n) {
+int fvec_all_0 (const float * v, long n) {
   while(n--) if(v[n]!=0) return 0;
   return 1;
 }
 
-int fvec_all_finite (float * v, long n) {
+int fvec_all_finite (const float * v, long n) {
   while(n--) if(!finite(v[n])) return 0;
   return 1;
 }
 
-int ivec_all_0 (int * v, long n) {
+int ivec_all_0 (const int * v, long n) {
   while(n--) if(v[n]!=0) return 0;
   return 1;
 }
