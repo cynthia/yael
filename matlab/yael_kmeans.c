@@ -12,11 +12,6 @@
 #include "mex.h"
 
 
-/* 
-compile with yael4matlab.sh
-*/
-
-
 void mexFunction (int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray*prhs[])
 

@@ -9,6 +9,22 @@ Only a few function are exported in matlab, as most of the function
 provided in the library are native matlab functions. 
 
 
+Legal & Contact
+===============
+
+This library has been written and is maintained by Herve Jegou and Matthijs Douze. 
+Contact: herve.jegou@inria.fr and matthijs.douze@inria.fr
+Copyright (C) INRIA 2009-2010
+Last change: June 2010. 
+
+This software is governed by the CeCILL license under French law and
+abiding by the rules of distribution of free software. 
+See http://www.cecill.info/licences.en.html
+
+INRIA may provide a licence for industrial applications. 
+Do not hesitate to contact us. 
+
+
 Prerequisites
 =============
 

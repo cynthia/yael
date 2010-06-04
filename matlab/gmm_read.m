@@ -1,5 +1,6 @@
-% This function reads a vector from a file in the libit format
-
+% This function reads the parameters of a gmm file
+% 
+% Usage: [w, mu, sigma] = gmm_read (filename)
 function [w, mu, sigma] = gmm_read (filename)
 
 % open the file and count the number of descriptors
