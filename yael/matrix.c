@@ -226,17 +226,15 @@ void fmat_print_tranposed(const float *a, int nrow, int ncol)
 /* Matrix manipulation functions                                             */
 /*---------------------------------------------------------------------------*/
 
-float *fmat_get_submatrix (const float *a, int ncola, int r1, int c1, int r2,
-                           int c2)
-{
-  int i, j;
-  int nrow = r2 - r1;
-  int ncol = c2 - c1;
-  float *b = fmat_new (nrow, ncol);
 
-  for (i = r1; i < r2; i++)
-    for (j = c1; j < c2; j++)
-      b[(i - r1) * ncol + (j - c1)] = a[i * ncola + j];
+float *fmat_get_submatrix (const float *a, int nrow, 
+                           int nrow_out,
+                           int ncol) {
+  long i;
+  float *b=fmat_new(nrow_out,ncol);
+  
+  for(i=0;i<ncol;i++) 
+    memcpy(b+i*nrow_out,a+i*nrow,nrow_out*sizeof(*a));
 
   return b;
 }

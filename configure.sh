@@ -133,6 +133,9 @@ while [ $# -gt 0 ] ; do
             numpycflags=-I${a#*=}
             ;;
 
+        --enable-openmp) 
+            useopenmp=yes
+            ;;
 	*)  echo "unknown option $a" 1>&2; exit 1;;
     esac
 done
@@ -183,6 +186,10 @@ YAELSHAREDFLAGS=$yaelsharedflags
 USENUMPY=$usenumpy
 NUMPYCFLAGS=$numpycflags
 NUMPYSWIGFLAGS=$numpyswigflags
+
+
+USEOPENMP=$useopenmp
+
 
 EOF
 

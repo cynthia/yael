@@ -133,9 +133,19 @@ void fmat_print_tranposed (const float *a, int nrow, int ncol);
 /* Matrix manipulation functions                                             */
 /*---------------------------------------------------------------------------*/
 
-/*! RM  return the submatrix defined by left-upper corner (included) 
-  and top-down corner (not included) */
-float *fmat_get_submatrix (const float *a, int ncola, int r1, int c1, int r2, int c2);
+/*! Extract a submatrix.
+ *  
+ * @param a        the matrix (at least nrow by ncol)
+ * @param nrow     nb of rows of input matrix
+ * @param nrow_out nb of rows of output matrix
+ * @param ncol     nb of columns of output matrix 
+ * @return         the extracted submatrix 
+ */
+
+float *fmat_get_submatrix (const float *a, int nrow, 
+                           int nrow_out,
+                           int ncol);
+
 
 /* RM return the submatrix defined by a list of columns  */
 float *fmat_get_columns (const float *a, int ncola, int nrow, int ncolout, const int *cols);
