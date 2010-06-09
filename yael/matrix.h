@@ -207,80 +207,54 @@ void fmat_rev_subtract_from_columns(int d,int n,float *m,const float *avg);
 
 
 
-/*! Perform the Principal Component Analysis of a set of vectors
- *
- * @param v(d,n)   vectors to perform the PCA on 
- *
- * @return (d,d) matrix of eigenvectors. To transform a
- *               vector a low-dimension space, multiply by the d2 first lines of the matrix
- */
-float *fmat_pca(int d,int n,const float *v); 
 
 
 /*! Compute covariance of a set of vectors
  * 
  * @param v(d,n)  vectors to compute covariance
  * @param avg(d)  on output, average vector (can be NULL)
+ * @param assume_centered  assumes the data is centered (avg not used)
  * 
  * @return (d,d)  covariance matrix
  */
-float *fmat_covariance (int d, int n, const float *v,
-                        float *avg);
+float *fmat_new_covariance (int d, int n, const float *v,
+                        float *avg,int assume_centered);
 
 
-#if 0
-/*! same as fmat_covariance, threaded 
- * 
- * @param nt      nb of computing threads
- */
-float *fmat_covariance_thread (int d, int n, const float *v,
-                               float *avg, int nt);
-
-#endif
-
-/*! Perform the Principal Component Analysis from a covariance matrix 
+/*! Perform the Principal Component Analysis of a set of vectors
  *
- * @param cov(d,d)     covariance to compute the PCA on
- * @param singvals(d)  on output, associated singular values (can be NULL)
+ * @param v(d,n)  vectors to perform the PCA on. The vectors are assumed to be centered already!
+ * @param singvals(d)  corresponding singular values (may be NULL)
  *
  * @return (d,d) matrix of eigenvectors. To transform a
  *               vector a low-dimension space, multiply by the d2 first lines of the matrix
  */
-float *fmat_pca_from_covariance(int d,const float *cov,
-                                float *singvals); 
+float *fmat_new_pca(int d,int n,const float *v,
+                    float *singvals); 
 
-/*! same as fmat_pca_from_covariance, but return only part of the vectors 
+/*! same as fmat_pca, but retun only a few vectors
  *
- * @param cov(d,d)     covariance to compute the PCA on
- * @param singvals(nv)  on output, associated singular values (can be NULL)
+ * @param v(d,n)  vectors to perform the PCA on. The vectors are assumed to be centered already!
+ * @param singvals(nev)  corresponding singular values (may be NULL)
  *
- * @return (d,nv) matrix of eigenvectors. 
+ * @return (d,nev) matrix of eigenvectors. To transform a
+ *                 vector a low-dimension space, multiply by the d2<nev first lines of the matrix
  */
-float *fmat_pca_part_from_covariance(int d,int nv,const float *cov,
-                                     float *singvals); 
+
+float *fmat_new_pca_part(int d,int n,int nev,
+                         const float *v,float *singvals); 
 
 
+/*! Compute SVD decomposition of a matrix: a = u * s * v'
+ */
+int fmat_svd_partial(int d,int n,int ns,const float *a,
+                      float *singvals,float *u,float *v); 
 
+/*! with additionnal options
+ */
+int fmat_svd_partial_full(int n,int m,int nev,const float *a,int a_transposed,
+                          float *s,float *vout,float *uout,int nt);
 
-
-
-/*! DEPRECATED compute only a few (nev) PCA vectors */
-int partial_pca(int n,int d,const float *a,
-                int nev,float *pcamat_out);
-
-
-/*! DEPRECATED compute the nev first lines of U and V and S for a (row-major, m rows, n columns) 
-
-   sout has size nev
-   uout has size nev-by-m
-   vout has size nev-by-m
-   all can be NULL if you are not interested.
-*/
-int partial_svd(int m,int n,const float *a,
-                int nev,
-                float *sout,
-                float *uout, float *vout,
-                int nt);
 
 /*---------------------------------------------------------------------------*/
 /*! @} */

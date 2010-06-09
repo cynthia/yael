@@ -40,6 +40,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <string.h>
 #include <math.h>
 
+#include "eigs.h"
 #include "vector.h"
 #include "sorting.h"
 #include "machinedeps.h"
@@ -51,6 +52,13 @@ extern void dsyev_( char *jobz, char *uplo, FINTEGER *n, double *a, FINTEGER *ld
 
 extern void dsygv_(FINTEGER * itype, char *jobz, char *uplo, FINTEGER *n, double *a, FINTEGER *lda,
 		    double *b, FINTEGER *lbd, double *w, double *work, FINTEGER *lwork, FINTEGER *info );
+
+
+typedef float real;
+
+extern void sgemv_(const char *trans, FINTEGER *m, FINTEGER *n, real *alpha, 
+                   const real *a, FINTEGER *lda, const real *x, FINTEGER *incx, real *beta, real *y, 
+                   FINTEGER *incy);
 
 
 
@@ -181,11 +189,40 @@ void eigs_reorder (int d, float * eigval, float * eigvec, int criterion)
 
 
 
+int eigs_sym_part (int n, const float * a, int nev, float * sout, float * vout) {
+  arpack_eigs_t *ae=arpack_eigs_begin(n,nev);
+  int ret=0;
+  
+
+  for(;;) {
+    float *x,*y;
+    ret=arpack_eigs_step(ae,&x,&y); 
+
+    if(ret<0) break; /* error */
+
+    if(ret==0) break; /* stop iteration */
+
+    /* ret==1 */
+
+    float zero=0,one=1;
+    int ione=1;
+    
+    sgemv_("Trans",&n,&n,&one,a,&n,x,&ione,&zero,y,&ione);    
+  } 
+  ret=arpack_eigs_end(ae,sout,vout);
+ 
+  return ret;
+}
+
+
+
+
 #ifdef HAVE_ARPACK
+
+
 
 typedef FINTEGER integer;
 typedef FINTEGER logical;
-typedef float real;
 
 extern void ssaupd_ (integer *ido,const char*bmat,integer *n, const char*which,integer *nev,
                      float* tol, float*resid, integer *ncv, float *v, integer *ldv, 
@@ -200,127 +237,167 @@ extern void sseupd_ (logical *rvec, const char *howmny, logical *select, float *
                      integer *iparam, integer * ipntr, float *workd, float *workl, 
                      integer *lworkl, integer *info );
 
-extern void sgemv_(const char *trans, integer *m, integer *n, real *alpha, 
-                   const real *a, integer *lda, const real *x, integer *incx, real *beta, real *y, 
-                   integer *incy);
+struct arpack_eigs_t {
+  int n,nev;
+
+  int ncv;
+  int ido,info;
+
+  int lworkl;
+  float *resid,*workd,*workl;
+  float *v;
+  int *iparam,*ipntr;
+  logical *select;
+
+};
 
 #define NEWA(type,n) (type*)malloc(sizeof(type)*(n))
 
+arpack_eigs_t *arpack_eigs_begin(int n,int nev) {
+  arpack_eigs_t *ae=NEWA(arpack_eigs_t,1);
 
-int eigs_sym_part (int n, const float * a, int nev, float * sout, float * vout) {
+  ae->n=n;
+  ae->nev=nev;
 
-  int ncv=2*nev;  /* should be enough (see remark 4 of ssaupd doc) */
+  int ncv=ae->ncv=2*nev;  /* should be enough (see remark 4 of ssaupd doc) */
 
-  float *s=NEWA(float,ncv*2);
-  int i,j;
-  const char *bmat="I",*which="LM";
-  float tol=0;
-  int info=0;
-  int ido=0;
-  int lworkl = ncv*(ncv+8);
-  float *resid=NEWA(float,n),*workd=NEWA(float,3*n),*workl=NEWA(float,lworkl);
-  float *v=NEWA(float,n*(long)ncv);
-  int *iparam=NEWA(int,11),*ipntr=NEWA(int,11);
-  logical *select=NEWA(logical,ncv);
-  int ret=0;
-  int *perm=NEWA(int,nev);
+  ae->lworkl = ncv*(ncv+8);
+  ae->resid=NEWA(float,n);
+  ae->workd=NEWA(float,3*n);
+  ae->workl=NEWA(float,ae->lworkl);
+  
+  ae->v=NEWA(float,n*(long)ncv);
+  int *iparam=ae->iparam=NEWA(int,11);
+  ae->ipntr=NEWA(int,11);
+
+
+  ae->ido=0;
 
   iparam[0]=1;
   iparam[2]=n;
   iparam[6]=1;
 
-  i=0;
-  for(;;) {
+  return ae;
+}
 
-    ssaupd_(&ido, bmat, &n, which, &nev, 
-            &tol, resid, &ncv, v, &n, 
-            iparam, ipntr, workd, workl, &lworkl,
-            &info);
 
-    if(ido==-1 || ido==1) {
-      
-      float *x=workd+ipntr[0]-1;
-      float *y=workd+ipntr[1]-1;
-
-      float zero=0,one=1;
-      int ione=1;
-            
-      sgemv_("Trans",&n,&n,&one,a,&n,x,&ione,&zero,y,&ione);
-
-    } else break;   
-
-    printf("ssaupd eval %d\r",i++); fflush(stdout);
-  }
+int arpack_eigs_step(arpack_eigs_t *ae,
+                     float **x, float **y) {
   
-  printf("\n ssaupd -> sseupd\n");
+  const char *bmat="I",*which="LM";
+  
+  float tol=0;
+  
+  ssaupd_(&ae->ido, bmat, &ae->n, which, &ae->nev, 
+          &tol, ae->resid, &ae->ncv, ae->v, &ae->n, 
+          ae->iparam, ae->ipntr, ae->workd, ae->workl, &ae->lworkl,
+          &ae->info);
+  
 
-  if(info<0) {
-    printf("eigs_sym_part: ssaupd_ error info=%d\n",info);
-    ret=info;
-    goto error;
+  if(ae->ido==-1 || ae->ido==1) {
+    *x=ae->workd+ae->ipntr[0]-1;
+    *y=ae->workd+ae->ipntr[1]-1;
+    return 1;
   } 
+  
+  *x=*y=NULL;
+  if(ae->info<0) {
+    printf("arpack_eigs_step: ssaupd_ error info=%d\n",ae->info);
+    
+    return ae->info;
+  } 
+
+  return 0; 
+}
+
+
+int arpack_eigs_end(arpack_eigs_t *ae,
+                     float * sout, float * vout) {
+  int i,ret=0;  
+  int n=ae->n,nev=ae->nev,ncv=ae->ncv;
+  int nconv;
+
+  logical *select=NEWA(logical,ncv);
+  float *s=NEWA(float,ncv*2);
+  int *perm=NEWA(int,nev);
+
+  if(ae->info<0) {
+    ret=ae->info;
+    goto error;
+  }
 
   {
     int ierr;
     logical rvec=1;
     float sigma;
-
+    const char *bmat="I",*which="LM";
+    float tol=0;
+  
     sseupd_(&rvec,"All",select,s,
-            v,&n, &sigma, bmat, &n, which, &nev, 
-            &tol, resid, &ncv, v, &n, 
-            iparam, ipntr, workd, workl, &lworkl,&ierr);
+            ae->v,&n, &sigma, bmat, &n, which, &nev, 
+            &tol, ae->resid, &ncv, ae->v, &n, 
+            ae->iparam, ae->ipntr, ae->workd, ae->workl, &ae->lworkl,
+            &ierr);
 
     if(ierr!=0) {
-      printf("eigs_sym_part: sseupd_ error: %d\n",ierr);
-      ret=ierr;     
+      printf("arpack_eigs_end: sseupd_ error: %d\n",ierr);
+      ret=ierr;
       goto error;
     }
-    int nconv=iparam[4];
-
-    if(nconv<nev) {
-      printf("eigs_sym_part: nev=%d, nconv=%d, increase ncv=%d\n",nev,nconv,ncv);
-      ret=0xdeadbeef; 
-      goto error;
-    }
+    ret=nconv=ae->iparam[4];
 
   }
 
-
   /* order v by s */
-  
-  fvec_sort_index(s,nev,perm); 
+
+  fvec_sort_index(s,nconv,perm); 
   
   if(vout) 
-    for(i=0;i<nev;i++) 
-      memcpy(vout+n*i,v+n*perm[i],sizeof(float)*n);
+    for(i=0;i<nconv;i++) 
+      memcpy(vout+n*i, ae->v+n*(nconv-1-perm[i]), sizeof(float)*n);
 
   if(sout) 
-    for(i=0;i<nev;i++) 
-      sout[i]=s[perm[i]];
+    for(i=0;i<nconv;i++) 
+      sout[i]=s[nconv-1-perm[i]];
 
  error: 
   free(select); 
-  free(resid); 
-  free(workl);
-  free(workd);
-  free(iparam);
-  free(ipntr);
-
   free(perm); 
-  free(v);
   free(s);
+
+  free(ae->resid); 
+  free(ae->workl);
+  free(ae->workd);
+  free(ae->iparam);
+  free(ae->ipntr);
+  free(ae->v);
+
+  free(ae);
 
   return ret;
 }
 
 
+
 #else
 
+arpack_eigs_t *arpack_eigs_begin(int n,int nev) {
+  fprintf(stderr,"Error: Yael not compiled with Arpack!");
+  abort();
+} 
 
-int eigs_sym_part (int d, const float * m, int nev, float * eigval, float * eigvec) 
-{
-  fprintf(stderr,"eigs_sym_part: ERROR Yael not compiled with arpack\n");
-  return -1;
+int arpack_eigs_step(arpack_eigs_t *,
+                     float **x, float **y) {
+  fprintf(stderr,"Error: Yael not compiled with Arpack!");
+  abort();
 }
+
+int arpack_eigs_end(arpack_eigs_t *,
+                    float * sout, float * vout) {
+  fprintf(stderr,"Error: Yael not compiled with Arpack!");
+  abort();
+}
+
+
 
 #endif

@@ -10,11 +10,7 @@
 /* 
 Copy/paste the points matrix into octave and compare:
 
-[d,n]=size(points)
-
-avg=sum(points,2)/n;
-
-centered_points=points-avg*ones(1,n);
+[d,n]=size(centered_points)
 
 cov=centered_points * centered_points';
 
@@ -23,7 +19,7 @@ cov=centered_points * centered_points';
 cov_eigenvalues=diag(cov_eigenvalues);
 
 [sorted,perm]=sort(cov_eigenvalues)
-cov_eigenvectors(:,perm(end:-1:1))'
+cov_eigenvectors(:,perm(end:-1:1))
 
 Lines should be the same up to the sign as eigs_f output
 
@@ -48,11 +44,12 @@ int main (int argc, char **argv)
   
   for(i=0;i<n*d;i++) points[i]=drand48()*2-1;
 
-  printf("points=");
+  fmat_center_columns(d,n,points);
+
+  printf("centered_points=");
   fmat_print(points,d,n);
 
-  float *eig_f=fmat_pca(d,n,points);
-  
+  float *eig_f=fmat_new_pca(d,n,points,NULL);  
   
   printf("eig_f=");
   fmat_print(eig_f,d,d);

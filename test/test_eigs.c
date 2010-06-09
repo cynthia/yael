@@ -61,7 +61,10 @@ int main()
 
   printf ("\n");
   ret=eigs_sym_part (d, a, d2, lambda, v_part);
-  assert(ret==0);
+  assert(ret>0);
+  if(ret<d2) 
+    printf("!!! only %d / %d eigenvalues converged\n",ret,d2);
+
   printf ("\n");
 
   printf("Eigenvectors:\n");

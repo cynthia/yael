@@ -408,6 +408,33 @@ void fmat_rev_subtract_from_columns(int d,int n,float *v,const float *avg) {
 }
 
 
+
+
+
+void fmat_splat_separable(const float *a,int nrow,int ncol,
+                          const int *row_assign,const int *col_assign,
+                          int k,
+                          float *accu) {
+  int i,j;
+
+  for(i=0;i<nrow;i++) for(j=0;j<ncol;j++) {
+    accu[row_assign[i]*k+col_assign[j]]+=a[i*ncol+j];
+  }
+
+}
+
+int *imat_joint_histogram(int n,int k,int *row_assign,int *col_assign) {
+  int *hist=ivec_new_0(k*k);
+  int i;
+
+  for(i=0;i<n;i++) 
+    hist[row_assign[i]*k+col_assign[i]]++;
+
+  return hist;
+}
+
+
+
 /******************************************************************
  * Covariance and PCA computation
  *****************************************************************/
@@ -431,30 +458,34 @@ void fmat_rev_subtract_from_columns(int d,int n,float *v,const float *avg) {
 
 
 
-float *fmat_covariance (int d, int n, const float *v, float *avg)
+float *fmat_new_covariance (int d, int n, const float *v, float *avg, int assume_centered)
 {
   
-  float *sums = avg ? avg : fvec_new(d);
   long i, j;
 
-  fvec_0(sums,d);
+  float *cov = fvec_new_0 (d * d);
+  
+  if(!assume_centered) {
 
-  for (i = 0; i < n; i++)
-    for (j = 0; j < d; j++)
-      sums[j] += v[i * d + j];
+    float *sums = avg ? avg : fvec_new(d);
+    fvec_0(sums,d);
+    
+    for (i = 0; i < n; i++)
+      for (j = 0; j < d; j++)
+        sums[j] += v[i * d + j];
+    
+    
+    for (i = 0; i < d; i++)
+      for (j = 0; j < d; j++)
+        cov[i + j * d] = sums[i] * sums[j];
+    
+    
+    if(avg)
+      for(i=0;i<d;i++) avg[i]/=n;
+    else
+      free (sums);
 
-  float *cov = fvec_new_nan (d * d);
-
-  for (i = 0; i < d; i++)
-    for (j = 0; j < d; j++)
-      cov[i + j * d] = sums[i] * sums[j];
-
-
-  if(avg)
-    for(i=0;i<d;i++) avg[i]/=n;
-  else
-    free (sums);
-
+  } 
 
   FINTEGER di=d,ni=n;
 
@@ -490,30 +521,7 @@ float *fmat_covariance (int d, int n, const float *v, float *avg)
 
 
 
-float *fmat_covariance_thread (int d, int n, const float *v, float *avg, int nt)
-{
-  fprintf (stderr, "# function fmat_covariance_thread is currently not implemented\n");
-  exit (1);
-}
-
-
-
-
-float *fmat_pca(int d,int n,const float *v) {
-
-  float *cov=fmat_covariance(d,n,v,NULL);
-  
-  assert(fvec_all_finite(cov,d*d));
-  
-  float *ret=fmat_pca_from_covariance(d,cov,NULL);
-    
-  free(cov);  
-  
-  return ret;
-}
-
-
-float *fmat_pca_from_covariance(int d,const float *cov,
+static float *fmat_new_pca_from_covariance(int d,const float *cov,
                                 float *singvals) {
 
   float *pcamat=fvec_new(d*d);
@@ -534,77 +542,32 @@ float *fmat_pca_from_covariance(int d,const float *cov,
   return pcamat;
 }
 
-float *fmat_pca_part_from_covariance(int d,int nv,const float *cov,
-                                     float *singvals) {
-  float *pcamat=fvec_new(d*nv);
+
+
+
+float *fmat_new_pca(int d,int n,const float *v, float *singvals) {
+
+  float *cov=fmat_new_covariance(d,n,v,NULL,1);
+  
+  assert(fvec_all_finite(cov,d*d));
+  
   float *evals=singvals;
 
-  if(!singvals) evals=fvec_new(nv);
+  if(!singvals) evals=fvec_new(d);
+  
+  float *ret=fmat_new_pca_from_covariance(d,cov,evals);
 
-  if(eigs_sym_part(d,cov,nv,evals,pcamat)!=0) {
-    free(pcamat);
-    pcamat=NULL;
-    goto error;
-  }
-  eigs_reorder(d,evals,pcamat,1); /* 1 = descending */
-
- error:
   if(!singvals) free(evals);
-
-  return pcamat;
+    
+  free(cov);  
   
-}
-
-
-#if 0
-
-
-/* to accumulate covariances */
-typedef struct {
-  int n,d;  
-  float *cov; /*< (d,d) covariance matrix */
-  float *sum; /*< (d) sum of points */
-} covariance_accu_t;
-
-void covariance_accu_init(covariance_accu_t *ca, int d) {
-  ca->cov=fvec_new_0(d*d);
-  ca->sum=fvec_new_0(d);
-}
-
-void covariance_accu_add(covariance_accu_t *ca,int n,const float* points) {
-  int i,d=ca->d;
-  
-  for(i=0;i<n;i++) fvec_add(ca->sum,points+i*d,d);
-  
-  float alpha = 1.0, beta = 0;
-  FINTEGER di=ca->d;  
-  FINTEGER ni=n;
-
-  sgemm_ ("N", "T", &di, &di, &ni, &alpha, points, &di, points, &di, &beta, ca->cov, &di);
-  
-}
-
-void covariance_accu_merge(covariance_accu_t *ca,const covariance_accu_t * other) {
-  int d=ca->d;
-  fvec_add(ca->cov,other->cov,d*d);
-  fvec_add(ca->sum,other->sum,d);
-}
-
-void covariance_accu_to_cov(covariance_accu_t *ca) {
-  
-
-}
-
-void covariance_accu_delete(covariance_accu_t *ca) {
-  free(ca->sum);
-  free(ca->cov);
+  return ret;
 }
 
 
 
 
 
-#endif
 
 
 
@@ -616,62 +579,6 @@ void covariance_accu_delete(covariance_accu_t *ca) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-void fmat_splat_separable(const float *a,int nrow,int ncol,
-                          const int *row_assign,const int *col_assign,
-                          int k,
-                          float *accu) {
-  int i,j;
-
-  for(i=0;i<nrow;i++) for(j=0;j<ncol;j++) {
-    accu[row_assign[i]*k+col_assign[j]]+=a[i*ncol+j];
-  }
-
-}
-
-int *imat_joint_histogram(int n,int k,int *row_assign,int *col_assign) {
-  int *hist=ivec_new_0(k*k);
-  int i;
-
-  for(i=0;i<n;i++) 
-    hist[row_assign[i]*k+col_assign[i]]++;
-
-  return hist;
-}
-
-
-
-
-
-#ifdef HAVE_ARPACK
-
-typedef FINTEGER integer;
-
-extern void ssaupd_ (integer *ido,const char*bmat,integer *n, const char*which,integer *nev,
-                     float* tol, float*resid, integer *ncv, float *v, integer *ldv, 
-                     integer *iparam, integer * ipntr, float *workd, float *workl, 
-                     integer *lworkl, integer *info );
-
-typedef FINTEGER logical;
-
-extern void sseupd_ (logical *rvec, const char *howmny, logical *select, float *d    ,
-                     float *z     ,integer *ldz   , float *sigma , const char*bmat,
-                     integer *n       , const char*which,integer *nev, float* tol, 
-                     float*resid, integer *ncv, float *v, integer *ldv, 
-                     integer *iparam, integer * ipntr, float *workd, float *workl, 
-                     integer *lworkl, integer *info );
 
 
 #ifdef _OPENMP
@@ -724,10 +631,6 @@ void fmat_mul_tv(int m,int n,const float*a,int lda,
 
   float *ybuf=malloc(sizeof(float)*nt*m);
 
-/*  printf("x=[");
-  for(j=0;j<n;j++) printf("%g ",x[j]);
-  printf("]\n");  
-*/
   if(nt>n) nt=n;
 #pragma omp parallel 
   {
@@ -754,193 +657,107 @@ void fmat_mul_tv(int m,int n,const float*a,int lda,
   }
 
   free(ybuf);
-/*
-  printf("y=[");
-  for(j=0;j<m;j++) printf("%g ",y[j]);
-  printf("]\n");
-*/
 }
 
 
 
-int partial_svd(int m,int n,const float *a,
-                int nev,
-                float *sout,
-                float *uout, float *vout,
-                int nt) {
+int fmat_svd_partial_full(int n,int m,int nev,const float *a,int a_transposed,
+                          float *s,float *vout,float *uout,int nt) {
   
-  int ncv=2*nev;  /* should be enough (see remark 4 of ssaupd doc) */
-
-  float *s=NEWA(float,ncv*2);
-  int i,j;
-  const char *bmat="I",*which="LM";
-  float tol=0;
-  int info=0;
-  int ido=0;
-  int lworkl = ncv*(ncv+8);
-  float *resid=NEWA(float,n),*workd=NEWA(float,3*n),*workl=NEWA(float,lworkl);
+  arpack_eigs_t *ae=arpack_eigs_begin(n,nev);
+  int ret=0;
+  
+  int j,i;
   float *ax=NEWA(float,m);
-  float *v=NEWA(float,n*(long)ncv);
-  int *iparam=NEWA(int,11),*ipntr=NEWA(int,11);
-
-  iparam[0]=1;
-  iparam[2]=n;
-  iparam[6]=1;
-
-  double dt0=0,dt1=0;
   
-  i=0;
-  for(;;) {
+  int it;
 
-    /*     double t0=getmillisecs(); */
+  for(it=0;;it++) {
+    float *x,*y;
+    ret=arpack_eigs_step(ae,&x,&y); 
 
-    ssaupd_(&ido, bmat, &n, which, &nev, 
-            &tol, resid, &ncv, v, &n, 
-            iparam, ipntr, workd, workl, &lworkl,
-            &info);
+    printf("arpack iteration %d ret=%d\r",it,ret);
 
-    /*     double t1=getmillisecs(); */
-    
-    if(ido==-1 || ido==1) {
-      
-      
-      float *x=workd+ipntr[0]-1;
-      float *w=ax;
-      float *y=workd+ipntr[1]-1;
+    if(ret<0) break; /* error */
 
-      if(0) {
-        float zero=0,one=1;
-        int ione=1;
-        
-        sgemv_("Trans",&n,&m,&one,a,&n,x,&ione,&zero,w,&ione);
-                
-        sgemv_("No",&n,&m,&one,a,&n,w,&ione,&zero,y,&ione);
-      } else {
+    if(ret==0) break; /* stop iteration */
 
-        fmat_mul_v(m,n,a,n,x,w,nt);
+    /* ret==1 */
 
-        fmat_mul_tv(n,m,a,n,w,y,nt);
-        
-      } 
-
-    } else break;   
-
-    /*     double t2=getmillisecs(); */
-    /*     dt0+=t1-t0; */
-    /*     dt1+=t2-t1; */
-    /*     printf("ssaupd eval %d (dt0=%.3f dt1=%.3f) \r",i++,dt0,dt1); fflush(stdout); */
-
-    printf("ssaupd eval %d\r",i++); fflush(stdout);
-  }
-  
-  printf("\n ssaupd -> sseupd\n");
-
-  if(info<0) {
-    printf("partial_pca: ssaupd_ error info=%d\n",info);
-    return info;
-  } else {
-    logical *select=NEWA(logical,ncv);
-    int ierr;
-    logical rvec=1;
-    float sigma;
-    sseupd_(&rvec,"All",select,s,
-            v,&n, &sigma, bmat, &n, which, &nev, 
-            &tol, resid, &ncv, v, &n, 
-            iparam, ipntr, workd, workl, &lworkl,&ierr);
-
-    if(ierr!=0) {
-      printf("partial_pca: sseupd_ error: %d\n",ierr);
-      return ierr;     
-    }
-    int nconv=iparam[4];
-
-    if(nconv<nev) {
-      printf("partial_pca: nev=%d, nconv=%d, increase ncv=%d\n",nev,nconv,ncv);
-      return 0xdeadbeef;     
+    if(!a_transposed) {
+      fmat_mul_v(m,n,a,n,x,ax,nt);
+      fmat_mul_tv(n,m,a,n,ax,y,nt);
+    } else {
+      fmat_mul_tv(m,n,a,m,x,ax,nt);
+      fmat_mul_v(n,m,a,m,ax,y,nt);
     }
 
-    for(j=0;j<nconv;j++) {
-      s[j]=sqrt(s[j]);
-    } 
+    fflush(stdout);
+  } 
+  printf("\n");
 
-    /*
-    printf("nconv=%d s=[",nconv);
-    for(i=0;i<nev;i++)  printf("%g ",s[i]);
-    printf("]\n");
-    */
-    free(select); 
-  }
-
-  free(resid); 
-  free(workl);
-  free(workd);
   free(ax);
-  free(iparam);
-  free(ipntr);
 
-  /* order v by s */
-  
-  int *perm=NEWA(int,nev);
-  fvec_sort_index(s,nev,perm); 
-  
-  if(vout) 
-    for(i=0;i<nev;i++) 
-      memcpy(vout+n*i,v+n*perm[nev-1-i],sizeof(float)*n);
+  float *v=vout ? vout : fmat_new(nev,n);
+    
+  ret=arpack_eigs_end(ae,s,vout);
 
-  if(sout) 
-    for(i=0;i<nev;i++) 
-      sout[i]=s[perm[nev-1-i]];
+  if(ret>0) {
+    int nconv=ret;
+        
+    if(s)
+      for(j=0;j<nconv;j++) 
+        s[j]=sqrt(s[j]);    
 
-  if(uout) { /* compute u */
-    for(i=0;i<nev;i++) {
-      float *u=uout+m*i;
-      fmat_mul_v(m,n,a,n,v+n*perm[nev-1-i],u,nt);
-      fvec_normalize(u,m,2);
-    }               
+    if(uout) 
+      for(i=0;i<nconv;i++) {
+        float *u=uout+m*i;
+        if(!a_transposed)
+          fmat_mul_v(m,n,a,n,vout+n*i,u,nt);
+        else
+          fmat_mul_tv(m,n,a,m,vout+n*i,u,nt);
+        fvec_normalize(u,m,2);
+      }               
+    
   }
 
-  free(perm); 
-  free(v);
-  free(s);
-
-  return 0;
-} 
-
-
-#else
-
-int partial_svd(int m,int n,const float *a,
-                int nev,
-                float *sout,
-                float *uout, float *vout,
-                int nt) {
-  fprintf(stderr,"partial_svd: ERROR bigimbaz not compiled with arpack\n");
-  return -1;
+  if(!vout) free(v);
+  
+  return ret;
 }
 
-#endif
+int fmat_svd_partial(int d,int n,int ns,const float *a,
+                     float *singvals,float *u,float *v) {
+  return fmat_svd_partial_full(d,n,ns,a,0,singvals,u,v,count_cpu());
+}
 
-int partial_pca(int m,int n,const float *a,
-                int nev,float *vout) {
-  if(!(nev<=m && nev<=n)) {
-    fprintf(stderr,"partial_pca: asking for too too many eigenvalues (%d) wrt %d*%d data\n",nev,m,n);
-    return -1;
+
+
+float *fmat_new_pca_part(int d,int n,int nev,
+                         const float *v,float *singvals) {
+
+  if(!(nev<=d && nev<=n)) {
+    fprintf(stderr,"fmat_new_pca_part: asking for too many eigenvalues (%d) wrt %d*%d data\n",nev,n,d);
+    return NULL;
   }
 
-  if(m>=n) 
-    return partial_svd(m,n,a,nev,NULL,NULL,vout,count_cpu());
-  else {
-    fprintf(stderr,"partial_pca: warn fewer learning points (%d) than dimensions (%d): transposing\n",m,n);
-    float *at=NEWA(float,m*n);
-    
-    int i,j;
-    for(i=0;i<m;i++) for(j=0;j<n;j++) 
-      at[i+j*m]=a[i*n+j];
+  float *pcamat=fvec_new(d*d);  
+  
+  int ret;
 
-    int ret=partial_svd(n,m,a,nev,NULL,vout,NULL,count_cpu());
+  if(n>=d) {
+    ret=fmat_svd_partial_full(d,n,nev,v,0,singvals,pcamat,NULL,count_cpu());
+  } else {
+    fprintf(stderr,"fmat_new_pca_part: warn fewer learning points (%d) than dimensions (%d): transposing\n",n,d);
 
-    free(at);
-    return ret;
+    ret=fmat_svd_partial_full(n,d,nev,v,1,singvals,NULL,pcamat,count_cpu());
   }
+
+  if(ret<0) {
+    free(pcamat); 
+    pcamat=NULL;
+  }
+
+  return pcamat;
 }
 

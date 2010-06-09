@@ -17,6 +17,7 @@
 #include "sorting.h"
 #include "vector.h"
 #include "matrix.h"
+#include "eigs.h"
 #include "gmm.h"
 #include "vlad.h"
 #include "machinedeps.h"
@@ -251,6 +252,8 @@ PARALLEL_FUNCTION_PEEK(knn_full_thread)
 
 
 %include "matrix.h"
+
+%include "eigs.h"
 
 
 /*************************************************************************

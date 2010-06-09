@@ -78,5 +78,38 @@ void eigs_reorder (int d, float * eigval, float * eigvec, int criterion);
 int eigs_sym_part (int d, const float * m, int nev, float * eigval, float * eigvec);
 
 
+/*! thin wrapper around the partial eigenvalue Arpack function */
+typedef struct arpack_eigs_t arpack_eigs_t; 
+
+
+/*! begin partial eigenvalue computation -- user should provide a matrix multiplication function
+ *
+ * @param n           dimension of the square matrix
+ * @param nev         nb of eigenvectors/values to return
+ */
+arpack_eigs_t *arpack_eigs_begin(int n,int nev); 
+
+/*! one iteration
+ * @param x    *x is the array that should be multiplied (size n)
+ * @param y    *y is result of the multiplication (size n)
+ * @return >1 compute y:=A*x, 0: stop iteration, <0, eroror (call arpack_eigs_end for cleanup)
+ */
+int arpack_eigs_step(arpack_eigs_t *,
+                     float **x, float **y); 
+
+/*! result and cleanup 
+ * @param sout   eigenvalues
+ * @param vout   eigenvectors
+ * @return       nb of filled-in eigenvals and eigenvecs (may be below nev if some did not converge)
+ */
+int arpack_eigs_end(arpack_eigs_t *,
+                    float * sout, float * vout); 
+
+
+
+
+
+
+
 /*! @} */
 #endif
