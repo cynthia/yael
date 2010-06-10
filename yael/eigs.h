@@ -90,12 +90,14 @@ typedef struct arpack_eigs_t arpack_eigs_t;
 arpack_eigs_t *arpack_eigs_begin(int n,int nev); 
 
 /*! one iteration
- * @param x    *x is the array that should be multiplied (size n)
- * @param y    *y is result of the multiplication (size n)
- * @return >1 compute y:=A*x, 0: stop iteration, <0, eroror (call arpack_eigs_end for cleanup)
+ * @param x    *x_out is the array that should be multiplied (size n)
+ * @param y    *y_out is result of the multiplication (size n)
+ * @return     >0 compute y := A * x
+               0: stop iteration
+               <0, error (call arpack_eigs_end for cleanup)
  */
 int arpack_eigs_step(arpack_eigs_t *,
-                     float **x, float **y); 
+                     float **x_out, float **y_out); 
 
 /*! result and cleanup 
  * @param sout   eigenvalues

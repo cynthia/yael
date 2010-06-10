@@ -253,6 +253,22 @@ PARALLEL_FUNCTION_PEEK(knn_full_thread)
 
 %include "matrix.h"
 
+%typemap(in,numinputs=0) 
+  (float **x_out, float **y_out)
+  (float *x,float *y) {
+  $1=&x;
+  $2=&y;
+}
+
+%typemap(argout) (float **x_out, float **y_out) {
+  $result=Py_BuildValue
+        ("(NNN)",
+         $result,
+         SWIG_NewPointerObj(*$1,SWIGTYPE_p_float,0),
+         SWIG_NewPointerObj(*$2,SWIGTYPE_p_float,0));
+}
+
+
 %include "eigs.h"
 
 
@@ -335,13 +351,16 @@ PyObject *ivec_to_numpy_ref(int *src,long di) {
     fprintf(stderr,"%s: input has bad type (type id %d != %d)\n",__PRETTY_FUNCTION__, \
             PyArray_TYPE(a),expected_npy);                              \
     return NULL;                                                        \
-  }                                                                     \
+  }
+
+/*
+                                                                     \
   if(((PyArrayObject *)a)->nd!=1) {                                     \
     fprintf(stderr,"%s: input in %d D (expected 1D)\n",__PRETTY_FUNCTION__, \
             ((PyArrayObject *)a)->nd);                  \
     return NULL;                                                        \
   }
-
+*/
 float *numpy_to_fvec(PyObject *a) {
   CHECK_NUMPY_ARRAY(NPY_FLOAT)
   size_t sz=PyArray_SIZE(a)*PyArray_ITEMSIZE(a);

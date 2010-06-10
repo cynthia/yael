@@ -316,39 +316,54 @@ in the current namespace, as
 a = fvec\_new\_0(5)
 }
 
-However, we do not advice to do so, in order to avoid function name conflicts 
+However, we do not advise to do so, in order to avoid function name conflicts 
 when using other python libraries jointly with \yael. 
 
 \section{Guidelines for the wrapping process}
 
 \begin{itemize}
-\item for most of the objects, memory is not managed by Python. They must be free explicitly. The main exception is for vectors, which can be explicitly acquired by Python so that they are garbage-collected like a Python object;
-\item arrays for simple types are wrapped with IntArray, FloatArray, etc. 
+\item for most of the objects, memory is not managed by Python. They must be free'd explicitly. The main exception is for vectors, which can be explicitly acquired by Python so that they are garbage-collected like a Python object;
+\item arrays for simple types are wrapped with \tc{IntArray}, \tc{FloatArray}, etc. 
 
   Usage:
 
-      \tc{a=IntArray(4)} constructs an array of 4 ints, accessible in Python with \tc{a[2]}. 
+      \tc{a = IntArray(4)} constructs an array of 4 ints, accessible in Python with \tc{a[2]}, as one would expect. There is no bound checking: the Python object does not know about the size of the array (like in C).
 
       \tc{a.cast()} returns an int* usable as a C function argument (most of the time, the cast is automatic, and \tc{a} can be used when a function expects an \tc{int *})
       % if x is a int* in C, ***RV: c'est pas automatiquement fait, ca? ***
       
-      \tc{b=IntArray.frompointer(x)} makes the Python \tc{a[i]} valid to access C's \tc{x[i]}.
+      if a C function returns an \tc{int*}, \tc{b=IntArray.frompointer(x)} makes the Python \tc{a[i]} valid to access C's \tc{x[i]}.
 
       \tc{b.plus(2)} returns \tc{x+2} (pointer arithmetic).
 
       \tc{b=IntArray.acquirepointer(x)} will in addition make \tc{free(x)} when b is deleted. This function therefore ensures that \tc{x} will be collected 
-by the python garbage manager. There is no problem in using the same 
-variable name: \tc{x=IntArray.acquirepointer(x)}
+by the python garbage manager. Often, when a C function returns a newly allocated pointer \tc{x}, it is advisable to do: \tc{x=IntArray.acquirepointer(x)}
 
-\item Any function that may last long must be wrapped with the macro \tc{PARALLEL\_FUNCTION} in the SWIG code, or it will block other threads from executing. 
+%\item Any function that may last long must be wrapped with the macro \tc{PARALLEL\_FUNCTION} in the SWIG code, or it will block other threads from executing. 
 
-\item output arguments in the C code (marked with \tc{\_out}) are returned as Python tuples. 
+\item all wrapped functions release Python's Global Interpreter Lock, so Python API functions should not be called in C code.
+
+\item output arguments in the C code (marked with \tc{\_out}) are combined with the function results tuples. 
 \end{itemize}
 
 
 \section{NumPy interface}
 
-See the \tc{test\_numpy.py} program. 
+If Yael is configured with \tc{--enable-numpy}, arrays can be
+exchanged with Numpy arrays. This is done through a series of functions with self-explanatory names: 
+
+\begin{verbatim}
+fvec_to_numpy 
+ivec_to_numpy 
+numpy_to_fvec 
+numpy_to_ivec 
+\end{verbatim}
+
+Arrays corresponding to Yael's \tc{FloatArray} are of Numpy's \tc{dtype='float32'}.  
+
+These functions copy their arguments. To share the same data buffer between Yael and Numpy, suffix the function with \tc{\_ref}. 
+
+See the \tc{test\_numpy.py} program for an example usage. 
 
 \chapter{Matlab}
 
