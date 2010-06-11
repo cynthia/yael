@@ -270,7 +270,7 @@ arpack_eigs_t *arpack_eigs_begin(int n,int nev) {
   int *iparam=ae->iparam=NEWA(int,11);
   ae->ipntr=NEWA(int,11);
 
-
+  ae->info=0; /* use random initial vector */
   ae->ido=0;
 
   iparam[0]=1;
@@ -333,7 +333,7 @@ int arpack_eigs_end(arpack_eigs_t *ae,
     const char *bmat="I",*which="LM";
     float tol=0;
   
-    sseupd_(&rvec,"All",select,s,
+    sseupd_(&rvec,"All",select, s,
             ae->v,&n, &sigma, bmat, &n, which, &nev, 
             &tol, ae->resid, &ncv, ae->v, &n, 
             ae->iparam, ae->ipntr, ae->workd, ae->workl, &ae->lworkl,
@@ -354,11 +354,13 @@ int arpack_eigs_end(arpack_eigs_t *ae,
   
   if(vout) 
     for(i=0;i<nconv;i++) 
-      memcpy(vout+n*i, ae->v+n*(nconv-1-perm[i]), sizeof(float)*n);
+      memcpy(vout+n*(long)i, ae->v+n*(long)(nconv-1-perm[i]), sizeof(float)*n);
 
   if(sout) 
     for(i=0;i<nconv;i++) 
       sout[i]=s[nconv-1-perm[i]];
+
+  
 
  error: 
   free(select); 
@@ -386,13 +388,13 @@ arpack_eigs_t *arpack_eigs_begin(int n,int nev) {
   abort();
 } 
 
-int arpack_eigs_step(arpack_eigs_t *,
+int arpack_eigs_step(arpack_eigs_t *ae,
                      float **x, float **y) {
   fprintf(stderr,"Error: Yael not compiled with Arpack!");
   abort();
 }
 
-int arpack_eigs_end(arpack_eigs_t *,
+int arpack_eigs_end(arpack_eigs_t *ae,
                     float * sout, float * vout) {
   fprintf(stderr,"Error: Yael not compiled with Arpack!");
   abort();
