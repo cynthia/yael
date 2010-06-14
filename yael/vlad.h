@@ -43,18 +43,11 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <stdlib.h>
 
 
-/* flags==0: simple sum of descriptors 
- * flags==15: sum + second moments
- */
 
-size_t vlad_sizeof (int k, int d, int flags);
-      
-
-
-/* compute descriptor. Writes the descriptor corresponding to v (size n*d) in desc (size vlad_sizeof(...)) */
+/* compute descriptor. Writes the descriptor corresponding to v (size n*d) in desc */
 void vlad_compute (int k, int d, const float *centroids, 
                    int n, const float *v,
-                   int flags, float *desc);
+                   float *desc);
 
 
 

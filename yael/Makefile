@@ -72,13 +72,13 @@ eigs.o: eigs.c eigs.h vector.h sorting.h machinedeps.h
 gmm.o: gmm.c vector.h matrix.h kmeans.h nn.h gmm.h sorting.h
 kmeans.o: kmeans.c vector.h kmeans.h nn.h
 machinedeps.o: machinedeps.c machinedeps.h
-matrix.o: matrix.c vector.h matrix.h sorting.h machinedeps.h eigs.h
+matrix.o: matrix.c matrix.h vector.h sorting.h machinedeps.h eigs.h
 nn.o: nn.c machinedeps.h vector.h nn.h binheap.h sorting.h
 sorting.o: sorting.c sorting.h machinedeps.h binheap.h vector.h
-spectral_clustering.o: spectral_clustering.c nn.h eigs.h vector.h \
+spectral_clustering.o: spectral_clustering.c spectral_clustering.h nn.h eigs.h vector.h \
   matrix.h kmeans.h spectral_clustering.h
 vector.o: vector.c vector.h
-vlad.o: vlad.c nn.h vector.h sorting.h
+vlad.o: vlad.c vlad.h nn.h vector.h sorting.h
 
 
 clean:
