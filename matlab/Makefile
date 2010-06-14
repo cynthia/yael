@@ -6,9 +6,7 @@ CC=gcc
 
 include ../makefile.inc
 
-
 # Here you can chose between Matlab and Octave
-
 TARGET=matlab
 #TARGET=octave
 
@@ -22,7 +20,7 @@ ifeq "$(TARGET)" "matlab"
     ifeq "$(YAELCONF)" "linux64"
         CFLAGS=-O3 -DFINTEGER=long -fPIC -m64 -I..
     else 
-        CFLAGS=-O3 -DFINTEGER=int -fPIC -m64 -I..
+        CFLAGS=-O3 -DFINTEGER=long -fPIC -m64 -I.. # should be int in 32-bit mode
     endif
 
     YAELAR=yael4matlab.a
@@ -33,13 +31,9 @@ ifeq "$(TARGET)" "matlab"
 else
 
     # modify this script to compile code to a octave-compilant mex file
-
     MEX=./octave_mex.sh
-
     YAELAR=yael4octave.a
-
     LDFLAGS=$(YAELAR)
-
 endif
 
 

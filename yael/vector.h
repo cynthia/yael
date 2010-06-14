@@ -40,6 +40,12 @@ knowledge of the CeCILL license and that you accept its terms.
 
 #include <stdio.h>
 
+/*-------------- Basic math operations ----------------*/
+
+
+/*! generate a random sample, mean 0 variance 1 */
+double gaussrand ();
+
 
 /*---------------------------------------------------------------------------*/
 /*! @addtogroup vector
@@ -101,6 +107,9 @@ int *ivec_new_set (long n, int val);
 
 /*!  create a vector initialized with uniformly drawn samples in [0,1) */
 float *fvec_new_rand (long n);
+
+/*!  create a vector initialized with gaussian samples */
+float *fvec_new_randn (long n);
 
 /*!  new vector [a,a+1,...b-1] */
 int * ivec_new_range (long a, long b);
@@ -244,6 +253,12 @@ void fvec_0 (float * v, long n);
 void ivec_0 (int * v, long n);
 
 void fvec_nan (float * v, long n);
+
+/*! Set all the components of the vector to random values in [0,1[ */
+void fvec_rand (float * v, long n);
+
+/*! Set all the components of the vector to gaussian values */
+void fvec_randn (float * v, long n);
 
 
 /*!  are all values 0? */

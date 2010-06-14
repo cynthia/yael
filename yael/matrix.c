@@ -92,31 +92,6 @@ extern void sgemv_(const char *trans, integer *m, integer *n, real *alpha,
 #undef integer
 
 
-/*---------------------------------------------------------------------------*/
-/* Standard operations                                                       */
-/*---------------------------------------------------------------------------*/
-
-/* Generate Gaussian random value, mean 0, variance 1  
-   From Python source code. */
-
-#define NV_MAGICCONST  1.71552776992141
-
-static double gaussrand ()
-{
-  double z;
-  while (1) {
-    float u1, u2, zz;
-    u1 = drand48 ();
-    u2 = drand48 ();
-    z = NV_MAGICCONST * (u1 - .5) / u2;
-    zz = z * z / 4.0;
-    if (zz < -log (u2))
-      break;
-  }
-  return z;
-}
-
-
 
 /*---------------------------------------------------------------------------*/
 /* Standard operations                                                       */

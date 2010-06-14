@@ -53,6 +53,32 @@ static void *memalign(size_t ignored,size_t nbytes) {
 #endif
 
 
+/*-------------------------------------------------------------*/
+/* Standard operations                                                       */
+/*-------------------------------------------------------------*/
+
+/* Generate Gaussian random value, mean 0, variance 1 */
+
+#define NV_MAGICCONST  1.71552776992141
+
+double gaussrand ()
+{
+  double z;
+  while (1) {
+    float u1, u2, zz;
+    u1 = drand48 ();
+    u2 = drand48 ();
+    z = NV_MAGICCONST * (u1 - .5) / u2;
+    zz = z * z / 4.0;
+    if (zz < -log (u2))
+      break;
+  }
+  return z;
+}
+
+
+/*-------------------------------------------------------------*/
+
 
 float *fvec_new (long n)
 {
@@ -91,14 +117,41 @@ float *fvec_new_nan (long n)
   return ret;
 }
 
-float *fvec_new_rand (long n) {
-  float *f=fvec_new (n);
+
+void fvec_rand (float * v, long n)
+{
   long i;
-  for(i=0;i<n;i++) f[i]=drand48();
+  for (i = 0 ; i < n ; i++)
+    v[i] = drand48();
+}
+
+
+void fvec_randn (float * v, long n)
+{
+  long i;
+  for (i = 0 ; i < n ; i++)
+    v[i] = gaussrand();
+}
+
+
+float *fvec_new_rand (long n) 
+{
+  float * f = fvec_new (n);
+  long i;
+  for (i = 0 ; i < n ; i++) 
+    f[i] = drand48();
   return f;
 }
 
 
+float * fvec_new_randn (long n)
+{
+  float * f = fvec_new (n);
+  long i;
+  for (i = 0 ; i < n ; i++)
+    f[i] = gaussrand();
+  return f;
+}
 
 int *ivec_new_0 (long n)
 {
@@ -188,7 +241,7 @@ int * ivec_new_random_idx (int n, int k)
     idx[i] = i;
 
   for (i = 0; i < k ; i++) {
-    int j = i + random () % (n - i);
+    int j = i + lrand48 () % (n - i);
     /* swap i and j */
     int p = idx[i];
     idx[i] = idx[j];

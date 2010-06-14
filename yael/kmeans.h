@@ -70,7 +70,7 @@ knowledge of the CeCILL license and that you accept its terms.
  * @return final quantization error 
  */
 float kmeans (int d, int n, int k, int niter, 
-	      const float * v, int flags, int seed, int redo, 
+	      const float * v, int flags, long seed, int redo, 
 	      float * centroids, float * dis, 
 	      int * assign, int * nassign);
 

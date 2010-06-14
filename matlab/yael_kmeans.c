@@ -18,11 +18,12 @@ void mexFunction (int nlhs, mxArray *plhs[],
 {
   if (nrhs < 2 || nrhs % 2 != 0) 
     mexErrMsgTxt("even nb of input arguments required.");
-  else if (nlhs != 3) 
-    mexErrMsgTxt("3 output arguments required.");
+  else if (nlhs > 4 || nlhs < 1) 
+    mexErrMsgTxt("1 to 3 output arguments are expected.");
 
   int d = mxGetM (prhs[0]);
   int n = mxGetN (prhs[0]);
+  long seed = 0L;
   
   if(mxGetClassID(prhs[0])!=mxSINGLE_CLASS)
     mexErrMsgTxt("need single precision array.");
@@ -30,7 +31,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   float *v = (float*) mxGetPr (prhs[0]);
   int k = (int) mxGetScalar (prhs[1]);
 
-  int niter = 50, redo = 1, nt = 1;
+  int niter = 50, redo = 1, nt = 1, verbose = 1;
 
   {
     int i;
@@ -45,11 +46,20 @@ void mexFunction (int nlhs, mxArray *plhs[],
       if (!strcmp(varname, "niter")) 
         niter = (int) mxGetScalar (prhs[i+1]);
 
-      else if (!strcmp(varname, "nt")) 
-        nt = (int) mxGetScalar (prhs[i+1]);
+      else if (!strcmp(varname, "nt"))  
+	/* !!! Normally, use nt=1 for multi-threading in Matlab: 
+	   Blas is already multi-threaded. 
+	   Explicit call with nt>1 causes memory leaks */
+	nt = (int) mxGetScalar (prhs[i+1]); 
       
       else if (!strcmp(varname,"redo")) 
         redo = (int) mxGetScalar (prhs[i+1]);
+
+      else if (!strcmp(varname,"seed")) 
+        seed = (int) mxGetScalar (prhs[i+1]);
+
+      else if (!strcmp(varname,"verbose")) 
+        verbose = (int) mxGetScalar (prhs[i+1]);
 
       else 
         mexErrMsgTxt("unknown variable name");  
@@ -58,10 +68,12 @@ void mexFunction (int nlhs, mxArray *plhs[],
   
   /* default: use all the processor cores */
   if (nt == 0)
-    nt = count_cpu();
+    nt = 1;
 
-  printf("input array of %d*%d k=%d niter=%d nt=%d ar=[%g %g ... ; %g %g... ]\n",
-         n, d, k, niter, nt, v[0], v[d], v[1], v[d+1]); 
+  if (verbose > 0)
+    printf("Input: %d vectors of dimension %d\nk=%d niter=%d nt=%d "
+	   "redo=%d verbose=%d seed=%d v1=[%g %g ...], v2=[%g %g... ]\n",
+	   n, d, k, niter, nt, redo, verbose, seed, v[0], v[1], v[d], v[d+1]); 
 
   if(n < k) {
     mexErrMsgTxt("fewer points than centroids");    
@@ -71,16 +83,35 @@ void mexFunction (int nlhs, mxArray *plhs[],
   /* ouptut: centroids, assignment, distances */
 
   plhs[0] = mxCreateNumericMatrix (d, k, mxSINGLE_CLASS, mxREAL);
-  
   float *centroids=(float*)mxGetPr(plhs[0]);
 
-  plhs[1] = mxCreateNumericMatrix (n, 1, mxSINGLE_CLASS, mxREAL);
-  
-  float *dis = (float*) mxGetPr (plhs[1]);
+  float * dis = NULL;
+  int * assign = NULL;
+  int * nassign = NULL;
 
-  plhs[2] = mxCreateNumericMatrix (n, 1, mxINT32_CLASS, mxREAL);
-  
-  int *assign = (int*) mxGetPr (plhs[2]);
-  
-  kmeans (d, n, k, niter, v, nt, 0, redo, centroids, dis, assign, NULL);
+  if (nlhs == 2) {
+    plhs[1] = mxCreateNumericMatrix (n, 1, mxINT32_CLASS, mxREAL);
+    assign = (int*) mxGetPr (plhs[1]);
+  }
+  else if (nlhs >= 3) {
+    plhs[1] = mxCreateNumericMatrix (n, 1, mxSINGLE_CLASS, mxREAL);
+    dis = (float*) mxGetPr (plhs[1]);
+    plhs[2] = mxCreateNumericMatrix (n, 1, mxINT32_CLASS, mxREAL);
+    assign = (int*) mxGetPr (plhs[2]);
+  }
+
+  if (nlhs >=4)  {
+    plhs[3] = mxCreateNumericMatrix (k, 1, mxINT32_CLASS, mxREAL);
+    nassign = (int*) mxGetPr (plhs[3]);
+  }
+
+  kmeans (d, n, k, niter, v, (verbose>0?nt:KMEANS_QUIET+nt), seed, 
+	  redo, centroids, dis, assign, nassign);
+
+  /* post-processing: Matlab starts from 1 */
+  if (assign) {
+    int i;
+    for (i = 0 ; i < n ; i++)
+      assign[i]++;
+  }
 }
