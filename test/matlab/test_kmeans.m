@@ -1,4 +1,4 @@
-addpath ('../matlab')
+addpath ('../../matlab')
 
 k = 1000;                   % number of cluster to create
 d = 128;                   % dimensionality of the vectors

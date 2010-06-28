@@ -20,13 +20,13 @@ ifeq "$(TARGET)" "matlab"
     ifeq "$(YAELCONF)" "linux64"
         CFLAGS=-O3 -DFINTEGER=long -fPIC -m64 -I..
     else 
-        CFLAGS=-O3 -DFINTEGER=long -fPIC -m64 -I.. # should be int in 32-bit mode
+        CFLAGS=-O3 -DFINTEGER=int -fPIC -m64 -I.. # should be int in 32-bit mode
     endif
 
     YAELAR=yael4matlab.a
     MEX=mex
 
-    LDFLAGS=$(YAELAR) -lmwblas
+    LDFLAGS=$(YAELAR) -lmwblas -lmwlapack -lmwarpack
 
 else
 
@@ -37,14 +37,17 @@ else
 endif
 
 
-all: $(YAELAR) yael_kmeans yael_nn yael_kmin yael_kmax yael_fvecs_normalize yael_L2sqr
+all: $(YAELAR) yael_kmeans yael_gmm yael_nn yael_kmin yael_kmax yael_fvecs_normalize yael_L2sqr
 
-LIBOBJ=vector.o nn.o kmeans.o sorting.o binheap.o machinedeps.o vlad.o
+LIBOBJ=vector.o matrix.o eigs.o nn.o kmeans.o gmm.o sorting.o binheap.o machinedeps.o vlad.o
 
 yael4matlab.a: 
 	gcc -c $(CFLAGS) ../yael/binheap.c
+	gcc -c $(CFLAGS) ../yael/eigs.c
+	gcc -c $(CFLAGS) ../yael/gmm.c
 	gcc -c $(CFLAGS) ../yael/kmeans.c
 	gcc -c $(CFLAGS) ../yael/machinedeps.c
+	gcc -c $(CFLAGS) ../yael/matrix.c
 	gcc -c $(CFLAGS) ../yael/nn.c
 	gcc -c $(CFLAGS) ../yael/sorting.c
 	gcc -c $(CFLAGS) ../yael/vector.c
@@ -59,6 +62,9 @@ yael4octave.a:
 
 yael_kmeans: yael_kmeans.c $(YAELAR)
 	$(MEX) yael_kmeans.c -I.. $(LDFLAGS)
+
+yael_gmm: yael_gmm.c $(YAELAR)
+	$(MEX) yael_gmm.c -I.. $(LDFLAGS)
 
 yael_nn: yael_nn.c $(YAELAR)
 	$(MEX) yael_nn.c -I.. $(LDFLAGS)

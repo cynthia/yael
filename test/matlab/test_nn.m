@@ -2,7 +2,7 @@
 % If the mex-compiled version exists, it is automatically called. 
 % Otherwise, the pure matlab implementation is used instead. 
 
-addpath ('../matlab')
+addpath ('../../matlab')
 
 n = 1000000;              % number of database vectors
 nq = 1000;                % number of queries
