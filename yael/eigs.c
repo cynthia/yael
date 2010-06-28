@@ -63,9 +63,10 @@ extern void sgemv_(const char *trans, FINTEGER *m, FINTEGER *n, real *alpha,
 
 
 
-int eigs_sym (int d, const float * m, float * eigval, float * eigvec)
+int eigs_sym (int di, const float * m, float * eigval, float * eigvec)
 {
   int i, j;
+  FINTEGER d=di;
   double * md = (double *) memalign (16, sizeof (*md) * d * d);
 
   /* processing is performed in double precision */
@@ -76,7 +77,7 @@ int eigs_sym (int d, const float * m, float * eigval, float * eigvec)
 
   /* variable for lapack function */
   double workopt = 0;
-  int lwork = -1, info;
+  FINTEGER lwork = -1, info;
 
   double * lambda = (double *) memalign (16, sizeof (*lambda) * d);
   dsyev_( "V", "L", &d, md, &d, lambda, &workopt, &lwork, &info );
@@ -106,9 +107,10 @@ int eigs_sym (int d, const float * m, float * eigval, float * eigvec)
 }
 
 
-int geigs_sym (int d, const float * a, const float * b, float * eigval, float * eigvec)
+int geigs_sym (int di, const float * a, const float * b, float * eigval, float * eigvec)
 {
   int i, j;
+  FINTEGER d=di;
   double * ad = (double *) memalign (16, sizeof (*ad) * d * d);
   double * bd = (double *) memalign (16, sizeof (*bd) * d * d);
 
@@ -121,7 +123,7 @@ int geigs_sym (int d, const float * a, const float * b, float * eigval, float * 
   
   /* variable for lapack function */
   double workopt = 0;
-  int lwork = -1, info, itype = 1;
+  FINTEGER lwork = -1, info, itype = 1;
 
   double * lambda = (double *) memalign (16, sizeof (*lambda) * d);
   dsygv_ (&itype, "V", "L", &d, ad, &d, bd, &d, lambda, &workopt, &lwork, &info );
@@ -189,7 +191,8 @@ void eigs_reorder (int d, float * eigval, float * eigvec, int criterion)
 
 
 
-int eigs_sym_part (int n, const float * a, int nev, float * sout, float * vout) {
+int eigs_sym_part (int ni, const float * a, int nev, float * sout, float * vout) {
+  FINTEGER n=ni;
   arpack_eigs_t *ae=arpack_eigs_begin(n,nev);
   int ret=0;
   
@@ -205,7 +208,7 @@ int eigs_sym_part (int n, const float * a, int nev, float * sout, float * vout) 
     /* ret==1 */
 
     float zero=0,one=1;
-    int ione=1;
+    FINTEGER ione=1;
     
     sgemv_("Trans",&n,&n,&one,a,&n,x,&ione,&zero,y,&ione);    
   } 

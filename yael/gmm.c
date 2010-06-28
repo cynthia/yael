@@ -105,10 +105,11 @@ int sgemv_(char *trans, integer *m, integer *n, real *alpha,
 #undef integer
 
 /* compute sum and diagonal of covariance matrix of a set of points (v) weighted by probabilities (p) */
-static void compute_sum_dcov(int n,int k,int d,
+static void compute_sum_dcov(int ni,int ki,int di,
                              const float *v,const float *mu_old,const float *p,
                              float *mu,float *sigma,float *w) {
   long i,j,l;
+  FINTEGER n=ni,k=ki,d=di;
 
   for (j = 0 ; j < k ; j++) {
     double dtmp = 0;
@@ -275,7 +276,7 @@ static void compute_mahalanobis_sqr(int n,long k,long d,
                                     const float *mu,const float *sigma,
                                     const float *v,
                                     float *p) {
-  FINTEGER di=d,ki=k; /* for blas functions */
+  FINTEGER di=d,ki=k,ni=n; /* for blas functions */
   long i, j, l;
     
   float *mu2_sums=fvec_new(k);
@@ -303,7 +304,7 @@ static void compute_mahalanobis_sqr(int n,long k,long d,
   
   float one=1;
   
-  sgemm_("Transposed","Not transposed",&ki,&n,&di,&one,inv_sigma,&di,v2,&di,&one,p,&ki);
+  sgemm_("Transposed","Not transposed",&ki,&ni,&di,&one,inv_sigma,&di,v2,&di,&one,p,&ki);
   
   free(v2);
   
@@ -313,7 +314,7 @@ static void compute_mahalanobis_sqr(int n,long k,long d,
   
   float minus_two=-2;
   
-  sgemm_("Transposed","Not transposed",&ki,&n,&di,&minus_two,mu_sigma,&di,v,&di,&one,p,&ki);  
+  sgemm_("Transposed","Not transposed",&ki,&ni,&di,&minus_two,mu_sigma,&di,v,&di,&one,p,&ki);  
   
   free(mu_sigma);      
 

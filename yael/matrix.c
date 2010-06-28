@@ -260,8 +260,9 @@ float *fmat_new_rand_gauss (int nrow, int ncol)
 
 /* method: we compute the QR decomposition of a matrix with Gaussian
    values */
-float *random_orthogonal_basis (int d)
-{
+float *random_orthogonal_basis (int di)
+{ 
+  FINTEGER d=di;
   int i;
 
 
@@ -274,8 +275,7 @@ float *random_orthogonal_basis (int d)
 
     /* query work size */
     float lwork_query;
-    int lwork = -1;
-    int info;
+    FINTEGER lwork = -1, info;
     sgeqrf_ (&d, &d, x, &d, tau, &lwork_query, &lwork, &info);
     assert (info == 0);
 
@@ -480,7 +480,7 @@ float *fmat_new_covariance (int d, int n, const float *v, float *avg, int assume
     free(vt);
   } else {
     float alpha = 1.0 / n, beta = -1.0 / (n * n);
-    ssyrk_("L","N", &di, &ni, &alpha,v,&di,&beta,cov,&di);
+    ssyrk_("L","N", &di, &ni, &alpha,(float*)v,&di,&beta,cov,&di);
 
     /* copy lower triangle to upper */
 
@@ -573,10 +573,11 @@ float *fmat_new_pca(int d,int n,const float *v, float *singvals) {
 /* multithreaded matrix-vector multiply */
 
 /* m=nb rows, n=nb cols */
-void fmat_mul_v(int m,int n,const float*a,int lda,
+void fmat_mul_v(int mi,int ni,const float*a,int ldai,
                  const float *x,
                  float *y,int nt) {
   int i;
+  FINTEGER lda=ldai,n=ni,m=mi;
   SET_NT;
   
 #pragma omp parallel 
@@ -585,9 +586,9 @@ void fmat_mul_v(int m,int n,const float*a,int lda,
     for(i=0;i<nt;i++) {
       int i0=i*(long)m/nt;
       int i1=(i+1)*(long)m/nt;
-      int m1=i1-i0;
+      FINTEGER m1=i1-i0;
       float one=1.0,zero=0.0;
-      int ione=1;
+      FINTEGER ione=1;
       // printf("%d %d\n",i,m1);
       sgemv_("Trans",&n,&m1,&one,
              a+lda*(long)i0,&lda,x,&ione,&zero,y+i0,&ione);
@@ -597,10 +598,11 @@ void fmat_mul_v(int m,int n,const float*a,int lda,
 
 }
 
-void fmat_mul_tv(int m,int n,const float*a,int lda,
+void fmat_mul_tv(int mi,int ni,const float*a,int ldai,
                  const float *x,
                  float *y,int nt) {
   int i,j;
+  FINTEGER lda=ldai,n=ni,m=mi;
   
   SET_NT;
 
@@ -613,9 +615,9 @@ void fmat_mul_tv(int m,int n,const float*a,int lda,
     for(i=0;i<nt;i++) {
       int i0=i*(long)n/nt;
       int i1=(i+1)*(long)n/nt;
-      int n1=i1-i0;
+      FINTEGER n1=i1-i0;
       float one=1.0,zero=0.0;
-      int ione=1;
+      FINTEGER ione=1;
       sgemv_("Not transposed",&m,&n1,&one,
              a+lda*(long)i0,&lda,x+i0,&ione,&zero,ybuf+i*(long)m,&ione);
       
