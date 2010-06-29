@@ -86,12 +86,12 @@ void mexFunction (int nlhs, mxArray *plhs[],
 
 
   plhs[0] = mxCreateNumericMatrix (1, k, mxSINGLE_CLASS, mxREAL);
-  plhs[1] = mxCreateNumericMatrix (d, k, mxSINGLE_CLASS, mxREAL);
-  plhs[2] = mxCreateNumericMatrix (k, d, mxSINGLE_CLASS, mxREAL);
+  plhs[1] = mxCreateNumericMatrix (k, d, mxSINGLE_CLASS, mxREAL);
+  plhs[2] = mxCreateNumericMatrix (d, k, mxSINGLE_CLASS, mxREAL);
 
   fvec_cpy (plhs[0], g->w, k);      /* w     */
-  fvec_cpy (plhs[1], g->w, d * k);  /* mu    */
-  fvec_cpy (plhs[2], g->w, d * k);  /* sigma */
+  fvec_cpy (plhs[1], g->mu, d * k);  /* mu    */
+  fvec_cpy (plhs[2], g->sigma, d * k);  /* sigma */
   
-  gmm_delete (g);
+  gmm_delete (g); 
 }
