@@ -20,8 +20,13 @@ ifeq "$(TARGET)" "matlab"
     ifeq "$(YAELCONF)" "linux64"
         CFLAGS=-O3 -DFINTEGER=long -fPIC -m64 -I..
     else 
+    ifeq "$(YAELCONF)" "mac64"
+        CFLAGS=-O3 -DFINTEGER=long -fPIC -m64 -I..
+    else 
         CFLAGS=-O3 -DFINTEGER=int -fPIC -m64 -I.. # should be int in 32-bit mode
     endif
+    endif
+
 
     YAELAR=yael4matlab.a
     MEX=mex

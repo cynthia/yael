@@ -70,11 +70,12 @@ usage: $0
   [--python-cflags=flags_to_compile_with_python_c_api]
   [--enable-numpy]
   [--numpy-cflags=includes-for-numpy]
+  [--mac64]
 
 Examples that work: 
 
 Compile for 64-bit mac, with optimization
-CFLAGS=-m64 LDFLAGS=-m64 ./configure.sh --python-cflags=-I$HOME/local64/include/python2.6
+./configure.sh --python-cflags=-I$HOME/local64/include/python2.6
 
 
 EOF
@@ -118,6 +119,12 @@ while [ $# -gt 0 ] ; do
 	--arpack=*) arpackldflags=${a#*=} ;;
 	--fortran-64bit-int) 
             lapackcflags="$lapackcflags -DFINTEGER=long" ;;       
+
+	--mac64)    
+	    conf=mac64
+	    cflags="$cflags -m64"
+	    ldflags="$ldflags -m64"
+	    ;;
 
         --python-cflags=*)     
             pythoncflags=${a#*=}
