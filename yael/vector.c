@@ -271,6 +271,21 @@ int *ivec_new_histogram (int k, int *v, long n)
   return h;
 }
 
+
+int * ivec_new_histogram_clip (int k, int * v, long n) {
+  long i;
+  int *h = ivec_new_0 (k);
+
+  for (i = 0; i < n; i++) {
+    int val=v[i];
+    if(val>=k) val=k-1;
+    if(val<0) val=0;
+    h[val]++;
+  }
+
+  return h;
+}
+
 void fvec_splat_add(const float *a,int n,
                     const int *assign,float *accu) {
   int i;

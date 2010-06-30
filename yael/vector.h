@@ -134,6 +134,9 @@ int *ivec_new_random_idx  (int n, int k);
 */
 int * ivec_new_histogram (int k, int * v, long n);
 
+/*!  same as ivec_new_histogram, but values falling out of range are clipped */
+int * ivec_new_histogram_clip (int k, int * v, long n);
+
 /*!  compute a hash value for the vector */
 int ivec_hash (const int * v, long n);
 
