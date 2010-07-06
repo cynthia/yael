@@ -67,7 +67,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
     }
   }
   
-  /* default: use all the processor cores */
+  /* default: use 1 processor core */
   if (nt == 0)
     nt = 1;
 
@@ -81,17 +81,18 @@ void mexFunction (int nlhs, mxArray *plhs[],
   }
 
 
-  /* ouptut: GMM, i.e., weights, mu and variances */
-  gmm_t * g = gmm_learn (d, n, k, niter, v, nt, seed, redo, flags);
 
+
+  /* ouptut: GMM, i.e., weights, mu and variances */
+  gmm_t * g = gmm_learn (d, n, k, niter, v, nt, seed, redo, flags); 
 
   plhs[0] = mxCreateNumericMatrix (1, k, mxSINGLE_CLASS, mxREAL);
   plhs[1] = mxCreateNumericMatrix (k, d, mxSINGLE_CLASS, mxREAL);
   plhs[2] = mxCreateNumericMatrix (d, k, mxSINGLE_CLASS, mxREAL);
 
-  fvec_cpy (plhs[0], g->w, k);      /* w     */
-  fvec_cpy (plhs[1], g->mu, d * k);  /* mu    */
-  fvec_cpy (plhs[2], g->sigma, d * k);  /* sigma */
+  fvec_cpy ((float*) mxGetPr(plhs[0]), g->w, k);      /* w     */
+  fvec_cpy ((float*) mxGetPr(plhs[1]), g->mu, d * k);  /* mu    */
+  fvec_cpy ((float*) mxGetPr(plhs[2]), g->sigma, d * k);  /* sigma */
   
   gmm_delete (g); 
 }

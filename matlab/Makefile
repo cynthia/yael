@@ -18,12 +18,12 @@ ifeq "$(TARGET)" "matlab"
     # Fortran integers are 64 bit, so Yael has to be recompiled
 
     ifeq "$(YAELCONF)" "linux64"
-        CFLAGS=-O3 -DFINTEGER=long -fPIC -m64 -I..
+        CFLAGS=-O3 -DFINTEGER=long -fPIC -m64 -g -I..
     else 
     ifeq "$(YAELCONF)" "mac64"
-        CFLAGS=-O3 -DFINTEGER=long -fPIC -m64 -I..
+        CFLAGS=-O3 -DFINTEGER=long -fPIC -m64 -g -I..
     else 
-        CFLAGS=-O3 -DFINTEGER=int -fPIC -m64 -I.. # should be int in 32-bit mode
+        CFLAGS=-O3 -DFINTEGER=int -fPIC -m64 -g -I.. # should be int in 32-bit mode
     endif
     endif
 
@@ -31,7 +31,7 @@ ifeq "$(TARGET)" "matlab"
     YAELAR=yael4matlab.a
     MEX=mex
 
-    LDFLAGS=$(YAELAR) -lmwblas -lmwlapack -lmwarpack
+    LDFLAGS=-g $(YAELAR) -lmwblas -lmwlapack -lmwarpack
 
 else
 

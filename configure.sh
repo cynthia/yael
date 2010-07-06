@@ -68,6 +68,7 @@ usage: $0
   [--enable-arpack]
   [--arpack=ld_flags_for_arpack]
   [--python-cflags=flags_to_compile_with_python_c_api]
+  [--enable-openmp]
   [--enable-numpy]
   [--numpy-cflags=includes-for-numpy]
   [--mac64]

@@ -1,3 +1,4 @@
+
 /*
 Copyright © INRIA 2010. 
 Authors: Matthijs Douze & Herve Jegou 
@@ -84,6 +85,7 @@ void gmm_delete (gmm_t * g)
   free(g->sigma);
   free(g);
 }
+
 
 
 
@@ -473,8 +475,6 @@ gmm_t * gmm_learn (int di, int ni, int ki, int niter,
 
   niter = (niter == 0 ? 10000 : niter);
 
-  int * assign = ivec_new (n);
-
   /* the GMM parameters */
   float * p = fvec_new_0 (n * k);      /* p(ci|x) for all i */
   gmm_t * g = gmm_new (d, k);
@@ -482,7 +482,7 @@ gmm_t * gmm_learn (int di, int ni, int ki, int niter,
   /* initialize the GMM: k-means + variance estimation */
   int * nassign = ivec_new (n);  /* not useful -> to be removed when debugged */
   float * dis = fvec_new (n);
-  kmeans (d, n, k, niter, v, nt, seed, nredo, g->mu, dis, assign, nassign); 
+  kmeans (d, n, k, niter, v, nt, seed, nredo, g->mu, dis, NULL, nassign); 
   
   fflush (stderr);
   fprintf (stderr, "assign = ");
@@ -526,6 +526,7 @@ gmm_t * gmm_learn (int di, int ni, int ki, int niter,
       break;
   }
   fprintf (stderr, "\n");
+
   free(p);
   
   return g;
