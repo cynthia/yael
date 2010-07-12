@@ -532,7 +532,7 @@ gmm_t * gmm_learn (int di, int ni, int ki, int niter,
   return g;
 }
 
-size_t gmm_dp_dlambda_sizeof(const gmm_t * g,int flags) {
+size_t gmm_fisher_sizeof(const gmm_t * g,int flags) {
   int sz=0;
   if(flags & GMM_FLAGS_W) sz+=g->k-1;
   if(flags & GMM_FLAGS_MU) sz+=g->d*g->k;
@@ -542,7 +542,7 @@ size_t gmm_dp_dlambda_sizeof(const gmm_t * g,int flags) {
 }
 
 
-void gmm_compute_dp_dlambda(int n, const float *v, const gmm_t * g, int flags, float *dp_dlambda) {
+void gmm_fisher(int n, const float *v, const gmm_t * g, int flags, float *dp_dlambda) {
   long d=g->d, k=g->k;
   float *p=fvec_new(n*k);
   long i,j,l;
@@ -644,7 +644,7 @@ void gmm_compute_dp_dlambda(int n, const float *v, const gmm_t * g, int flags, f
 
   }
   
-  assert(ii==gmm_dp_dlambda_sizeof(g,flags));
+  assert(ii==gmm_fisher_sizeof(g,flags));
 #undef P
 #undef V
 #undef MU

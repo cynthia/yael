@@ -89,7 +89,7 @@ typedef struct gmm_s {
  * @param nt     nb of threads 
  * @param seed   usedd by kmeans to initialize random number generator
  * @param nredo  number of "redo"  (launch several kmeans)
- * @param flags  see GMM_* flags 
+ * @param flags  see GMM_* flags. Typically, use GMM_FLAGS_W (to estimate weights).
  */
 gmm_t * gmm_learn (int d, int n, int k, int niter,
                    const float * v, int nt, int seed, int nredo,
@@ -124,14 +124,15 @@ void gmm_compute_p (int n, const float * v,
  *   lambda = (w, mu, sqrt(sigma))
  *
  * @param v(d,n)           vectors where to compute descriptor 
- * @param flags            combination of GMM_FLAGS_*. 
- * @param dp_dlambda(dd,n) ouput descriptor. The output descriptor size dd is given by gmm_dp_dlambda_sizeof(flags)
+ * @param flags combination of GMM_FLAGS_*. Typically, use
+ *                         yael.GMM_FLAGS_MU (only interested in the derivative wrt mu)
+ * @param dp_dlambda(dd,n) output descriptor. The output descriptor size dd is given by gmm_fisher_sizeof(flags)
  *
  */
-void gmm_compute_dp_dlambda (int n, const float *v, const gmm_t * g, 
-			    int flags, float *dp_dlambda);
+void gmm_fisher (int n, const float *v, const gmm_t * g, 
+                 int flags, float *dp_dlambda);
 
-size_t gmm_dp_dlambda_sizeof (const gmm_t * g, int flags);
+size_t gmm_fisher_sizeof (const gmm_t * g, int flags);
 
 
 
