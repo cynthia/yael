@@ -164,15 +164,94 @@ static int kmeans_reassign_empty (int d, int n, int k, float * centroids,
 }
 
 
+/* the core of the kmeans function (no initialization) */
+static void kmeans_core (int d, int n, int k, int niter, int nt, int flags, int verbose, 
+			 float * centroids, const float * v, 
+			 int * assign, int * nassign,
+			 float * dis, 
+			 double * qerr_out, long * iter_tot)
+{
+  int i, iter;
+  int nreassign;
+
+  /* the quantization error */
+  double qerr = HUGE_VAL, qerr_old;
+
+  for (iter = 1 ; iter <= niter ; iter++) {
+    (*iter_tot)++;
+
+    /* Assign point to cluster and count the cluster size */
+    nn_full (d, n, k, v, centroids, nt, assign, dis);
+      
+    /* compute the number of points assigned to each cluster and a 
+       probability to select a given cluster for splitting */
+    ivec_0 (nassign, k);
+    for (i = 0 ; i < n ; i++)
+      nassign[assign[i]]++;
+
+    /* update the centroids */
+    if(flags & KMEANS_NORMALIZE_SOPHISTICATED) {
+        
+      float *norms = fvec_new(k);
+      fvec_0 (centroids, d * k);
+        
+      for (i = 0 ; i < n ; i++) {
+	fvec_add (centroids + assign[i] * d, v + i * d, d);
+	norms[assign[i]]+=fvec_norm(v + i * d,d,2);
+      }
+
+      for (i = 0 ; i < k ; i++) {          
+	fvec_normalize(centroids + i * d, d,2);
+	fvec_mul_by (centroids + i * d, d, norms[i] / nassign[i]);
+      }
+
+      free(norms);
+    } 
+    else {
+      fvec_0 (centroids, d * k);
+        
+      for (i = 0 ; i < n ; i++)
+	fvec_add (centroids + assign[i] * d, v + i * d, d);
+        
+      /* normalize */
+      for (i = 0 ; i < k ; i++) {          
+	fvec_mul_by (centroids + i * d, d, 1.0 / nassign[i]);
+      }
+        
+      if(flags & KMEANS_NORMALIZE_CENTS) 
+	for (i = 0 ; i < k ; i++) 
+	  fvec_normalize(centroids + i * d, d, 2.0);
+    }
+
+    /* manage empty clusters and update nassign */
+    nreassign = kmeans_reassign_empty (d, n, k, centroids, assign, nassign);
+    if (nreassign > 0)
+      fprintf (stderr, "# Warning: %d empty clusters -> split\n", nreassign);
+
+    /* compute the quantization error */
+    assert(qerr>=0);
+    qerr_old = qerr;
+    qerr = fvec_sum (dis, n);
+
+    if (qerr_old == qerr && nreassign == 0)
+      break;
+    if (verbose)
+      fprintf (stderr, " -> %.3f", qerr / n);
+  }
+  if (verbose)      
+    fprintf (stderr, "\n");
+
+  *qerr_out = qerr;
+}
+
 
 float kmeans (int di, int n, int k, int niter, 
 	      const float * v, int flags, long seed, int redo, 
 	      float * centroids_out, float * dis_out, 
 	      int * assign_out, int * nassign_out)
 {
-  long i, run, iter, iter_tot = 0, d=di;
+  long i, run, iter_tot = 0, d=di;
 
-  int nreassign;
   int nt = flags & 0xffff;
   if (nt == 0) nt = 1;
 
@@ -180,11 +259,19 @@ float kmeans (int di, int n, int k, int niter,
 
   niter = (niter == 0 ? 1000000 : niter);
 
-  /* look at which variables have to be returned / allocated */
+  /* look at which variables have to be returned */
   int isout_centroids = (centroids_out == NULL ? 0 : 1);
   int isout_dis = (dis_out == NULL ? 0 : 1);
   int isout_assign = (assign_out == NULL ? 0 : 1);
   int isout_nassign = (nassign_out == NULL ? 0 : 1);
+
+  /* if flags KMEANS_INIT_USER is activated, no distance output */
+  int is_user_init = flags & KMEANS_INIT_USER;
+
+  fprintf (stderr, "toto -> is_user_init = %d\n", is_user_init);
+
+  if (is_user_init)
+    isout_dis = 0;
 
   /* the centroids */
   float * centroids = fvec_new (k * (size_t) d);
@@ -199,7 +286,7 @@ float kmeans (int di, int n, int k, int niter,
   int * nassign = ivec_new (k);
 
   /* the total quantization error */
-  double qerr, qerr_old, qerr_best = HUGE_VAL;
+  double qerr, qerr_best = HUGE_VAL;
 
   /* for the initial configuration */
   int * selected = ivec_new (k);
@@ -212,7 +299,10 @@ float kmeans (int di, int n, int k, int niter,
     if(verbose)
       fprintf (stderr, "<><><><> kmeans / run %d <><><><><>\n", (int)run);
 
-    if( flags & KMEANS_INIT_RANDOM ) {
+    if (is_user_init)
+      fvec_cpy (centroids, dis, d * k);
+    else {
+    if (flags & KMEANS_INIT_RANDOM) {
       random_init(d,n,k,v,selected);
     } 
     else {
@@ -225,77 +315,15 @@ float kmeans (int di, int n, int k, int niter,
       }
       kmeanspp_init (d, nsubset, k, v, selected, verbose);
     }
+    }
 
-     
     for (i = 0 ; i < k ; i++) 
       fvec_cpy (centroids + i * d, v + selected[i] * d, d);
 
-    /* the quantization error */
-    qerr = HUGE_VAL;
+    kmeans_core (d, n, k, niter, nt, flags, verbose, 
+		 centroids, v, assign, nassign, dis, 
+		 &qerr, &iter_tot);
 
-    for (iter = 1 ; iter <= niter ; iter++) {
-      iter_tot++;
-
-      /* Assign point to cluster and count the cluster size */
-      nn_full (d, n, k, v, centroids, nt, assign, dis);
-      
-      /* compute the number of points assigned to each cluster and a 
-	 probability to select a given cluster for splitting */
-      ivec_0 (nassign, k);
-      for (i = 0 ; i < n ; i++)
-	nassign[assign[i]]++;
-
-      /* update the centroids */
-      if(flags & KMEANS_NORMALIZE_SOPHISTICATED) {
-        
-        float *norms = fvec_new(k);
-        fvec_0 (centroids, d * k);
-        
-        for (i = 0 ; i < n ; i++) {
-          fvec_add (centroids + assign[i] * d, v + i * d, d);
-          norms[assign[i]]+=fvec_norm(v + i * d,d,2);
-        }
-
-        for (i = 0 ; i < k ; i++) {          
-          fvec_normalize(centroids + i * d, d,2);
-          fvec_mul_by (centroids + i * d, d, norms[i] / nassign[i]);
-        }
-
-        free(norms);
-      } 
-      else {
-        fvec_0 (centroids, d * k);
-        
-        for (i = 0 ; i < n ; i++)
-          fvec_add (centroids + assign[i] * d, v + i * d, d);
-        
-        /* normalize */
-        for (i = 0 ; i < k ; i++) {          
-          fvec_mul_by (centroids + i * d, d, 1.0 / nassign[i]);
-        }
-        
-        if(flags & KMEANS_NORMALIZE_CENTS) 
-          for (i = 0 ; i < k ; i++) 
-            fvec_normalize(centroids + i * d, d, 2.0);
-      }
-
-      /* manage empty clusters and update nassign */
-      nreassign = kmeans_reassign_empty (d, n, k, centroids, assign, nassign);
-      if (nreassign > 0)
-	fprintf (stderr, "# Warning: %d empty clusters -> split\n", nreassign);
-
-      /* compute the quantization error */
-      assert(qerr>=0);
-      qerr_old = qerr;
-      qerr = fvec_sum (dis, n);
-
-      if (qerr_old == qerr && nreassign == 0)
-	break;
-      if (verbose)
-        fprintf (stderr, " -> %.3f", qerr / n);
-    }
-    if (verbose)      
-      fprintf (stderr, "\n");
 
     /* If this run is the best encountered, save the results */
     if (qerr < qerr_best) {

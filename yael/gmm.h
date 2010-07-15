@@ -130,7 +130,7 @@ void gmm_compute_p (int n, const float * v,
  *
  */
 void gmm_fisher (int n, const float *v, const gmm_t * g, 
-                 int flags, float *dp_dlambda);
+                 int flags, float * fisher_vector_out);
 
 size_t gmm_fisher_sizeof (const gmm_t * g, int flags);
 

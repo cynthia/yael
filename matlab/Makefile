@@ -42,7 +42,7 @@ else
 endif
 
 
-all: $(YAELAR) yael_kmeans yael_gmm yael_nn yael_kmin yael_kmax yael_fvecs_normalize yael_L2sqr
+all: $(YAELAR) yael_kmeans yael_kmeans_init_user yael_gmm yael_nn yael_kmin yael_kmax yael_fvecs_normalize yael_L2sqr
 
 LIBOBJ=vector.o matrix.o eigs.o nn.o kmeans.o gmm.o sorting.o binheap.o machinedeps.o vlad.o
 
@@ -67,6 +67,9 @@ yael4octave.a:
 
 yael_kmeans: yael_kmeans.c $(YAELAR)
 	$(MEX) yael_kmeans.c -I.. $(LDFLAGS)
+
+yael_kmeans_init_user: yael_kmeans_init_user.c $(YAELAR)
+	$(MEX) yael_kmeans_init_user.c -I.. $(LDFLAGS)
 
 yael_gmm: yael_gmm.c $(YAELAR)
 	$(MEX) yael_gmm.c -I.. $(LDFLAGS)

@@ -16,12 +16,12 @@ void mexFunction (int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray*prhs[])
 
 {
-  if (nrhs < 2 || nrhs % 2 != 0) 
-    mexErrMsgTxt("even nb of input arguments required.");
-  else if (nlhs > 4 || nlhs < 1) 
-    mexErrMsgTxt("1 to 3 output arguments are expected.");
+  if (nrhs < 3 || nrhs % 2 != 1) 
+    mexErrMsgTxt ("odd nb of input arguments required.");
+  else if (nlhs != 1) 
+    mexErrMsgTxt ("1 output argument are expected (the centroids).");
 
-  int flags = 0;
+  int flags = KMEANS_INIT_USER;
   int d = mxGetM (prhs[0]);
   int n = mxGetN (prhs[0]);
   long seed = 0L;
@@ -30,13 +30,14 @@ void mexFunction (int nlhs, mxArray *plhs[],
     mexErrMsgTxt("need single precision array.");
 
   float *v = (float*) mxGetPr (prhs[0]);
-  int k = (int) mxGetScalar (prhs[1]);
+  float *centroids0 = (float *) mxGetPr (prhs[1]);
+  int k = (int) mxGetScalar (prhs[2]);
 
   int niter = 50, redo = 1, nt = 1, verbose = 1;
 
   {
     int i;
-    for(i = 2 ; i < nrhs ; i += 2) {
+    for(i = 3 ; i < nrhs ; i += 2) {
       char varname[256];
       if (mxGetClassID(prhs[i]) != mxCHAR_CLASS) 
         mexErrMsgTxt ("variable name required");         
@@ -99,33 +100,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   plhs[0] = mxCreateNumericMatrix (d, k, mxSINGLE_CLASS, mxREAL);
   float *centroids=(float*)mxGetPr(plhs[0]);
 
-  float * dis = NULL;
-  int * assign = NULL;
-  int * nassign = NULL;
-
-  if (nlhs == 2) {
-    plhs[1] = mxCreateNumericMatrix (n, 1, mxINT32_CLASS, mxREAL);
-    assign = (int*) mxGetPr (plhs[1]);
-  }
-  else if (nlhs >= 3) {
-    plhs[1] = mxCreateNumericMatrix (n, 1, mxSINGLE_CLASS, mxREAL);
-    dis = (float*) mxGetPr (plhs[1]);
-    plhs[2] = mxCreateNumericMatrix (n, 1, mxINT32_CLASS, mxREAL);
-    assign = (int*) mxGetPr (plhs[2]);
-  }
-
-  if (nlhs >=4)  {
-    plhs[3] = mxCreateNumericMatrix (k, 1, mxINT32_CLASS, mxREAL);
-    nassign = (int*) mxGetPr (plhs[3]);
-  }
-
   kmeans (d, n, k, niter, v, flags, seed, 
-	  redo, centroids, dis, assign, nassign);
+	  redo, centroids, centroids0, NULL, NULL);
 
-  /* post-processing: Matlab starts from 1 */
-  if (assign) {
-    int i;
-    for (i = 0 ; i < n ; i++)
-      assign[i]++;
-  }
 }
