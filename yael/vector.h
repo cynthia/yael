@@ -354,6 +354,7 @@ long fvec_index_nonfinite (float * v, long n);
 double fvec_sum (const float * v, long n);
 long long ivec_sum (const int * v, long n);
 
+/*!  compute the sum of the product of the vector */
 double fvec_product (const float * v, long n);
 long long ivec_product (const int * v, long n);
 
@@ -361,6 +362,9 @@ long long ivec_product (const int * v, long n);
 double fvec_sum_sqr (const float * v, long n);
 long long ivec_sum_sqr (const int * v, long n);
 
+/*!  compute the sum of the value of the vector */
+double fvec_mean (const float * v, long n);
+long long ivec_mean (const int * v, long n);
 
 /*!  compute the norm of a given vector */
 double fvec_norm (const float * v, long n, double norm);

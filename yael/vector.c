@@ -1197,6 +1197,17 @@ double fvec_sum (const float * v, long n)
 }
 
 
+double fvec_mean (const float * v, long n)
+{
+  long i;
+  double s = 0;
+  for (i = 0 ; i < n ; i++)
+    s += v[i];
+
+  return s / n;
+}
+
+
 double fvec_sum_sqr (const float * v, long n)
 {
   long i;
@@ -1222,7 +1233,6 @@ long long ivec_product (const int * v, long n) {
 }
 
 
-
 long long ivec_sum (const int * v, long n)
 {
   long i;
@@ -1232,6 +1242,18 @@ long long ivec_sum (const int * v, long n)
 
   return s;
 }
+
+
+long long ivec_mean (const int * v, long n)
+{
+  long i;
+  long long s = 0;
+  for (i = 0 ; i < n ; i++)
+    s += v[i];
+
+  return s / n;
+}
+
 
 long long ivec_sum_sqr (const int * v, long n)
 {

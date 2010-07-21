@@ -111,9 +111,12 @@ int fvec_count_0(const float *val,int n);
 
 /*! return the smallest value of a vector */
 float fvec_min (const float *f, long n);
+int ivec_min (const int * f, long n);
+
 
 /*! return the largest value of a vector */
 float fvec_max(const float *f, long n);
+int ivec_max (const int *f, long n);
 
 /*! return the position of the smallest element of a vector.
   First position in case of ties, n should be >0. */

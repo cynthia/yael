@@ -722,10 +722,34 @@ float fvec_min (const float *f, long n)
 }
 
 
+int ivec_min (const int *f, long n) 
+{
+  assert (n > 0);
+  int m = f[0];
+  long i;
+  for (i = 1 ; i < n ; i++) 
+    if (f[i] < m) 
+      m = f[i];
+  return m;
+}
+
+
 float fvec_max (const float *f, long n) 
 {
   assert (n > 0);
   float m = f[0];
+  long i;
+  for (i = 1 ; i < n ; i++) 
+    if (f[i] > m) 
+      m = f[i];
+  return m;
+}
+
+
+int ivec_max (const int *f, long n) 
+{
+  assert (n > 0);
+  int m = f[0];
   long i;
   for (i = 1 ; i < n ; i++) 
     if (f[i] > m) 
