@@ -18,8 +18,8 @@ void mexFunction (int nlhs, mxArray *plhs[],
 {
   if (nrhs < 4) 
     mexErrMsgTxt("At least 4 arguments are required even nb of input arguments required.");
-  else if (nrhs != 1) 
-    mexErrMsgTxt("yael_fishier produces exactly 1 output argument.");
+  else if (nlhs != 1) 
+    mexErrMsgTxt("yael_fisher produces exactly 1 output argument.");
 
   int flags = GMM_FLAGS_MU;
   
@@ -50,7 +50,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   int k = mxGetN (prhs[1]);  /* number of gaussian */
 
   if (mxGetM (prhs[2]) != d || mxGetM (prhs[3]) != d || mxGetN (prhs[2]) !=k 
-      || mxGetN (prhs[3]) != k || mxGetN (prhs[1]) != 1)
+      || mxGetN (prhs[3]) != k || mxGetM (prhs[1]) != 1)
     mexErrMsgTxt("Invalid input dimensionalities.");
 
   {
