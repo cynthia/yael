@@ -24,7 +24,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   int d = mxGetM (prhs[0]);
   int n = mxGetN (prhs[0]);
   long seed = 0L;
-  int flags = GMM_FLAGS_W | GMM_FLAGS_SIGMA | GMM_FLAGS_MU;
+  int flags = GMM_FLAGS_MU;
   
   if(mxGetClassID(prhs[0])!=mxSINGLE_CLASS)
     mexErrMsgTxt("need single precision array.");
@@ -81,13 +81,11 @@ void mexFunction (int nlhs, mxArray *plhs[],
   }
 
 
-
-
   /* ouptut: GMM, i.e., weights, mu and variances */
   gmm_t * g = gmm_learn (d, n, k, niter, v, nt, seed, redo, flags); 
 
   plhs[0] = mxCreateNumericMatrix (1, k, mxSINGLE_CLASS, mxREAL);
-  plhs[1] = mxCreateNumericMatrix (k, d, mxSINGLE_CLASS, mxREAL);
+  plhs[1] = mxCreateNumericMatrix (d, k, mxSINGLE_CLASS, mxREAL);
   plhs[2] = mxCreateNumericMatrix (d, k, mxSINGLE_CLASS, mxREAL);
 
   fvec_cpy ((float*) mxGetPr(plhs[0]), g->w, k);      /* w     */

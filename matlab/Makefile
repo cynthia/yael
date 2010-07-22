@@ -42,24 +42,45 @@ else
 endif
 
 
-all: $(YAELAR) yael_kmeans yael_kmeans_init_user yael_gmm yael_nn yael_kmin yael_kmax yael_fvecs_normalize yael_L2sqr
+all: $(YAELAR) yael_kmeans yael_kmeans_init_user yael_gmm yael_fisher yael_nn yael_kmin yael_kmax yael_fvecs_normalize yael_L2sqr
+
 
 LIBOBJ=vector.o matrix.o eigs.o nn.o kmeans.o gmm.o sorting.o binheap.o machinedeps.o vlad.o
+YAELSRC=../yael/binheap.c ../yael/eigs.c ../yael/gmm.c ../yael/kmeans.c ../yael/machinedeps.c ../yael/matrix.c ../yael/nn.c ../yael/sorting.c ../yael/vector.c ../yael/vlad.c
 
-yael4matlab.a: 
+binheap.o: ../yael/binheap.c ../yael/binheap.h
 	gcc -c $(CFLAGS) ../yael/binheap.c
+
+eigs.o: ../yael/eigs.c ../yael/eigs.h
 	gcc -c $(CFLAGS) ../yael/eigs.c
+
+gmm.o: ../yael/gmm.c ../yael/gmm.h
 	gcc -c $(CFLAGS) ../yael/gmm.c
+
+kmeans.o: ../yael/kmeans.c ../yael/kmeans.h
 	gcc -c $(CFLAGS) ../yael/kmeans.c
+
+machinedeps.o: ../yael/machinedeps.c ../yael/machinedeps.h
 	gcc -c $(CFLAGS) ../yael/machinedeps.c
+
+matrix.o: ../yael/matrix.c ../yael/matrix.h
 	gcc -c $(CFLAGS) ../yael/matrix.c
+
+nn.o: ../yael/nn.c ../yael/nn.h
 	gcc -c $(CFLAGS) ../yael/nn.c
+
+sorting.o: ../yael/sorting.c ../yael/sorting.h
 	gcc -c $(CFLAGS) ../yael/sorting.c
+
+vector.o: ../yael/vector.c ../yael/vector.h
 	gcc -c $(CFLAGS) ../yael/vector.c
+
+vlad.o: ../yael/vlad.c ../yael/vlad.h
 	gcc -c $(CFLAGS) ../yael/vlad.c
+
+yael4matlab.a: $(LIBOBJ)
 	ar r yael4matlab.a $(LIBOBJ)
 	rm *.o
-
 
 yael4octave.a: 
 	ar r $@ $(addprefix ../yael/,$(LIBOBJ))
@@ -73,6 +94,9 @@ yael_kmeans_init_user: yael_kmeans_init_user.c $(YAELAR)
 
 yael_gmm: yael_gmm.c $(YAELAR)
 	$(MEX) yael_gmm.c -I.. $(LDFLAGS)
+
+yael_fisher: yael_fisher.c $(YAELAR)
+	$(MEX) yael_fisher.c -I.. $(LDFLAGS)
 
 yael_nn: yael_nn.c $(YAELAR)
 	$(MEX) yael_nn.c -I.. $(LDFLAGS)
