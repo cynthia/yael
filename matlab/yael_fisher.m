@@ -1,4 +1,4 @@
-% *IMPORTANT NOTE* This matlab implementation has NOT been validated up to now
+% * NOTE* This matlab implementation has NOT been validated up to now
 %
 % This function computes the fisher vector representation of a set of vectors
 % See "Fisher kernels on visual vocabularies for image categorization"
@@ -19,4 +19,5 @@
 %   'weights'   includes the mixture weights in the representation
 %   'sigma'     includes the terms associated with variacne
 %   'nomu'      do not compute the terms associated with mean
+%   'nonorm'    do not normalize the fisher vector
 %   'verbose'   

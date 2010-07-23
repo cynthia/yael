@@ -24,6 +24,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
 
   int flags = GMM_FLAGS_MU;
   int verbose = 0;
+  int fishernorm1 = 1;
   
   if(mxGetClassID(prhs[0])!=mxSINGLE_CLASS)
     mexErrMsgTxt("need single precision array.");
@@ -64,6 +65,9 @@ void mexFunction (int nlhs, mxArray *plhs[],
       else if (!strcmp(varname,"verbose")) 
         verbose = 1;
 
+      else if (!strcmp(varname,"nonorm")) 
+        fishernorm1 = 0;
+
       else 
         mexErrMsgTxt("unknown variable name");  
     }
@@ -98,4 +102,10 @@ void mexFunction (int nlhs, mxArray *plhs[],
   plhs[0] = mxCreateNumericMatrix (dout, 1, mxSINGLE_CLASS, mxREAL);
   float * vf = (float *) mxGetPr (plhs[0]);
   gmm_fisher (n, v, &g, flags, vf);
+
+  if (fishernorm1) {
+    int ret = fvec_normalize (vf, dout, 2.);
+    if (ret == 1)
+      fvec_set (vf, dout, 1);
+  }
 }

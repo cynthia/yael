@@ -1045,7 +1045,7 @@ double fvec_normalize (float * v, long n, double norm)
   double nr = fvec_norm (v, n, norm);
 
   /*  if(nr!=0)*/
-  fvec_mul_by (v, n, 1 / nr);
+  fvec_mul_by (v, n, 1. / nr);
   return nr;
 }
 
@@ -1268,7 +1268,6 @@ long long ivec_sum_sqr (const int * v, long n)
 
 double fvec_norm (const float * v, long n, double norm)
 {
-
   if(norm==0) return n;
 
   long i;
@@ -1283,11 +1282,14 @@ double fvec_norm (const float * v, long n, double norm)
   if(norm==2) {
     for (i = 0 ; i < n ; i++)
       s += v[i]*v[i];
+    
     return sqrt(s);
   }
 
-  for (i = 0 ; i < n ; i++)
+  for (i = 0 ; i < n ; i++) {
     s += pow (v[i], norm);
+  }
+
 
   return pow (s, 1 / norm);
 }
