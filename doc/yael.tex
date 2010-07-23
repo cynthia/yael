@@ -28,7 +28,7 @@
 
 \title{~\vspace{9cm} \\ \yael: Getting started} 
 \author{Matthijs Douze \and Herv\'e J\'egou}
-\date{April 20\textsuperscript{th}, 2010} 
+\date{July 23\textsuperscript{th}, 2010} 
 
 
 \begin{document}
@@ -103,7 +103,7 @@ It offers three interfaces:
 \begin{itemize}
 \item C, 
 \item Python, 
-\item Matlab.
+\item Matlab\footnote{Octave extension is included, but not fully checked at each release.}.
 \end{itemize}
 
 The library has been tested under different architectures, in particular
@@ -390,8 +390,8 @@ Therefore, it computes $n_1\times n_2$ distances.
 \item [yael\_kmin and yael\_kmax] compute the $k$ smallest (respectively largest) 
 values of a set of scalar. It is more efficient than sorting the data. 
 \item [yael\_fvecs\_normalize] normalizes a set of vectors. 
-
-
+\item [yael\_gmm] learns a Gaussian mixture model (diagonal form).
+\item [yael\_fisher] computes the Fisher Kernel representation of a set of features. 
 \end{description}
 
 There are also several I/O functions, see Chapter~\ref{cha:I/O}. 
