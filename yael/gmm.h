@@ -57,7 +57,7 @@ typedef struct gmm_s {
   int d;          /*!< vector dimension */
   int k;          /*!< number of mixtures */
   float * w;      /*!< weights of the mixture elements (size k) */
-  float * mu;     /*!< centroids (k-by-d) */
+  float * mu;     /*!< centroids (d-by-k) */
   float * sigma;  /*!< diagonal of the covariance matrix (d-by-k) */
 } gmm_t;
 
@@ -126,7 +126,7 @@ void gmm_compute_p (int n, const float * v,
  * @param v(d,n)           vectors where to compute descriptor 
  * @param flags combination of GMM_FLAGS_*. Typically, use
  *                         yael.GMM_FLAGS_MU (only interested in the derivative wrt mu)
- * @param dp_dlambda(dd,n) output descriptor. The output descriptor size dd is given by gmm_fisher_sizeof(flags)
+ * @param fisher_vector_out(dd) output descriptor. The output descriptor size dd is given by gmm_fisher_sizeof(flags)
  *
  */
 void gmm_fisher (int n, const float *v, const gmm_t * g, 

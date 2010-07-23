@@ -1,3 +1,4 @@
+/* *** Not tested yet on an image set *** */
 #include <stdio.h>
 #include <string.h>
 
@@ -22,6 +23,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
     mexErrMsgTxt("yael_fisher produces exactly 1 output argument.");
 
   int flags = GMM_FLAGS_MU;
+  int verbose = 0;
   
   if(mxGetClassID(prhs[0])!=mxSINGLE_CLASS)
     mexErrMsgTxt("need single precision array.");
@@ -39,19 +41,6 @@ void mexFunction (int nlhs, mxArray *plhs[],
   float *w = (float*) mxGetPr (prhs[1]);
   float *mu = (float*) mxGetPr (prhs[2]);
   float *sigma = (float*) mxGetPr (prhs[3]);
-
-  fprintf (stderr, "v     -> %d x %d\n", mxGetM (prhs[0]), mxGetN (prhs[0]));
-  fprintf (stderr, "w     -> %d x %d\n", mxGetM (prhs[1]), mxGetN (prhs[1]));
-  fprintf (stderr, "mu    -> %d x %d\n", mxGetM (prhs[2]), mxGetN (prhs[2]));
-  fprintf (stderr, "sigma -> %d x %d\n", mxGetM (prhs[3]), mxGetN (prhs[3]));
-  
-  int d = mxGetM (prhs[0]);  /* vector dimensionality */
-  int n = mxGetN (prhs[0]);  /* number of fisher vector to produce */
-  int k = mxGetN (prhs[1]);  /* number of gaussian */
-
-  if (mxGetM (prhs[2]) != d || mxGetM (prhs[3]) != d || mxGetN (prhs[2]) !=k 
-      || mxGetN (prhs[3]) != k || mxGetM (prhs[1]) != 1)
-    mexErrMsgTxt("Invalid input dimensionalities.");
 
   {
     int i;
@@ -72,18 +61,41 @@ void mexFunction (int nlhs, mxArray *plhs[],
       else if (!strcmp(varname,"nomu")) 
         flags ^= GMM_FLAGS_MU;
 
+      else if (!strcmp(varname,"verbose")) 
+        verbose = 1;
+
       else 
         mexErrMsgTxt("unknown variable name");  
     }
   }
+
+  if (verbose) {
+    fprintf (stdout, "v     -> %ld x %ld\n", mxGetM (prhs[0]), mxGetN (prhs[0]));
+    fprintf (stdout, "w     -> %ld x %ld\n", mxGetM (prhs[1]), mxGetN (prhs[1]));
+    fprintf (stdout, "mu    -> %ld x %ld\n", mxGetM (prhs[2]), mxGetN (prhs[2]));
+    fprintf (stdout, "sigma -> %ld x %ld\n", mxGetM (prhs[3]), mxGetN (prhs[3]));
+  }
+
+  int d = mxGetM (prhs[0]);  /* vector dimensionality */
+  int n = mxGetN (prhs[0]);  /* number of fisher vector to produce */
+  int k = mxGetN (prhs[1]);  /* number of gaussian */
+
+  if (verbose)
+    fprintf (stdout, "d       = %d\nn       = %d\nk       = %d\n", d, n, k);
+
+  if (mxGetM (prhs[2]) != d || mxGetM (prhs[3]) != d || mxGetN (prhs[2]) !=k 
+      || mxGetN (prhs[3]) != k || mxGetM (prhs[1]) != 1)
+    mexErrMsgTxt("Invalid input dimensionalities.");
+
   
 
   /* ouptut: GMM, i.e., weights, mu and variances */
   gmm_t g = {d, k, w, mu, sigma};
   int dout = gmm_fisher_sizeof (&g, flags); 
-  fprintf (stderr, "Size of the fisher vector = %d\n", dout);
+  if (verbose)
+    fprintf (stdout, "Size of the fisher vector = %d\n", dout);
 
-  plhs[0] = mxCreateNumericMatrix (dout, k, mxSINGLE_CLASS, mxREAL);
+  plhs[0] = mxCreateNumericMatrix (dout, 1, mxSINGLE_CLASS, mxREAL);
   float * vf = (float *) mxGetPr (plhs[0]);
   gmm_fisher (n, v, &g, flags, vf);
 }

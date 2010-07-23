@@ -16,3 +16,6 @@ tic
 [w, mu, sigma] = yael_gmm (v, k, 'niter', niter, ...
 			   'verbose', verbose, 'seed', seed);
 toc
+
+vt = single(rand(d,100));
+fvt = yael_fisher(vt,w,mu,sigma);
