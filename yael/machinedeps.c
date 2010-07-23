@@ -103,7 +103,7 @@ void *memalign (size_t ignored, size_t nbytes)
 #endif
 
 #if defined(__APPLE__) && defined(_LP64)
-
+#ifndef _YAEL4MATLAB_
 #warning "warn: using bugfix sgemm for Mac 64 bit"
 
 #define real float
@@ -132,7 +132,7 @@ int sgemm_bugfix (char *transa, char *transb, integer * pm, integer *
   return 0;
 }
 
-
+#endif
 #endif
 
 
