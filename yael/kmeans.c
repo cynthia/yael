@@ -268,7 +268,7 @@ float kmeans (int di, int n, int k, int niter,
   /* if flags KMEANS_INIT_USER is activated, no distance output */
   int is_user_init = flags & KMEANS_INIT_USER;
 
-  fprintf (stderr, "toto -> is_user_init = %d\n", is_user_init);
+/*   fprintf (stderr, "toto -> is_user_init = %d\n", is_user_init); */
 
   if (is_user_init)
     isout_dis = 0;
