@@ -99,7 +99,7 @@ extern void sgemv_(const char *trans, integer *m, integer *n, real *alpha,
 
 float *fmat_new (int nrow, int ncol)
 {
-  float *m = fvec_new (nrow * ncol);
+  float *m = fvec_new (nrow * (long)ncol);
   return m;
 }
 
@@ -677,7 +677,7 @@ int fmat_svd_partial_full(int n,int m,int nev,const float *a,int a_transposed,
 
   float *v=vout ? vout : fmat_new(nev,n);
     
-  ret=arpack_eigs_end(ae,s,vout);
+  ret=arpack_eigs_end(ae,s,v);
 
   if(ret>0) {
     int nconv=ret;
@@ -690,9 +690,9 @@ int fmat_svd_partial_full(int n,int m,int nev,const float *a,int a_transposed,
       for(i=0;i<nconv;i++) {
         float *u=uout+m*i;
         if(!a_transposed)
-          fmat_mul_v(m,n,a,n,vout+n*i,u,nt);
+          fmat_mul_v(m,n,a,n,v+n*i,u,nt);
         else
-          fmat_mul_tv(m,n,a,m,vout+n*i,u,nt);
+          fmat_mul_tv(m,n,a,m,v+n*i,u,nt);
         fvec_normalize(u,m,2);
       }               
     

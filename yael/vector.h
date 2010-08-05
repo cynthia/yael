@@ -196,7 +196,7 @@ int fvecs_new_read (const char *fname, int *d_out, float **vf);
 int fvecs_new_fread_max (FILE *f, int *d_out, float **vf, long nmax);
 
 /*! reads sparse vectors and return them as dense. d must be known */
-int fvecs_new_read_sparse (const char *fname, int d, float **vf);
+int fvecs_new_read_sparse (const char *fname, int d, float **vf_out);
 
 /*!  load float vector without allocating memory 
  *
