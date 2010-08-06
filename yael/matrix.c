@@ -688,11 +688,11 @@ int fmat_svd_partial_full(int n,int m,int nev,const float *a,int a_transposed,
 
     if(uout) 
       for(i=0;i<nconv;i++) {
-        float *u=uout+m*i;
+        float *u=uout+m*(long)i;
         if(!a_transposed)
-          fmat_mul_v(m,n,a,n,v+n*i,u,nt);
+          fmat_mul_v(m,n,a,n,v+n*(long)i,u,nt);
         else
-          fmat_mul_tv(m,n,a,m,v+n*i,u,nt);
+          fmat_mul_tv(m,n,a,m,v+n*(long)i,u,nt);
         fvec_normalize(u,m,2);
       }               
     
