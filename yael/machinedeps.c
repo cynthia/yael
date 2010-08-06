@@ -397,7 +397,7 @@ void compute_tasks (int n, int nthread,
   if(nthread==1) 
     start_routine(&context);    
   else {
-    pthread_t *threads = malloc (sizeof (pthread_t) * n);
+    pthread_t *threads = malloc (sizeof (pthread_t) * nthread);
       
     for (i = 0; i < nthread; i++) 
       pthread_create (&threads[i], NULL, &start_routine, &context);
