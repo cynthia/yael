@@ -266,12 +266,12 @@ float kmeans (int di, int n, int k, int niter,
   int isout_nassign = (nassign_out == NULL ? 0 : 1);
 
   /* if flags KMEANS_INIT_USER is activated, no distance output */
-  int is_user_init = flags & KMEANS_INIT_USER;
-
-/*   fprintf (stderr, "toto -> is_user_init = %d\n", is_user_init); */
-
-  if (is_user_init)
+  int is_user_init = ((flags & KMEANS_INIT_USER) > 0 ? 1 : 0);
+  if (is_user_init) {
+    assert (dis_out != NULL);
+    redo = 1;   /* no randomness if initialization is provided by user */
     isout_dis = 0;
+  }
 
   /* the centroids */
   float * centroids = fvec_new (k * (size_t) d);
@@ -299,26 +299,26 @@ float kmeans (int di, int n, int k, int niter,
     if(verbose)
       fprintf (stderr, "<><><><> kmeans / run %d <><><><><>\n", (int)run);
 
-    if (is_user_init)
-      fvec_cpy (centroids, dis, d * k);
+    if (is_user_init) {
+      fvec_cpy (centroids, dis_out, d * k);
+    }
     else {
-    if (flags & KMEANS_INIT_RANDOM) {
-      random_init(d,n,k,v,selected);
-    } 
-    else {
-      int nsubset = n;
+      if (flags & KMEANS_INIT_RANDOM) {
+	random_init(d,n,k,v,selected);
+      } 
+      else {
+	int nsubset = n;
       
-      if (n > k * 8 && n > 8192) { 
-        nsubset = k * 8; 
-        if(verbose) 
-          printf ("Restricting k-means++ initialization to %d points\n", nsubset);
+	if (n > k * 8 && n > 8192) { 
+	  nsubset = k * 8; 
+	  if(verbose) 
+	    printf ("Restricting k-means++ initialization to %d points\n", nsubset);
+	}
+	kmeanspp_init (d, nsubset, k, v, selected, verbose);
       }
-      kmeanspp_init (d, nsubset, k, v, selected, verbose);
+      for (i = 0 ; i < k ; i++) 
+	fvec_cpy (centroids + i * d, v + selected[i] * d, d);
     }
-    }
-
-    for (i = 0 ; i < k ; i++) 
-      fvec_cpy (centroids + i * d, v + selected[i] * d, d);
 
     kmeans_core (d, n, k, niter, nt, flags, verbose, 
 		 centroids, v, assign, nassign, dis, 
@@ -400,8 +400,8 @@ float *clustering_kmeans (int n, int d,
 
   int *clust_assign;
 
-  float *centroids = clustering_kmeans_assign_with_score (n, d, points, k, nb_iter_max,
-                                               normalize, count_cpu(), NULL, &clust_assign);
+  float *centroids = clustering_kmeans_assign_with_score (n, d, points, k, 
+		     nb_iter_max, normalize, count_cpu(), NULL, &clust_assign);
   free (clust_assign);
 
   return centroids;

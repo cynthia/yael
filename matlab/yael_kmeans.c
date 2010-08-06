@@ -97,7 +97,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   /* ouptut: centroids, assignment, distances */
 
   plhs[0] = mxCreateNumericMatrix (d, k, mxSINGLE_CLASS, mxREAL);
-  float *centroids=(float*)mxGetPr(plhs[0]);
+  float *centroids = (float*) mxGetPr (plhs[0]);
 
   float * dis = NULL;
   int * assign = NULL;

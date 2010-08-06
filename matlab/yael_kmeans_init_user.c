@@ -26,12 +26,13 @@ void mexFunction (int nlhs, mxArray *plhs[],
   int n = mxGetN (prhs[0]);
   long seed = 0L;
   
-  if(mxGetClassID(prhs[0])!=mxSINGLE_CLASS)
+  if (mxGetClassID(prhs[0]) != mxSINGLE_CLASS 
+     || mxGetClassID(prhs[2]) != mxSINGLE_CLASS)
     mexErrMsgTxt("need single precision array.");
 
   float *v = (float*) mxGetPr (prhs[0]);
-  float *centroids0 = (float *) mxGetPr (prhs[1]);
-  int k = (int) mxGetScalar (prhs[2]);
+  int k = (int) mxGetScalar (prhs[1]);
+  float *centroids0 = (float *) mxGetPr (prhs[2]);
 
   int niter = 50, redo = 1, nt = 1, verbose = 1;
 
@@ -98,7 +99,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   /* ouptut: centroids, assignment, distances */
 
   plhs[0] = mxCreateNumericMatrix (d, k, mxSINGLE_CLASS, mxREAL);
-  float *centroids=(float*)mxGetPr(plhs[0]);
+  float *centroids = (float*) mxGetPr (plhs[0]);
 
   kmeans (d, n, k, niter, v, flags, seed, 
 	  redo, centroids, centroids0, NULL, NULL);

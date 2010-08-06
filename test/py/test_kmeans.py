@@ -3,8 +3,8 @@ import time
 
 k = 100                           # number of cluster to create
 d = 128                           # dimensionality of the vectors
-n = 100000                        # number of vectors
-nt = 4                            # number of threads to use
+n = 10000                        # number of vectors
+nt = 2                            # number of threads to use
 v = yael.fvec_new_rand (d * n)    # random set of vectors 
 niter = 30                        # number of iterations
 redo = 1                          # number of redo
