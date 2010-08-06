@@ -39,6 +39,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
 
 #include "eigs.h"
 #include "vector.h"
@@ -241,15 +242,15 @@ extern void sseupd_ (logical *rvec, const char *howmny, logical *select, float *
                      integer *lworkl, integer *info );
 
 struct arpack_eigs_t {
-  int n,nev;
+  FINTEGER n,nev;
 
-  int ncv;
-  int ido,info;
+  FINTEGER ncv;
+  FINTEGER ido,info;
 
-  int lworkl;
+  FINTEGER lworkl;
   float *resid,*workd,*workl;
   float *v;
-  int *iparam,*ipntr;
+  FINTEGER *iparam,*ipntr;
   logical *select;
 
 };
@@ -264,14 +265,14 @@ arpack_eigs_t *arpack_eigs_begin(int n,int nev) {
 
   int ncv=ae->ncv=2*nev;  /* should be enough (see remark 4 of ssaupd doc) */
 
-  ae->lworkl = ncv*(ncv+8);
+  ae->lworkl = ncv*(long)(ncv+8);
   ae->resid=NEWA(float,n);
   ae->workd=NEWA(float,3*n);
   ae->workl=NEWA(float,ae->lworkl);
   
   ae->v=NEWA(float,n*(long)ncv);
-  int *iparam=ae->iparam=NEWA(int,11);
-  ae->ipntr=NEWA(int,11);
+  FINTEGER *iparam=ae->iparam=NEWA(FINTEGER,11);
+  ae->ipntr=NEWA(FINTEGER,11);
 
   ae->info=0; /* use random initial vector */
   ae->ido=0;
@@ -317,7 +318,7 @@ int arpack_eigs_step(arpack_eigs_t *ae,
 int arpack_eigs_end(arpack_eigs_t *ae,
                      float * sout, float * vout) {
   int i,ret=0;  
-  int n=ae->n,nev=ae->nev,ncv=ae->ncv;
+  FINTEGER n=ae->n,nev=ae->nev,ncv=ae->ncv;
   int nconv;
 
   logical *select=NEWA(logical,ncv);
@@ -330,7 +331,7 @@ int arpack_eigs_end(arpack_eigs_t *ae,
   }
 
   {
-    int ierr;
+    FINTEGER ierr;
     logical rvec=1;
     float sigma;
     const char *bmat="I",*which="LM";
@@ -348,6 +349,7 @@ int arpack_eigs_end(arpack_eigs_t *ae,
       goto error;
     }
     ret=nconv=ae->iparam[4];
+    assert(nconv<=nev);
 
   }
 

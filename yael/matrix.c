@@ -676,7 +676,7 @@ int fmat_svd_partial_full(int n,int m,int nev,const float *a,int a_transposed,
   free(ax);
 
   float *v=vout ? vout : fmat_new(nev,n);
-    
+
   ret=arpack_eigs_end(ae,s,v);
 
   if(ret>0) {
@@ -718,7 +718,9 @@ float *fmat_new_pca_part(int d,int n,int nev,
     return NULL;
   }
 
-  float *pcamat=fvec_new(d*d);  
+
+  float *pcamat=fmat_new(d,nev);  
+
   
   int ret;
 
@@ -726,7 +728,7 @@ float *fmat_new_pca_part(int d,int n,int nev,
     ret=fmat_svd_partial_full(d,n,nev,v,0,singvals,pcamat,NULL,count_cpu());
   } else {
     fprintf(stderr,"fmat_new_pca_part: warn fewer learning points (%d) than dimensions (%d): transposing\n",n,d);
-
+    
     ret=fmat_svd_partial_full(n,d,nev,v,1,singvals,NULL,pcamat,count_cpu());
   }
 
