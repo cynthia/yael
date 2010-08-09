@@ -100,8 +100,9 @@ void mexFunction (int nlhs, mxArray *plhs[],
 
   plhs[0] = mxCreateNumericMatrix (d, k, mxSINGLE_CLASS, mxREAL);
   float *centroids = (float*) mxGetPr (plhs[0]);
+  fvec_cpy (centroids, centroids0, d * k);
 
   kmeans (d, n, k, niter, v, flags, seed, 
-	  redo, centroids, centroids0, NULL, NULL);
+	  redo, centroids, NULL, NULL, NULL);
 
 }

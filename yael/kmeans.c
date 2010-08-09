@@ -41,6 +41,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <assert.h>
 
 #include "vector.h"
+#include "matrix.h"
 #include "kmeans.h"
 #include "nn.h"
 #include "machinedeps.h"
@@ -265,31 +266,31 @@ float kmeans (int di, int n, int k, int niter,
   int isout_assign = (assign_out == NULL ? 0 : 1);
   int isout_nassign = (nassign_out == NULL ? 0 : 1);
 
-  /* if flags KMEANS_INIT_USER is activated, no distance output */
+  /* if flags KMEANS_INIT_USER is activated, centroids_out contains initial centroids */
   int is_user_init = ((flags & KMEANS_INIT_USER) > 0 ? 1 : 0);
   if (is_user_init) {
-    assert (dis_out != NULL);
+    assert (centroids_out != NULL);
     redo = 1;   /* no randomness if initialization is provided by user */
-    isout_dis = 0;
   }
 
   /* the centroids */
   float * centroids = fvec_new (k * (size_t) d);
-
+  
   /* store the distances from points to their nearest centroids */
   float * dis = fvec_new (n);
-
+  
   /* the centroid indexes to which each vector is assigned */
   int * assign = ivec_new (n);
-
+  
   /* the number of points assigned to a cluster */
   int * nassign = ivec_new (k);
-
+  
   /* the total quantization error */
   double qerr, qerr_best = HUGE_VAL;
-
+  
   /* for the initial configuration */
   int * selected = ivec_new (k);
+  
 
   /* seeding if seed != 0 */
   if (seed != 0)
@@ -300,7 +301,7 @@ float kmeans (int di, int n, int k, int niter,
       fprintf (stderr, "<><><><> kmeans / run %d <><><><><>\n", (int)run);
 
     if (is_user_init) {
-      fvec_cpy (centroids, dis_out, d * k);
+      fvec_cpy (centroids, centroids_out, d * k);
     }
     else {
       if (flags & KMEANS_INIT_RANDOM) {
@@ -352,6 +353,87 @@ float kmeans (int di, int n, int k, int niter,
   free (assign);
   free (nassign);
 
+  return qerr_best / n; 
+}
+
+
+/* The jegou's k-means variant (unpublished) */
+float kmeans_jegou (int d, int n, int k, int dstep, int niterstep, 
+		    const float * v, int flags, long seed, float * centroids_out)
+{
+  long i, iter_tot = 0, dd;
+
+  int nt = flags & 0xffff;
+  if (nt == 0) nt = 1;
+
+  int verbose = !(flags & KMEANS_QUIET);
+  niterstep = (niterstep == 0 ? 1000000 : niterstep);
+
+  /* Allocate memory (see k-means for details) */
+  float * centroids = fvec_new (k * (size_t) d);
+  float * dis = fvec_new (n);
+  int * assign = ivec_new (n);
+  int * nassign = ivec_new (k);
+  double qerr, qerr_best = HUGE_VAL;
+  int * selected = ivec_new (k);
+
+  /* seeding if seed != 0 */
+  if (seed != 0)
+    srand48 ((long) seed);
+
+  /* compute PCA and express the vectors in this new basis */
+  float * vc = fvec_new_cpy (v, d * n);
+  float * vavg = fmat_center_columns (d, n, vc);   /* mean values of points in vavg*/
+  float * pca = fmat_new_pca (d, n, vc, NULL);
+  float * vp = fvec_new (d * n);
+
+
+  for (dd = dstep ; dd < d ; dd += dstep) {
+
+    /* use only the dd first components */
+    fmat_mul (pca, vc, dd, d, n, vp);
+
+    if(verbose)
+      fprintf (stderr, "<> kmeans incremental dimension / dim %d/%d <>\n", (int) dd, (int) d);
+
+    /* first k-means choose random points */
+    if (dd == dstep) {
+      random_init (dd, n, k, vp, selected);
+
+      for (i = 0 ; i < k ; i++) 
+	fvec_cpy (centroids + i * dd, vp + selected[i] * dd, dd);
+    }
+
+    /* used centroids from previous iteration */
+    else {
+      fvec_cpy (centroids_out, centroids, (dd - dstep) * k);
+      fvec_0 (centroids, dd * k);
+      for (i = 0 ; i < k ; i++)
+	fvec_cpy (centroids + i * dd, centroids_out + i * (dd - dstep), dd - dstep);
+    }
+    kmeans_core (dd, n, k, niterstep, nt, flags, verbose, 
+		 centroids, vp, assign, nassign, dis, 
+		 &qerr, &iter_tot);
+
+    if (verbose)
+      fprintf (stderr, "-> number of iterations: %d\n", (int)iter_tot);
+  }
+
+  /* Express the centroids in the original basis (inv PCA) */
+  fmat_mul_tl (pca, centroids, d, d, n, centroids_out);
+  for (i = 0 ; i < k ; i++)
+    fvec_add (centroids + i * d, vavg, d);
+
+  /* free the variables that are not returned */
+  free (vp);
+  free (vc);
+  free (pca);
+  free (vavg);
+  free (selected);
+  free (centroids);
+  free (dis);
+  free (assign);
+  free (nassign);
   return qerr_best / n; 
 }
 

@@ -19,7 +19,7 @@ tic
 centroids = v(:, cinit);
 for i = 1:3
 
-centroids = yael_kmeans_init_user (v, centroids, k, 'niter', niter, 'nt', nt, ...
+centroids = yael_kmeans_init_user (v, k, centroids, 'niter', niter, 'nt', nt, ...
 				   'verbose', verbose, 'seed', seed);
 end
 

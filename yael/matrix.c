@@ -352,7 +352,8 @@ float *hadamard (int d)
 /* Statistical matrix operations                                             */
 /*---------------------------------------------------------------------------*/
 
-float *fmat_center_columns(int d,int n,float *v) {
+float *fmat_center_columns(int d,int n,float *v) 
+{
   assert(n>0);
 
   float *accu=fvec_new_cpy(v,d);

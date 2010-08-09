@@ -232,7 +232,7 @@ float *fmat_new_covariance (int d, int n, const float *v,
 float *fmat_new_pca(int d,int n,const float *v,
                     float *singvals); 
 
-/*! same as fmat_pca, but retun only a few vectors
+/*! same as fmat_pca, but return only a few vectors
  *
  * @param v(d,n)  vectors to perform the PCA on. The vectors are assumed to be centered already!
  * @param singvals(nev)  corresponding singular values (may be NULL)
