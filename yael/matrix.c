@@ -112,8 +112,8 @@ void fmat_mul_full(const float *left, const float *right,
   float alpha = 1;
   float beta = 0;
   FINTEGER m=mi,n=ni,k=ki;
-  FINTEGER lda=transp[0]=='N' ? m : k;
-  FINTEGER ldb=transp[1]=='N' ? k : n;
+  FINTEGER lda = (transp[0] == 'N' ? m : k);
+  FINTEGER ldb = (transp[1] == 'N' ? k : n);
   
   sgemm_ (transp, transp+1, &m, &n, &k,
           &alpha, left, &lda, right, &ldb, &beta, result, &m);

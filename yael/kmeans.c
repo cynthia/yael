@@ -361,7 +361,7 @@ float kmeans (int di, int n, int k, int niter,
 float kmeans_jegou (int d, int n, int k, int dstep, int niterstep, 
 		    const float * v, int flags, long seed, float * centroids_out)
 {
-  long i, iter_tot = 0, dd;
+  long i, iter_tot = 0, dd, last_dd;
 
   int nt = flags & 0xffff;
   if (nt == 0) nt = 1;
@@ -384,20 +384,28 @@ float kmeans_jegou (int d, int n, int k, int dstep, int niterstep,
   /* compute PCA and express the vectors in this new basis */
   float * vc = fvec_new_cpy (v, d * n);
   float * vavg = fmat_center_columns (d, n, vc);   /* mean values of points in vavg*/
-  float * pca = fmat_new_pca (d, n, vc, NULL);
-  float * vp = fvec_new (d * n);
+  float * eigval = fvec_new (d * k);
+  float * pca = fmat_new_pca (d, n, vc, eigval);
+  float * vp = fvec_new_0 (d * n);
 
+  fmat_mul (pca, vc, d, n, d, vp);
+  fvec_cpy (vc, vp, d * n);
 
-  for (dd = dstep ; dd < d ; dd += dstep) {
+  for (dd = dstep ; dd <= d ; dd += dstep) {
+
+    if (dd == 1) {
+      continue;
+    }
 
     /* use only the dd first components */
-    fmat_mul (pca, vc, dd, d, n, vp);
+    for (i = 0 ; i < n ; i++)
+      fvec_cpy (vp + i * dd, vc + i * d, dd);
 
     if(verbose)
       fprintf (stderr, "<> kmeans incremental dimension / dim %d/%d <>\n", (int) dd, (int) d);
 
     /* first k-means choose random points */
-    if (dd == dstep) {
+    if (dd == dstep || dd == 2) {
       random_init (dd, n, k, vp, selected);
 
       for (i = 0 ; i < k ; i++) 
@@ -409,20 +417,23 @@ float kmeans_jegou (int d, int n, int k, int dstep, int niterstep,
       fvec_cpy (centroids_out, centroids, (dd - dstep) * k);
       fvec_0 (centroids, dd * k);
       for (i = 0 ; i < k ; i++)
-	fvec_cpy (centroids + i * dd, centroids_out + i * (dd - dstep), dd - dstep);
+	fvec_cpy (centroids + i * dd, centroids_out + i * last_dd, last_dd);
     }
+    
     kmeans_core (dd, n, k, niterstep, nt, flags, verbose, 
 		 centroids, vp, assign, nassign, dis, 
 		 &qerr, &iter_tot);
 
     if (verbose)
       fprintf (stderr, "-> number of iterations: %d\n", (int)iter_tot);
+    last_dd = dd;
   }
 
+
   /* Express the centroids in the original basis (inv PCA) */
-  fmat_mul_tl (pca, centroids, d, d, n, centroids_out);
+  fmat_mul_tl (pca, centroids, d, k, d, centroids_out);
   for (i = 0 ; i < k ; i++)
-    fvec_add (centroids + i * d, vavg, d);
+    fvec_add (centroids_out + i * d, vavg, d);
 
   /* free the variables that are not returned */
   free (vp);
