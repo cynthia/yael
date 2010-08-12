@@ -127,6 +127,11 @@ int *ivec_new_random_perm (int n);
 /*!  select k random indexes among n (without repetition) */ 
 int *ivec_new_random_idx  (int n, int k);
 
+/*! resize a vector (realloc). Usage: v = fvec_resize (v, n). */
+float * fvec_resize (float * v, long n);
+
+/*! resize a vector (realloc). Usage: v = fvec_resize (v, n). */
+int * ivec_resize (int * v, long n);
 
 /*!  count occurrences
    @param k is the range of the values that may be encountered (assuming start at 0)

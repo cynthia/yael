@@ -251,6 +251,19 @@ int * ivec_new_random_idx (int n, int k)
   return idx;
 }
 
+float * fvec_resize (float * v, long n)
+{
+  float * v2 = realloc (v, n * sizeof (*v));
+  return v2;
+}
+
+
+int * ivec_resize (int * v, long n)
+{
+  int * v2 = realloc (v, n * sizeof (*v));
+  return v2;
+}
+
 
 int *ivec_new_random_perm (int n)
 {
