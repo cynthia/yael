@@ -226,8 +226,7 @@ float *fmat_new_covariance (int d, int n, const float *v,
  * @param v(d,n)  vectors to perform the PCA on. The vectors are assumed to be centered already!
  * @param singvals(d)  corresponding singular values (may be NULL)
  *
- * @return (d,d) matrix of eigenvectors. To transform a
- *               vector a low-dimension space, multiply by the d2 first lines of the matrix
+ * @return (d,d) matrix of eigenvectors (column-stored). 
  */
 float *fmat_new_pca(int d,int n,const float *v,
                     float *singvals); 
