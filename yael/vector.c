@@ -764,6 +764,30 @@ float *fvec_fread_raw(FILE * f, long d) {
   return v;
 }
 
+
+int fvecs_fread (FILE * f, float * v, long n)
+{
+  long i = 0, d = -1, ret;
+  for (i = 0 ; i < n ; i++) {
+    ret = fvec_fread (f, v + i * d);
+
+    if (ret == -1)
+      return i;
+
+    assert (ret > 0);
+
+    if (i == 0)
+      d = ret;
+
+    if (d != ret) {
+      perror ("# fvecs_fread: dimension of the vectors is not consistent\n");
+      return i;
+    }
+  }
+  return i;
+}
+
+
 int ivec_fwrite (FILE *f, const int *v, int d)
 {
   int ret = fwrite (&d, sizeof (d), 1, f);

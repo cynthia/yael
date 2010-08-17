@@ -226,6 +226,9 @@ int fvec_fread (FILE * f, float * v);
 
 float *fvec_fread_raw(FILE * f, long n);
 
+/*! load a set of n float vectors from an open file. Return the number of vectors read. */
+int fvecs_fread (FILE * f, float * v, long n);
+
 
 /*!  read and allocate a an integer vector file */
 int * ivec_new_read(const char *fname, int *d_out);
