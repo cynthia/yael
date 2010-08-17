@@ -136,20 +136,11 @@ float* knn_thread (int n, int nb, int d, int k,
 
 
 /*! 
- * Computes a subset of L2 distances between b and v. 
- *
- *  @param n                  nb of vectors in v
- *  @param nb                 nb of vectors in b
- *  @param k                  nb of distances per v vector
- *  @param assign(k, n)       assign(:, i) is the set of vectors of b for 
- *                            which we have to compute distances to v(:,i). 
- *                            On output, assign(:,i) is reordered
- *  @param dists(k,n)         On output, distances corresponding to the assign array.
+ * Re-order a short-list based on exact distances 
  */
 void knn_reorder_shortlist(int n, int nb, int d, int k,
                            const float *b, const float *v,
-                           int *assign,
-                           float *dists);
+                           int *assign, float *dists);
 
 
 /*! Computes all distances between 2 sets of vectors 
