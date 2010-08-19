@@ -173,6 +173,8 @@ void fvec_sort_index (const float *tab, int n, int *perm);
  */
 void ivec_sort_by_permutation (int * v, const int * order, int n);
 
+void fvec_sort_by_permutation (float * v, const int * order, int n);
+
 
 /************ operations on sorted int arrays */
 

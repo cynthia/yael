@@ -446,6 +446,31 @@ void ivec_sort_by_permutation (int * v, const int * order, int n)
 }
 
 
+void fvec_sort_by_permutation (float * v, const int * order, int n)
+{
+  int i;
+  float * o = malloc (n * sizeof (*o));
+
+  for (i = 0 ; i < n ; i++)
+    o[order[i]] = i;
+
+  for (i = 0 ; i < n ; i++)
+    while (o[i] != i) {
+      int newpos = o[i];
+
+      float a = v[i];
+      v[i] = v[newpos];
+      v[newpos] = a;
+
+      float b = o[newpos];
+      o[newpos] = o[i];
+      o[i] = b;
+    }
+
+  free (o);
+} 
+
+
 /*********************************************************************
  * Get ranks of a few values
  *********************************************************************/
