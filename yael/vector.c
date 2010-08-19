@@ -100,6 +100,17 @@ int *ivec_new (long n)
   return ret;
 }
 
+long * lvec_new (long n)
+{
+  long *ret = (long *) malloc (sizeof (*ret) * n);
+  if (!ret) {
+    fprintf (stderr, "ivec_new %ld : out of memory\n", n);
+    abort();
+  }
+  return ret;
+}
+
+
 float *fvec_new_0 (long n)
 {
   float *ret = (float *) calloc (sizeof (*ret), n);
@@ -109,6 +120,18 @@ float *fvec_new_0 (long n)
   }
   return ret;
 }
+
+
+long *lvec_new_0 (long n)
+{
+  long *ret = (long *) calloc (sizeof (*ret), n);
+  if (!ret) {
+    fprintf (stderr, "fvec_new_0 %ld : out of memory\n", n);
+    abort();
+  }
+  return ret;
+}
+
 
 float *fvec_new_nan (long n)
 {
@@ -772,7 +795,7 @@ int fvecs_fread (FILE * f, float * v, long n)
     ret = fvec_fread (f, v + i * d);
 
     if (ret == -1)
-      return i;
+      return 0;
 
     assert (ret > 0);
 
@@ -781,10 +804,10 @@ int fvecs_fread (FILE * f, float * v, long n)
 
     if (d != ret) {
       perror ("# fvecs_fread: dimension of the vectors is not consistent\n");
-      return i;
+      return 0;
     }
   }
-  return i;
+  return d * n;
 }
 
 

@@ -79,6 +79,9 @@ void fbinheap_init (fbinheap_t *bh, int maxk);
 /*! free allocated memory */
 void fbinheap_delete (fbinheap_t * bh);
 
+/*! remove all the elements from the heap */
+void fbinheap_reset (fbinheap_t *bh);
+
 /*! insert an element on the heap (if the value val is small enough) */
 void fbinheap_add (fbinheap_t * bh, int label, float val);
 

@@ -90,11 +90,17 @@ float * fvec_new (long n);
 /*! Alloc an int array -- to be de-allocated with free. */
 int *ivec_new (long n);
 
+/*! Alloc a long array -- to be de-allocated with free */
+long * lvec_new (long n);
+
 /*! create a vector initialized with 0's. */
 float *fvec_new_0 (long n);
 
 /*! create a vector initialized with 0's. */
 int *ivec_new_0 (long n);
+
+/*! create a vector initialized with 0's. */
+long *lvec_new_0 (long n);
 
 /*! create a vector initialized with NaN (to trace errors) */
 float *fvec_new_nan (long n);
@@ -226,7 +232,7 @@ int fvec_fread (FILE * f, float * v);
 
 float *fvec_fread_raw(FILE * f, long n);
 
-/*! load a set of n float vectors from an open file. Return the number of vectors read. */
+/*! load a set of n float vectors from an open file. Return the total number of elements (d*n) that have been read. */
 int fvecs_fread (FILE * f, float * v, long n);
 
 

@@ -70,6 +70,10 @@ fbinheap_t * fbinheap_new (int maxk)
   return bh;
 }
 
+void fbinheap_reset (fbinheap_t *bh)
+{
+  bh->k = 0;
+}
 
 void fbinheap_delete (fbinheap_t * bh)
 {

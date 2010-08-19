@@ -341,10 +341,10 @@ float kmeans (int di, int n, int k, int niter,
     }
   }
 
-  if(verbose)
-    fprintf (stderr, "Total number of iterations: %d\n", (int)iter_tot);
-
-  /* printf("unbalanced factor of last iteration: %g\n",ivec_unbalanced_factor(nassign,k)); */
+  if(verbose) {
+    printf ("Total number of iterations: %d\n", (int)iter_tot);
+    printf ("Unbalanced factor of last iteration: %g\n",ivec_unbalanced_factor(nassign,k));
+  }
   
   /* free the variables that are not returned */
   free (selected);

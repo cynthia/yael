@@ -29,8 +29,8 @@ void common_srandom(int seed) {
   srand48(seed); 
 }
 
-typedef int * int_pointer_t;
-typedef float * float_pointer_t;
+ typedef int * int_pointer_t;
+ typedef float * float_pointer_t;
 
 %}
 
@@ -41,6 +41,8 @@ typedef float * float_pointer_t;
 array_class_plus(double,DoubleArray)
 array_class_plus(float,FloatArray)
 array_class_plus(int,IntArray)
+array_class_plus(unsigned char,bvec)
+array_class_plus(long,lvec)
 array_class_plus(unsigned long long,UInt64Array)
 
 %extend IntArray {
