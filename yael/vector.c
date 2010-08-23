@@ -90,6 +90,18 @@ float *fvec_new (long n)
   return ret;
 }
 
+
+double *dvec_new (long n)
+{
+  double *ret = (double *) memalign (16, sizeof (*ret) * n);
+  if (!ret) {
+    fprintf (stderr, "dvec_new %ld : out of memory\n", n);
+    abort();
+  }
+  return ret;
+}
+
+
 int *ivec_new (long n)
 {
   int *ret = (int *) malloc (sizeof (*ret) * n);
@@ -114,6 +126,17 @@ long * lvec_new (long n)
 float *fvec_new_0 (long n)
 {
   float *ret = (float *) calloc (sizeof (*ret), n);
+  if (!ret) {
+    fprintf (stderr, "fvec_new_0 %ld : out of memory\n", n);
+    abort();
+  }
+  return ret;
+}
+
+
+double * dvec_new_0 (long n)
+{
+  double *ret = (double *) calloc (sizeof (*ret), n);
   if (!ret) {
     fprintf (stderr, "fvec_new_0 %ld : out of memory\n", n);
     abort();

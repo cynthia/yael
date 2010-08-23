@@ -93,8 +93,12 @@ int *ivec_new (long n);
 /*! Alloc a long array -- to be de-allocated with free */
 long * lvec_new (long n);
 
+/*! Alloc an int array -- to be de-allocated with free. */
+double * dvec_new (long n);
+
 /*! create a vector initialized with 0's. */
-float *fvec_new_0 (long n);
+float * fvec_new_0 (long n);
+double * dvec_new_0 (long n);
 
 /*! create a vector initialized with 0's. */
 int *ivec_new_0 (long n);
