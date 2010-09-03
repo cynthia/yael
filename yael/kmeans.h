@@ -54,7 +54,7 @@ knowledge of the CeCILL license and that you accept its terms.
 /*! Compute the k-means centroids. 
  *
  * @param v(d, n)           vectors to cluster
- * @param centroids(d, k)   output centroids
+ * @param centroids(d, k)   output centroids (input centroids here if KMEANS_INIT_USER)
  * @param flags             a set of computation parameters: 
  *                     - flags & 0xffff : use this many threads to compute 
  *                     - flags & KMEANS_QUIET: suppress kmeans output
@@ -77,7 +77,7 @@ float kmeans (int d, int n, int k, int niter,
 	      int * assign, int * nassign);
 
 
-/*! The jegou's k-means variant (unpublished). A bit longer, better centroids. */
+/*! Jegou's k-means variant (unpublished). A bit longer, better centroids. */
 float kmeans_jegou (int d, int n, int k, int dstep, int niterstep, 
 		    const float * v, int flags, long seed, float * centroids_out);
 

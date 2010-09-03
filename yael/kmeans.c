@@ -357,7 +357,7 @@ float kmeans (int di, int n, int k, int niter,
 }
 
 
-/* The jegou's k-means variant (unpublished) */
+/* Jegou's k-means variant (unpublished) */
 float kmeans_jegou (int d, int n, int k, int dstep, int niterstep, 
 		    const float * v, int flags, long seed, float * centroids_out)
 {

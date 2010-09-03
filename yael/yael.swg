@@ -72,7 +72,12 @@ typedef float * float_pointer_t;
 array_class_plus(int_pointer_t,IntPtrArray)
 array_class_plus(float_pointer_t,FloatPtrArray)
 
+%pythoncode {
 
+  fvec=FloatArray
+  ivec=IntArray
+
+}
 
 
 
