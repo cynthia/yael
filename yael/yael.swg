@@ -75,8 +75,8 @@ array_class_plus(float_pointer_t,FloatPtrArray)
 %pythoncode {
 
   fvec=FloatArray
+  dvec=DoubleArray
   ivec=IntArray
-
 }
 
 
