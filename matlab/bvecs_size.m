@@ -1,7 +1,7 @@
-% Return the number of vectors contained in a fvecs files and their dimension
+% Return the number of vectors contained in a bvecs files and their dimension
 %
-% Syntax:   [n,d] = fvecs_size (filename) 
-function [n, d] = fvecs_size (filename)
+% Syntax:   [n,d] = bvecs_size (filename) 
+function [n, d] = bvecs_size (filename)
 
 % open the file and count the number of descriptors
 fid = fopen (filename, 'rb');
@@ -15,7 +15,7 @@ d = fread (fid, 1, 'int');
 
 % Read the number of vectors
 fseek (fid, 0, 1);
-n = ftell (fid) / (1 * 4 + d * 4);
+n = ftell (fid) / (1 * 4 + d);
 fseek (fid, 0, -1);
 
 fclose (fid);
