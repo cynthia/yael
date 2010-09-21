@@ -50,7 +50,7 @@ n = b - a + 1;
 fseek (fid, (a - 1) * vecsizeof, -1);
 
 % read n vectors
-v = fread (fid, (d + 1) * n, 'float=>double');
+v = fread (fid, (d + 1) * n, 'int=>double');
 v = reshape (v, d + 1, n);
 
 % Check if the first column (dimension of the vectors) is correct
