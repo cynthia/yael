@@ -1,6 +1,6 @@
 % Compute all the distances between two sets of vectors
 %
-% Usage: [ids,dis,t] = dis_L2(q, v)
+% Usage: [dis] = dis_L2(q, v)
 %
 % Parameters:
 %   v, q        sets of vectors (1 vector per column)
@@ -10,7 +10,7 @@
 %               vectors of q corresponds to row, and columns for v
 %
 % Both v and q contains vectors stored in rows (columns, so transpose them if needed
-function dis = dis_L2sqr_tmp (q, v)
+function dis = dis_L2sqr (q, v)
 
   
 % vector dimension and number of vectors in the dataset

@@ -1,17 +1,16 @@
 % Return the k nearest neighbors of a set of query vectors
 %
-% Usage: [ids,dis] = nn(v, q, k, nt)
+% Usage: [ids,dis] = nn(v, q, k)
 %   v                the dataset to be searched (one vector per column)
 %   q                the set of queries (one query per column)
 %   k  (default:1)   the number of nearest neigbors we want
-%   nt (default:1)   the number of processors core (mex version only)
 %
 % Returned values
 %   idx         the vector index of the nearest neighbors
 %   dis         the corresponding *square* distances
 %
 % Both v and q contains vectors stored in columns, so transpose them if needed
-function [idx, dis] = yael_nn (v, q, k, nt)
+function [idx, dis] = yael_nn (v, q, k)
 
 fprintf ('* Warning: this is the slow version of nn\nConsider using the Mex-compiled version instead\n');
 

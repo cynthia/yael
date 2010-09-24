@@ -45,6 +45,7 @@ array_class_plus(unsigned char,bvec)
 array_class_plus(long,lvec)
 array_class_plus(unsigned long long,UInt64Array)
 
+
 %extend IntArray {
   IntArray(PyObject *list) {
     if(!PyList_Check(list)) {
@@ -96,7 +97,7 @@ array_class_plus(float_pointer_t,FloatPtrArray)
 // (floats,n,d)
 // floats= float table
 // d=dimension of the pts (128)
-// n=nb of centroids or -1 on error
+// n=nb of vectors or -1 on error
 
 %typemap(in,numinputs=0) 
   (int *d_out,float **vf)

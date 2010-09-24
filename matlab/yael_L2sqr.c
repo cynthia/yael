@@ -17,7 +17,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
     mexErrMsgTxt ("Invalid number of input arguments");
   
   if (nlhs != 1)
-    mexErrMsgTxt ("2 output arguments required");
+    mexErrMsgTxt ("1 output arguments required");
 
   int d = mxGetM (prhs[0]);
   int na = mxGetN (prhs[0]);

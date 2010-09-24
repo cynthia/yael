@@ -47,12 +47,6 @@ void mexFunction (int nlhs, mxArray *plhs[],
       if (!strcmp(varname, "niter")) 
         niter = (int) mxGetScalar (prhs[i+1]);
 
-      else if (!strcmp(varname, "nt"))  
-	/* !!! Normally, use nt=1 for multi-threading in Matlab: 
-	   Blas is already multi-threaded. 
-	   Explicit call with nt>1 causes memory leaks */
-	nt = (int) mxGetScalar (prhs[i+1]); 
-      
       else if (!strcmp(varname,"redo")) 
         redo = (int) mxGetScalar (prhs[i+1]);
 
@@ -75,16 +69,12 @@ void mexFunction (int nlhs, mxArray *plhs[],
     }
   }
   
-  /* default: use all the processor cores */
-  if (nt == 0)
-    nt = 1;
-
   flags |= nt;
 
   if (verbose > 0)
-    printf("Input: %d vectors of dimension %d\nk=%d niter=%d nt=%d "
+    printf("Input: %d vectors of dimension %d\nk=%d niter=%d "
 	   "redo=%d verbose=%d seed=%d v1=[%g %g ...], v2=[%g %g... ]\n",
-	   n, d, k, niter, nt, redo, verbose, seed, v[0], v[1], v[d], v[d+1]); 
+	   n, d, k, niter, redo, verbose, seed, v[0], v[1], v[d], v[d+1]); 
   else
     flags |= KMEANS_QUIET;
   
