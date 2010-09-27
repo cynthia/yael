@@ -2,9 +2,9 @@
 % The function returns a set of output uint8 vector (one vector per column)
 %
 % Syntax: 
-%   v = b2fvecs_read (filename)        -> read all vectors
-%   v = b2fvecs_read (filename, n)      -> read n vectors 
-%   v = b2fvecs_read (filename, [a b]) -> read the vectors from a to b (indices starts from 1)
+%   v = bvecs_read (filename)        -> read all vectors
+%   v = bvecs_read (filename, n)      -> read n vectors 
+%   v = bvecs_read (filename, [a b]) -> read the vectors from a to b (indices starts from 1)
 function v = bvecs_read (filename, bounds)
 
 % open the file and count the number of descriptors
