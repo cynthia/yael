@@ -91,7 +91,7 @@ float * fvec_new (long n);
 int *ivec_new (long n);
 
 /*! Alloc a long array -- to be de-allocated with free */
-long * lvec_new (long n);
+long long * lvec_new (long n);
 
 /*! Alloc an int array -- to be de-allocated with free. */
 double * dvec_new (long n);
@@ -104,7 +104,7 @@ double * dvec_new_0 (long n);
 int *ivec_new_0 (long n);
 
 /*! create a vector initialized with 0's. */
-long *lvec_new_0 (long n);
+long long *lvec_new_0 (long n);
 
 /*! create a vector initialized with NaN (to trace errors) */
 float *fvec_new_nan (long n);
@@ -181,6 +181,8 @@ long ivec_count_gt(const int * v, long n, int val);
   (vectors of same size). Output the number of bytes of the file. */
 long fvecs_fsize (const char * fname, int *d_out, int *n_out);
 long ivecs_fsize (const char * fname, int *d_out, int *n_out);
+long bvecs_fsize (const char * fname, int *d_out, int *n_out);
+long lvecs_fsize (const char * fname, int *d_out, int *n_out);
 
 
 
@@ -236,8 +238,17 @@ int fvec_fread (FILE * f, float * v);
 
 float *fvec_fread_raw(FILE * f, long n);
 
-/*! load a set of n float vectors from an open file. Return the total number of elements (d*n) that have been read. */
-int fvecs_fread (FILE * f, float * v, long n);
+/*! load a set of n vectors from an open file. 
+  Return the number of vectors that have been read. */
+long fvecs_fread (FILE * f, float * v, long n);
+
+long ivecs_fread (FILE * f, int * v, long n);
+
+long bvecs_fread (FILE * f, unsigned char * v, long n);
+
+long lvecs_fread (FILE * f, long long * v, long n);
+
+long b2fvecs_fread (FILE * f, float * v, long n);
 
 
 /*!  read and allocate a an integer vector file */
@@ -245,6 +256,14 @@ int * ivec_new_read(const char *fname, int *d_out);
 
 /*!  read an integer vector file from an open file and return the dimension */
 int ivec_fread (FILE *f, int * v);
+
+/*!  read a byte vector file from an open file and return the dimension */
+int bvec_fread (FILE *f, unsigned char * v);
+int b2fvec_fread (FILE * f, float * v);
+
+/*!  read an long vector file from an open file and return the dimension */
+int lvec_fread (FILE *f, long long * v);
+
 
 /*!  read several integer vectors from an ivec file. Return number read */
 int ivecs_new_read (const char *fname, int *d_out, int **vi);

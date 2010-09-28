@@ -112,9 +112,9 @@ int *ivec_new (long n)
   return ret;
 }
 
-long * lvec_new (long n)
+long long * lvec_new (long n)
 {
-  long *ret = (long *) malloc (sizeof (*ret) * n);
+  long long *ret = (long long *) malloc (sizeof (*ret) * n);
   if (!ret) {
     fprintf (stderr, "ivec_new %ld : out of memory\n", n);
     abort();
@@ -145,9 +145,9 @@ double * dvec_new_0 (long n)
 }
 
 
-long *lvec_new_0 (long n)
+long long *lvec_new_0 (long n)
 {
-  long *ret = (long *) calloc (sizeof (*ret), n);
+  long long *ret = (long long*) calloc (sizeof (*ret), n);
   if (!ret) {
     fprintf (stderr, "fvec_new_0 %ld : out of memory\n", n);
     abort();
@@ -460,7 +460,7 @@ long fvecs_fsize (const char * fname, int *d_out, int *n_out)
   nbytes = ftell (f);
   fclose (f);
   
-  assert (nbytes % (d + 1) == 0);   /* checksum */
+  assert (nbytes % (4 * d + 4) == 0);   /* checksum */
 
   *d_out = d;
   *n_out = nbytes / (4 * d + 4);
@@ -474,6 +474,52 @@ long ivecs_fsize (const char * fname, int *d_out, int *n_out)
 }
 
 
+long bvecs_fsize (const char * fname, int *d_out, int *n_out)
+{
+  int d, ret; 
+  long nbytes;
+
+  FILE * f = fopen (fname, "r");
+  
+  /* read the dimension from the first vector */
+  ret = fread (&d, sizeof (d), 1, f);
+  if (ret == 0)
+    return ret;
+  
+  fseek (f, 0, SEEK_END);
+  nbytes = ftell (f);
+  fclose (f);
+  
+  assert (nbytes % (d + 4) == 0);   /* checksum */
+
+  *d_out = d;
+  *n_out = nbytes / (d + 4);
+  return nbytes;
+}
+
+
+long lvecs_fsize (const char * fname, int *d_out, int *n_out)
+{
+  int d, ret; 
+  long nbytes;
+
+  FILE * f = fopen (fname, "r");
+  
+  /* read the dimension from the first vector */
+  ret = fread (&d, sizeof (d), 1, f);
+  if (ret == 0)
+    return ret;
+  
+  fseek (f, 0, SEEK_END);
+  nbytes = ftell (f);
+  fclose (f);
+  
+  assert (nbytes % (sizeof (long long) * d + 4) == 0);   /* checksum */
+
+  *d_out = d;
+  *n_out = nbytes / (sizeof (long long) * d + 4);
+  return nbytes;
+}
 
 
 int fvec_fwrite (FILE *fo, const float *v, int d) 
@@ -579,6 +625,7 @@ int fvecs_new_read (const char *fname, int *d_out, float **vf_out)
   
   return n;
 }
+
 
 int fvecs_new_fread_max (FILE *f, int *d_out, float **vf_out, long nmax)
 {
@@ -783,6 +830,9 @@ int fvec_fread (FILE * f, float * v)
   int d;
   int ret = fread (&d, sizeof (int), 1, f);
 
+  if (feof (f))
+    return 0;
+
   if (ret != 1) {
     perror ("# fvec_fread error 1");
     return -1;
@@ -811,16 +861,19 @@ float *fvec_fread_raw(FILE * f, long d) {
 }
 
 
-int fvecs_fread (FILE * f, float * v, long n)
+long fvecs_fread (FILE * f, float * v, long n)
 {
   long i = 0, d = -1, ret;
   for (i = 0 ; i < n ; i++) {
+    if (feof (f))
+      break;
+
     ret = fvec_fread (f, v + i * d);
+    if (ret == 0)  /* eof */
+      break;
 
     if (ret == -1)
       return 0;
-
-    assert (ret > 0);
 
     if (i == 0)
       d = ret;
@@ -830,7 +883,111 @@ int fvecs_fread (FILE * f, float * v, long n)
       return 0;
     }
   }
-  return d * n;
+  return i;
+}
+
+
+long ivecs_fread (FILE * f, int * v, long n)
+{
+  long i = 0, d = -1, ret;
+  for (i = 0 ; i < n ; i++) {
+    if (feof (f))
+      break;
+
+    ret = ivec_fread (f, v + i * d);
+    if (ret == 0)  /* eof */
+      break;
+
+    if (ret == -1)
+      return 0;
+
+    if (i == 0)
+      d = ret;
+
+    if (d != ret) {
+      perror ("# ivecs_fread: dimension of the vectors is not consistent\n");
+      return 0;
+    }
+  }
+  return i;
+}
+
+
+long bvecs_fread (FILE * f, unsigned char * v, long n)
+{
+  long i = 0, d = -1, ret;
+  for (i = 0 ; i < n ; i++) {
+    if (feof (f))
+      break;
+
+    ret = bvec_fread (f, v + i * d);
+    if (ret == 0)  /* eof */
+      break;
+
+    if (ret == -1)
+      return 0;
+
+    if (i == 0)
+      d = ret;
+
+    if (d != ret) {
+      perror ("# bvecs_fread: dimension of the vectors is not consistent\n");
+      return 0;
+    }
+  }
+  return i;
+}
+
+
+long b2fvecs_fread (FILE * f, float * v, long n)
+{
+  long i = 0, d = -1, ret;
+  for (i = 0 ; i < n ; i++) {
+    if (feof (f))
+      break;
+
+    ret = b2fvec_fread (f, v + i * d);
+    if (ret == 0)  /* eof */
+      break;
+
+    if (ret == -1)
+      return 0;
+
+    if (i == 0)
+      d = ret;
+
+    if (d != ret) {
+      perror ("# bvecs_fread: dimension of the vectors is not consistent\n");
+      return 0;
+    }
+  }
+  return i;
+}
+
+
+long lvecs_fread (FILE * f, long long * v, long n)
+{
+  long i = 0, d = -1, ret;
+  for (i = 0 ; i < n ; i++) {
+    if (feof (f))
+      break;
+
+    ret = lvec_fread (f, v + i * d);
+    if (ret == 0)  /* eof */
+      break;
+
+    if (ret == -1)
+      return 0;
+
+    if (i == 0)
+      d = ret;
+
+    if (d != ret) {
+      perror ("# lvecs_fread: dimension of the vectors is not consistent\n");
+      return 0;
+    }
+  }
+  return i;
 }
 
 
@@ -923,6 +1080,8 @@ int ivec_fread (FILE * f, int * v)
 {
   int d;
   int ret = fread (&d, sizeof (int), 1, f);
+  if (feof (f))
+    return 0;
 
   if (ret != 1) {
     perror ("# ivec_fread error 1");
@@ -932,6 +1091,74 @@ int ivec_fread (FILE * f, int * v)
   ret = fread (v, sizeof (*v), d, f);
   if (ret != d) {
     perror ("# ivec_fread error 2");
+    return -1;
+  }
+  return d;
+}
+
+
+int bvec_fread (FILE * f, unsigned char * v)
+{
+  int d;
+  int ret = fread (&d, sizeof (int), 1, f);
+  if (feof (f))
+    return 0;
+
+  if (ret != 1) {
+    perror ("# bvec_fread error 1");
+    return -1;
+  }
+
+  ret = fread (v, sizeof (*v), d, f);
+  if (ret != d) {
+    perror ("# bvec_fread error 2");
+    return -1;
+  }
+  return d;
+}
+
+
+int b2fvec_fread (FILE * f, float * v)
+{
+  int d, j;
+  int ret = fread (&d, sizeof (int), 1, f);
+  if (feof (f))
+    return 0;
+
+  if (ret != 1) {
+    perror ("# bvec_fread error 1");
+    return -1;
+  }
+
+  unsigned char * vb = (unsigned char *) malloc (sizeof (*vb) * d);
+
+  ret = fread (vb, sizeof (*vb), d, f);
+  if (ret != d) {
+    perror ("# bvec_fread error 2");
+    return -1;
+  }
+  for (j = 0 ; j < d ; j++)
+    v[j] = vb[j];
+  free (vb);
+  return d;
+}
+
+
+int lvec_fread (FILE * f, long long * v)
+{
+  int d;
+  int ret = fread (&d, sizeof (int), 1, f);
+  if (feof (f))
+    return 0;
+
+  if (ret != 1) {
+    perror ("# bvec_fread error 1");
+    return -1;
+  }
+
+  ret = fread (v, sizeof (*v), d, f);
+  if (ret != d) {
+    perror ("# bvec_fread error 2");
     return -1;
   }
   return d;
@@ -955,6 +1182,26 @@ void ivec_print (const int * v, int n)
   printf ("[");
   for (i = 0 ; i < n ; i++)
     printf ("%d ", v[i]);
+  printf ("]\n");
+}
+
+
+void bvec_print (const unsigned char * v, int n)
+{
+  int i;
+  printf ("[");
+  for (i = 0 ; i < n ; i++)
+    printf ("%d ", (int) v[i]);
+  printf ("]\n");
+}
+
+
+void lvec_print (const long long * v, int n)
+{
+  int i;
+  printf ("[");
+  for (i = 0 ; i < n ; i++)
+    printf ("%lld ", (long long) v[i]);
   printf ("]\n");
 }
 

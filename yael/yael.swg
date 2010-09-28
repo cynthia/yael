@@ -42,7 +42,7 @@ array_class_plus(double,DoubleArray)
 array_class_plus(float,FloatArray)
 array_class_plus(int,IntArray)
 array_class_plus(unsigned char,bvec)
-array_class_plus(long,lvec)
+array_class_plus(long long,lvec)
 array_class_plus(unsigned long long,UInt64Array)
 
 
@@ -91,6 +91,20 @@ array_class_plus(float_pointer_t,FloatPtrArray)
   $action
   Py_END_ALLOW_THREADS
 }
+
+// ?vecs_size functions returns a tuple (nbytes, n,d)
+%typemap(in,numinputs=0) 
+  (int *d_out,int *n_out)
+  (int d,int n) {
+  $1=&d;
+  $2=&n;
+}
+
+%typemap(argout) (int *d_out,int *n_out)  {
+  $result=Py_BuildValue
+    ("(Nii)", $result, *$1,*$2);
+}
+
 
 
 // fvecs_new_read and fvecs_new_fread_max returns a tuple 
