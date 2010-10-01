@@ -102,7 +102,7 @@ double *dvec_new (long n)
 }
 
 
-int *ivec_new (long n)
+ int *ivec_new (long n)
 {
   int *ret = (int *) malloc (sizeof (*ret) * n);
   if (!ret) {
@@ -111,6 +111,17 @@ int *ivec_new (long n)
   }
   return ret;
 }
+
+unsigned char * bvec_new (long n)
+{
+  unsigned char *ret = (unsigned char *) memalign (16, sizeof (*ret) * n);
+  if (!ret) {
+    fprintf (stderr, "bvec_new %ld : out of memory\n", n);
+    abort();
+  }
+  return ret;
+}
+
 
 long long * lvec_new (long n)
 {
@@ -794,6 +805,52 @@ int fvecs_read_txt (const char *fname, int d, int n, float *v)
   return i / d;
 }
 
+
+/* The behavior of bvecs_new_read in not completely consistent 
+   with the one of fvecs_new_read (can not read stream)         */
+int bvecs_new_read (const char *fname, int *d_out, unsigned char **v_out)
+{
+  int n, d;
+  bvecs_fsize (fname, &d, &n);
+  unsigned char * v = bvec_new (n * d);
+  FILE * f = fopen (fname, "r");
+  assert (f || "bvecs_new_read: Unable to open the file");
+  bvecs_fread (f, v, n * d);
+  fclose (f);
+
+  v_out = &v;
+  return n;
+}
+
+
+int b2fvecs_new_read (const char *fname, int *d_out, float **v_out)
+{
+  int n, d;
+  bvecs_fsize (fname, &d, &n);
+  float * v = fvec_new (n * d);
+  FILE * f = fopen (fname, "r");
+  assert (f || "bvecs_new_read: Unable to open the file");
+  b2fvecs_fread (f, v, n * d);
+  fclose (f);
+
+  v_out = &v;
+  return n;
+}
+
+
+int lvecs_new_read (const char *fname, int *d_out, long long **v_out)
+{
+  int n, d;
+  lvecs_fsize (fname, &d, &n);
+  long long * v = lvec_new (n * d);
+  FILE * f = fopen (fname, "r");
+  assert (f || "bvecs_new_read: Unable to open the file");
+  lvecs_fread (f, v, n * d);
+  fclose (f);
+
+  v_out = &v;
+  return n;
+}
 
 
 int fvec_read (const char *fname, int d, float *a, int o_f)

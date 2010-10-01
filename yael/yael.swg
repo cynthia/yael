@@ -14,6 +14,7 @@
 
 #include "nn.h"
 #include "kmeans.h"
+#include "hkm.h"
 #include "sorting.h"
 #include "vector.h"
 #include "matrix.h"
@@ -181,7 +182,7 @@ PARALLEL_FUNCTION_PEEK(knn_full_thread)
 
 
 /*************************************************************************
- * clustering.h
+ * kmeans.h
  */
 
 
@@ -202,6 +203,8 @@ PARALLEL_FUNCTION_PEEK(knn_full_thread)
 
 
 %include "kmeans.h"
+
+%include "hkm.h"
 
 /*************************************************************************
  * sorting.h

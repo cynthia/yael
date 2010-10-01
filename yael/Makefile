@@ -22,7 +22,7 @@ endif
 #############################
 # Various  
 
-LIBOBJ=matrix.o vector.o nn.o kmeans.o gmm.o eigs.o \
+LIBOBJ=matrix.o vector.o nn.o kmeans.o hkm.o gmm.o eigs.o \
 	spectral_clustering.o sorting.o binheap.o machinedeps.o vlad.o
 
 libyael.a: $(LIBOBJ)
@@ -40,6 +40,8 @@ matrix.o: EXTRACFLAGS=$(LAPACKCFLAGS) $(THREADCFLAGS) $(EXTRAMATRIXFLAG)
 
 kmeans.o: EXTRACFLAGS=$(THREADCFLAGS)
 
+hkm.o: EXTRACFLAGS=$(THREADCFLAGS)
+
 gmm.o: EXTRACFLAGS=$(THREADCFLAGS) $(LAPACKCFLAGS)
 
 eigs.o: EXTRACFLAGS=$(LAPACKCFLAGS) $(LAPACKCFLAGS) $(EXTRAEIGSFLAG)
@@ -55,7 +57,7 @@ mmap_and_lock: mmap_and_lock.c
 # Python wrapper 
 
 
-yael_wrap.c : yael.swg common.swg nn.h kmeans.h gmm.h eigs.h \
+yael_wrap.c : yael.swg common.swg nn.h kmeans.h gmm.h eigs.h hkm.h \
 	sorting.h matrix.h vector.h machinedeps.h vlad.h
 	$(SWIG) -I.. $(NUMPYSWIGFLAGS) $< 
 
@@ -71,6 +73,7 @@ binheap.o: binheap.c binheap.h sorting.h
 eigs.o: eigs.c eigs.h vector.h sorting.h machinedeps.h 
 gmm.o: gmm.c vector.h matrix.h kmeans.h nn.h gmm.h sorting.h
 kmeans.o: kmeans.c vector.h kmeans.h nn.h
+hkm.o: hkm.c hkm.h kmeans.h vector.h kmeans.h nn.h
 machinedeps.o: machinedeps.c machinedeps.h
 matrix.o: matrix.c matrix.h vector.h sorting.h machinedeps.h eigs.h
 nn.o: nn.c machinedeps.h vector.h nn.h binheap.h sorting.h

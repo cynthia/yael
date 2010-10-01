@@ -90,6 +90,9 @@ float * fvec_new (long n);
 /*! Alloc an int array -- to be de-allocated with free. */
 int *ivec_new (long n);
 
+/*! Alloc an byte array -- to be de-allocated with free. */
+unsigned char *bvec_new (long n);
+
 /*! Alloc a long array -- to be de-allocated with free */
 long long * lvec_new (long n);
 
@@ -211,6 +214,15 @@ int fvecs_write_txt (const char * fname, int d, int n, const float *vf);
 int fvecs_new_read (const char *fname, int *d_out, float **vf);
 
 int fvecs_new_fread_max (FILE *f, int *d_out, float **vf, long nmax);
+
+/* The behavior of bvecs_new_read in not completely consistent 
+   with the one of fvecs_new_read (can not read stream)         */
+int bvecs_new_read (const char *fname, int *d_out, unsigned char **v_out);
+
+int lvecs_new_read (const char *fname, int *d_out, long long **v_out);
+
+/*! load a file of byte vectors, and convert them to float on-the-fly */
+int b2fvecs_new_read (const char *fname, int *d_out, float **v_out);
 
 /*! reads sparse vectors and return them as dense. d must be known */
 int fvecs_new_read_sparse (const char *fname, int d, float **vf_out);
