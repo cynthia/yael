@@ -136,7 +136,7 @@ static void call_peek_fun_thread(void *arg,double frac) {
   }
 };
 %pythoncode %{
-name.acquirepointer=staticmethod(lambda ptr: _frompointer_and_acquire(name,ptr))
+name.aptr=name.acquirepointer=staticmethod(lambda ptr: _frompointer_and_acquire(name,ptr))
 %}
 %enddef
 

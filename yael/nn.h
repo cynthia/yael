@@ -175,7 +175,7 @@ void compute_cross_distances_thread (int d, int na, int nb,
 
 
 
-/*! alternative distances. 
+/*! Like compute_cross_distances with alternative distances. 
  *
  * @param distance_type    type of distance to compute: 
  *    - 1: L1
@@ -186,6 +186,15 @@ void compute_cross_distances_thread (int d, int na, int nb,
 void compute_cross_distances_alt (int distance_type, int d, int na, int nb,
                                   const float *a,
                                   const float *b, float *dist2);
+
+
+/*! compute_cross_distances_alt with non-packed input and output */
+void compute_cross_distances_alt_nonpacked (int distance_type, int d, int na, int nb,
+                                            const float *a, int lda,
+                                            const float *b, int ldb,
+                                            float *dist2, int ldd);
+
+
 
 
 void compute_cross_distances_alt_thread (int distance_type,int d, int na, int nb,
