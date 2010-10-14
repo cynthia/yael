@@ -262,9 +262,8 @@ void compute_cross_distances_alt (int distance_type, int d, int na, int nb,
  * blocks are BLOCK_NPT * BLOCK_CLUST
  */
 
-#define BLOCK_N1 1024
-#define BLOCK_N2 1024
-
+#define BLOCK_N1 512
+#define BLOCK_N2 512
 
 
 
@@ -276,12 +275,12 @@ void compute_cross_distances_alt (int distance_type, int d, int na, int nb,
 
 /* n1 = pts */
 static void nn_single_full (int distance_type,
-                                           int n1, int n2, int d,
-                                           const float *mat2, const float *mat1, 
-                                           const float *vw_weights,                             
-                                           int *vw, float *vwdis,
-                                           void (*peek_fun) (void *arg, double frac),
-                                           void *peek_arg)
+			    int n1, int n2, int d,
+			    const float *mat2, const float *mat1, 
+			    const float *vw_weights,                             
+			    int *vw, float *vwdis,
+			    void (*peek_fun) (void *arg, double frac),
+			    void *peek_arg)
 {
   int step1 = MIN (n1, BLOCK_N1), step2 = MIN (n2, BLOCK_N2);
 
@@ -354,11 +353,11 @@ static void nn_single_full (int distance_type,
 
 
 void knn_full (int distance_type,int n1, int n2, int d, int k,
-                             const float *mat2, const float *mat1,
-                             const float *vw_weights,
-                             int *vw, float *vwdis,                                             
-                             void (*peek_fun) (void *arg,double frac),
-                             void *peek_arg)
+	       const float *mat2, const float *mat1,
+	       const float *vw_weights,
+	       int *vw, float *vwdis,                                             
+	       void (*peek_fun) (void *arg,double frac),
+	       void *peek_arg)
 {
   assert (k <= n2);
 
