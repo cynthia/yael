@@ -1,5 +1,5 @@
 /*
-Copyright © INRIA 2010. 
+Copyright ï¿½ INRIA 2010. 
 Authors: Matthijs Douze & Herve Jegou 
 Contact: matthijs.douze@inria.fr  herve.jegou@inria.fr
 
@@ -437,6 +437,19 @@ long ivec_count_gt(const int * v, long n, int val) {
   while(n--) if(v[n]>val) count++;
   return count;
 }
+
+long fvec_count_inrange(const float * v, long n, float vmin, float vmax) {
+  long count=0;
+  while(n--) if(v[n]>=vmin && v[n]<vmax) count++;
+  return count;
+}
+
+long ivec_count_inrange(const int * v, long n, int vmin, int vmax) {
+  long count=0;
+  while(n--) if(v[n]>=vmin && v[n]<vmax) count++;
+  return count;
+}
+
 
 
 void ivec_accumulate_slices(const int *v,int *sl,int n) {
@@ -1360,6 +1373,16 @@ void fvec_incr (float * v, long n, double scal)
 void fvec_decr (float * v, long n, double scal)
 {
   fvec_incr(v, n, -scal);  
+}
+
+
+void ivec_incr (int * v, long n, int scal) {
+  long i = 0;
+  for (i = 0 ; i < n ; i++)
+    v[i] += scal;
+}
+void ivec_decr (int * v, long n, int scal) {
+  ivec_incr(v, n, -scal);  
 }
 
 

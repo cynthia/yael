@@ -1,5 +1,5 @@
 /*
-Copyright © INRIA 2010. 
+Copyright ï¿½ INRIA 2010. 
 Authors: Matthijs Douze & Herve Jegou 
 Contact: matthijs.douze@inria.fr  herve.jegou@inria.fr
 
@@ -173,6 +173,10 @@ long ivec_count_lt(const int * v, long n, int val);
 long fvec_count_gt(const float * v, long n, float val);
 long ivec_count_gt(const int * v, long n, int val);
 
+/*!  count number of values in a range (min <= x < max) */
+long fvec_count_inrange(const float * v, long n, float vmin, float vmax);
+long ivec_count_inrange(const int * v, long n, int vmin, int vmax);
+
 
 /*---------------------------------------------------------------------------*/
 /* Input/Output functions                                                    */
@@ -331,6 +335,10 @@ void fvec_cpy (float * vdest, const float * vsource, long n);
 /*!  Increment or decrement a vector by a scalar value */
 void fvec_incr (float * v, long n, double scal);
 void fvec_decr (float * v, long n, double scal);
+void ivec_incr (int * v, long n, int scal);
+void ivec_decr (int * v, long n, int scal);
+
+
 
 /*!  Multiply or divide a vector by a scalar */
 void fvec_mul_by (float * v, long n, double scal);
