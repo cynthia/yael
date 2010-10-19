@@ -653,7 +653,8 @@ int fvecs_new_read (const char *fname, int *d_out, float **vf_out)
 
 int fvecs_new_fread_max (FILE *f, int *d_out, float **vf_out, long nmax)
 {
-  int n, d = -1;
+  long n;
+  int d = -1;
 
   float *vf=NULL;
   long nalloc=0;
@@ -761,7 +762,7 @@ int fvecs_read (const char *fname, int d, int n, float *a)
     return -1;
   }
 
-  int i;
+  long i;
   for (i = 0; i < n; i++) {
     int new_d;
 
@@ -793,7 +794,7 @@ int fvecs_read (const char *fname, int d, int n, float *a)
 
 int fvecs_read_txt (const char *fname, int d, int n, float *v)
 {
-  int i, ret;
+  long i, ret;
   FILE * f = fopen (fname, "r");
   if (!f) {
     fprintf (stderr, "fvecs_read_txt: could not open %s\n", fname);
@@ -823,7 +824,8 @@ int fvecs_read_txt (const char *fname, int d, int n, float *v)
    with the one of fvecs_new_read (can not read stream)         */
 int bvecs_new_read (const char *fname, int *d_out, unsigned char **v_out)
 {
-  int n, d;
+  long n;
+  int d;
   bvecs_fsize (fname, &d, &n);
   unsigned char * v = bvec_new (n * d);
   FILE * f = fopen (fname, "r");
@@ -838,7 +840,8 @@ int bvecs_new_read (const char *fname, int *d_out, unsigned char **v_out)
 
 int b2fvecs_new_read (const char *fname, int *d_out, float **v_out)
 {
-  int n, d;
+  long n;
+  int d;
   bvecs_fsize (fname, &d, &n);
   float * v = fvec_new (n * d);
   FILE * f = fopen (fname, "r");
@@ -853,7 +856,8 @@ int b2fvecs_new_read (const char *fname, int *d_out, float **v_out)
 
 int lvecs_new_read (const char *fname, int *d_out, long long **v_out)
 {
-  int n, d;
+  long n;
+  int d;
   lvecs_fsize (fname, &d, &n);
   long long * v = lvec_new (n * d);
   FILE * f = fopen (fname, "r");
@@ -1134,7 +1138,8 @@ int ivecs_new_read (const char *fname, int *d_out, int **vi_out)
 
 
 int *ivec_new_read(const char *fname, int *d_out) {
-  int d, n;
+  int d;
+  long n;
   int *vi;
   n = ivecs_new_read(fname,&d,&vi);
   if (n<0) 
