@@ -824,13 +824,13 @@ int fvecs_read_txt (const char *fname, int d, int n, float *v)
    with the one of fvecs_new_read (can not read stream)         */
 int bvecs_new_read (const char *fname, int *d_out, unsigned char **v_out)
 {
-  long n;
+  int n;
   int d;
   bvecs_fsize (fname, &d, &n);
-  unsigned char * v = bvec_new (n * d);
+  unsigned char * v = bvec_new ((long) n * d);
   FILE * f = fopen (fname, "r");
   assert (f || "bvecs_new_read: Unable to open the file");
-  bvecs_fread (f, v, n * d);
+  bvecs_fread (f, v, n);
   fclose (f);
 
   v_out = &v;
@@ -840,13 +840,13 @@ int bvecs_new_read (const char *fname, int *d_out, unsigned char **v_out)
 
 int b2fvecs_new_read (const char *fname, int *d_out, float **v_out)
 {
-  long n;
+  int n;
   int d;
   bvecs_fsize (fname, &d, &n);
-  float * v = fvec_new (n * d);
+  float * v = fvec_new ((long) n * (long) d);
   FILE * f = fopen (fname, "r");
   assert (f || "bvecs_new_read: Unable to open the file");
-  b2fvecs_fread (f, v, n * d);
+  b2fvecs_fread (f, v, n);
   fclose (f);
 
   v_out = &v;
@@ -856,13 +856,13 @@ int b2fvecs_new_read (const char *fname, int *d_out, float **v_out)
 
 int lvecs_new_read (const char *fname, int *d_out, long long **v_out)
 {
-  long n;
+  int n;
   int d;
   lvecs_fsize (fname, &d, &n);
-  long long * v = lvec_new (n * d);
+  long long * v = lvec_new ((long) n * (long) d);
   FILE * f = fopen (fname, "r");
   assert (f || "bvecs_new_read: Unable to open the file");
-  lvecs_fread (f, v, n * d);
+  lvecs_fread (f, v, n);
   fclose (f);
 
   v_out = &v;
