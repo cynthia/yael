@@ -1357,13 +1357,13 @@ void ivec_set (int * v, long n, int val)
 
 void ivec_cpy (int * vdest, const int * vsource, long n)
 {
-  memcpy (vdest, vsource, n * sizeof (*vdest));
+  memmove (vdest, vsource, n * sizeof (*vdest));
 }
 
 
 void fvec_cpy (float * vdest, const float * vsource, long n)
 {
-  memcpy (vdest, vsource, n * sizeof (*vdest));
+  memmove (vdest, vsource, n * sizeof (*vdest));
 }
 
 
@@ -1728,6 +1728,15 @@ long fvec_nz (const float * v, long n)
   return nz;
 }
 
+long fvec_num_nan (const float * v, long n)
+{
+  long i, nnan = 0;
+  for (i = 0 ; i < n ; i++)
+    if (isnan(v[i]))
+      nnan++;
+
+  return nnan;
+}
 
 long ivec_nz (const int * v, long n)
 {

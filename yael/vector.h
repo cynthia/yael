@@ -432,7 +432,8 @@ double fvec_norm2sqr (const float * v, long n);
 /*!  count the number of non-zeros elements */
 long fvec_nz (const float * v, long n);
 long ivec_nz (const int * v, long n);
-
+/*! count the number of nan values */
+long fvec_num_nan (const float * v, long n);
 
 /*!  compute the positions of the non-null positions.
   return the number of non-zeros positions. */

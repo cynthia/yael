@@ -494,6 +494,68 @@ float *fmat_new_covariance (int d, int n, const float *v, float *avg, int assume
   return cov;
 }
 
+float* fmat_new_transp (const float *a, int ncol, int nrow)
+{
+  int i,j;
+  float *vt=fvec_new(ncol*nrow);
+
+  for(i=0;i<ncol;i++) 
+    for(j=0;j<nrow;j++) 
+      vt[i*nrow+j]=a[j*ncol+i];
+
+  return vt;
+}
+
+/* algo from http://cheshirekow.com/blog/?p=4 */
+void fmat_inplace_transp(float *a, int ncol, int nrow)
+{
+  int length,k_start,k_new,k,i,j;
+
+  length=ncol*nrow;
+
+  for(k_start=1; k_start < length; k_start++)
+  {
+    float temp = a[k_start];
+    float aux;
+    int abort = 0;
+
+    k_new = k = k_start;
+    do
+    {
+      if( k_new < k_start )
+      {
+	abort = 1;
+	break;
+      }
+      k = k_new;
+      i = k% nrow;
+      j = k/nrow;
+      k_new = i*ncol + j;
+    }while(k_new != k_start);
+
+    if(abort)
+      continue;
+
+    k_new = k = k_start;
+    do
+    {
+      aux=temp;
+      temp = a[k_new];
+      a[k_new]=aux;
+
+      k       = k_new;
+      i       = k%nrow;
+      j       = k/nrow;
+      k_new   = i*ncol + j;
+    }while(k_new != k_start);
+    
+    aux=temp;
+    temp = a[k_new];
+    a[k_new]=aux;
+  }
+}
+
+
 
 
 

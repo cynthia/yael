@@ -156,6 +156,18 @@ float *fmat_get_rows (const float *a, int ncol, int nrowout, const int *rows);
 /*! RM  per-column sum of matrix elements */
 float *fmat_sum_columns (const float *a, int ncol, int nrow);
 
+/*! Matrix transposition
+ * 
+ * @param a         the matrix (nrow by ncol
+ * @param ncol      number of columns of original matrix
+ * @param nrow      number of rows of original matrix
+ * @return          transposed copy of the matrix (and void for the inplace version)
+ */
+
+float *fmat_new_transp (const float *a, int ncol, int nrow);
+
+void fmat_inplace_transp ( float *a, int ncol, int nrow);
+
 /*! RM 
  * a is ncol-by-nrow
  * accu is k-by-k
