@@ -60,7 +60,7 @@ void fvec_k_max(const float *v, int n, int *maxes, int k);
 /*! Find the minimum elements of an array.
  * See find_k_max. 
  */
-void fvec_k_min(const float *v, int n, int *maxes, int k);
+void fvec_k_min(const float *v, int n, int *mins, int k);
 
 
 /*! finds the ranks of a few values in a large set.

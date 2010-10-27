@@ -227,7 +227,7 @@ static void gmm_compute_params (int n, const float * v, const float * p,
 
   long nz=0;
   for(i=0;i<k*d;i++) 
-    if(fabs(g->sigma[i])<min_sigma) {
+    if(g->sigma[i]<min_sigma) {
       g->sigma[i]=min_sigma;
       nz++;
     }
@@ -271,7 +271,7 @@ static double log_sum (double log_a, double log_b)
   return log_s;
 }
 
-#define CHECKFINITE(a) if(!finite(a)) {fprintf(stderr,"!!!! gmm_compute_p: not finite " #a "=%g at line %d\n",a,__LINE__); }; 
+#define CHECKFINITE(a) if(!finite(a)) {fprintf(stderr,"!!!! gmm_compute_p: not finite " #a "=%g at line %d\n",a,__LINE__); abort(); }; 
 
 
 static void compute_mahalanobis_sqr(int n,long k,long d,
@@ -512,6 +512,7 @@ gmm_t * gmm_learn (int di, int ni, int ki, int niter,
     
     gmm_compute_params (n, v, p, g, flags, nt);
     fflush(stdout);
+
 
     iter_tot++;
 
