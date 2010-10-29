@@ -513,6 +513,9 @@ void ivec_accumulate_slices(const int *v,int *sl,int n);
 /*!  mapping operator: dest[i]:=src[map[i]] for i=0..n-1 */
 void fvec_map (const float *src,const int *map,int n,float *dest);
 
+/*!  mapping operator: dest[i]:=src[map[i]] for i=0..n-1 */
+void ivec_map (const int *src,const int *map,int n,int *dest);
+
 /*!  inverse mapping operator: dest[imap[i]]:=src[i] for i=0..n-1 */
 void fvec_imap(const float *src,const int *imap,int n,float *dest);
 

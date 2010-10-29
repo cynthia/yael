@@ -378,6 +378,12 @@ void fvec_map(const float *src,const int *map,int n,float *dest) {
     dest[i]=src[map[i]];
 }
 
+void ivec_map (const int *src,const int *map,int n,int *dest) {
+  int i;
+  for(i=0;i<n;i++) 
+    dest[i]=src[map[i]];
+}
+
 void fvec_imap(const float *src,const int *imap,int n,float *dest) {
   int i;
   for(i=0;i<n;i++) 

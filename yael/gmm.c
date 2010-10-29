@@ -204,26 +204,7 @@ static void gmm_compute_params (int n, const float * v, const float * p,
       double var=fvec_sum(sigma_j,d)/d;
       fvec_set(sigma_j,d,var);
     }
-  } else if(0) { /* grouped sigmas, not useful */
-    int group_sigma=2;
-    int *perm = ivec_new(d);
-    for (j = 0 ; j < k ; j++) {
-      float *sigma_j=g->sigma+j*d;
-      fvec_sort_index (sigma_j,d,perm);
-      int group_size=d>>(group_sigma-2),gbegin,l;
-      for(gbegin=0;gbegin<d;gbegin+=group_size) {
-        double var=0;
-        for(l=0;l<group_size;l++) 
-          var+=sigma_j[perm[gbegin+l]];
-        var/=group_size;
-        for(l=0;l<group_size;l++) 
-          sigma_j[perm[gbegin+l]]=var;
-      }     
-      
-    } 
-    free(perm);
   }
-
 
   long nz=0;
   for(i=0;i<k*d;i++) 
@@ -238,6 +219,8 @@ static void gmm_compute_params (int n, const float * v, const float * p,
     fvec_div_by (g->mu + j * d, d, g->w[j]);
     fvec_div_by (g->sigma + j * d, d, g->w[j]);
   }
+
+  assert(finite(fvec_sum(g->mu, k*d)));
 
   fvec_normalize (g->w, k, 1);
 
@@ -431,14 +414,19 @@ void gmm_handle_empty(int n, const float *v, gmm_t *g, float *p) {
     for (j = 0 ; j < k ; j++) 
       w[j]+=p[j+i*k];
       
+  int bigprime=1000003;
+
   for (j = 0 ; j < k ; j++) if(w[j]==0) {
     printf("center %d is empty....",j);
     fflush(stdout);
     int j2;
 
-    do {
-      j2=random()%k;
-    } while(w[j2]==0);
+    j2=j;
+    for(i=0;i<k;i++) {
+      j2=(j2+bigprime)%k; 
+      if(w[j2]>0) break;
+    }
+    assert(i<k || !"could not find centroid to split, veeeery bad input data");
     
     /* dimension to split: that with highest variance */
     int split_dim = fvec_arg_max (g->sigma + d * j2, d);
@@ -447,18 +435,19 @@ void gmm_handle_empty(int n, const float *v, gmm_t *g, float *p) {
     int nt=0,nnz=0;
     for(i=0;i<n;i++) if(p[j2+i*k]>0) { 
       nnz++;
-      if(v[j*d+split_dim]<g->mu[split_dim]) {
+      if(v[i*d+split_dim]<g->mu[j2*d+split_dim]) {
         p[j+i*k]=p[j2+i*k];
         p[j2+i*k]=0;
         nt++;
       }
     }
 
-    printf("split %d at dim %d (transferred %d/%d pts)\n",j2,split_dim,nt,nnz);    
+    printf("split %d at dim %d (variance %g, transferred %d/%d pts)\n",                      
+           j2,split_dim,g->sigma[d*j2+split_dim],nt,nnz);    
 
-    w[j2]=0; /* avoid further splits */
+    w[j2]=-1; /* avoid further splits */
   }
-
+  
   free(w);
 
 }
