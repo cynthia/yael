@@ -450,6 +450,16 @@ long ivec_count_inrange(const int * v, long n, int vmin, int vmax) {
   return count;
 }
 
+long fvec_count_nan (const float * v, long n)
+{
+  long i, nnan = 0;
+  for (i = 0 ; i < n ; i++)
+    if (isnan(v[i]))
+      nnan++;
+
+  return nnan;
+}
+
 
 
 void ivec_accumulate_slices(const int *v,int *sl,int n) {
@@ -1726,16 +1736,6 @@ long fvec_nz (const float * v, long n)
       nz++;
 
   return nz;
-}
-
-long fvec_num_nan (const float * v, long n)
-{
-  long i, nnan = 0;
-  for (i = 0 ; i < n ; i++)
-    if (isnan(v[i]))
-      nnan++;
-
-  return nnan;
 }
 
 long ivec_nz (const int * v, long n)

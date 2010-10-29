@@ -177,6 +177,9 @@ long ivec_count_gt(const int * v, long n, int val);
 long fvec_count_inrange(const float * v, long n, float vmin, float vmax);
 long ivec_count_inrange(const int * v, long n, int vmin, int vmax);
 
+/*! count the number of nan values */
+long fvec_count_nan (const float * v, long n);
+
 
 /*---------------------------------------------------------------------------*/
 /* Input/Output functions                                                    */
@@ -432,8 +435,6 @@ double fvec_norm2sqr (const float * v, long n);
 /*!  count the number of non-zeros elements */
 long fvec_nz (const float * v, long n);
 long ivec_nz (const int * v, long n);
-/*! count the number of nan values */
-long fvec_num_nan (const float * v, long n);
 
 /*!  compute the positions of the non-null positions.
   return the number of non-zeros positions. */
