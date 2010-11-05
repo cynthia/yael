@@ -222,21 +222,22 @@ static float vec_chi2(const float *a,const float *b,int n) {
 
 /* TODO optimize a bit more with blocks */
 static void cross_distances_chi2_vec(int d,int na,int nb,
-                                     const float *a,int lda,
-                                     const float *b,int ldb,
-                                     float *c,int ldc) {  
+                              const float *a,int lda,
+                              const float *b,int ldb,
+                              float *c,int ldc) {  
   int i,j;
-  const float *al=a;
-  float *cl=c;  
-  for(i=0;i<na;i++) {
-    const float *bl=b;
-    for(j=0;j<nb;j++) {
-      cl[j]=vec_chi2(al,bl,d);
-      bl+=ldb;
+  const float *bl=b;
+  float *cl=c;    
+
+  for(j=0;j<nb;j++) {
+    const float *al=a;
+    for(i=0;i<na;i++) {
+      cl[i]=vec_chi2(al,bl,d);;
+      al+=lda;
     }
-    al+=lda;
     cl+=ldc;
-  } 
+    bl+=ldb;
+  }
 }
 
 #endif  
