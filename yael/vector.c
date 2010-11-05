@@ -466,6 +466,15 @@ long fvec_count_nan (const float * v, long n)
   return nnan;
 }
 
+long fvec_count_nonfinite (const float * v, long n)
+{
+  long i, nnf = 0;
+  for (i = 0 ; i < n ; i++)
+    if (!finite(v[i]))
+      nnf++;
+
+  return nnf;
+}
 
 
 void ivec_accumulate_slices(const int *v,int *sl,int n) {

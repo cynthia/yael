@@ -195,22 +195,71 @@ void compute_distances_1 (int d, int nb,
 }
 
 
+#ifdef __SSE2__
 
+#include <emmintrin.h>
 
+#warning "using SSE optimized Chi^2"
 
+/* compute chi2 distance between two vectors */
+static float vec_chi2(const float *a,const float *b,int n) {
+  int i=0;
+  __v4sf accu={0,0,0,0};
+  __v4sf *av=(void*)a,*bv=(void*)b;
+  n/=4;
 
+  for(i=0;i<n;i++) {
+    __v4sf ai=av[i],bi=bv[i];
+    __v4sf sum=ai+bi,diff=ai-bi;
+    __v4sf mask=_mm_cmpneq_ps(ai,bi);
+    accu+=_mm_and_ps(_mm_div_ps(_mm_mul_ps(diff,diff),sum),mask);
+  }
+
+  float *af=(void*)&accu;
+      
+  return af[0]+af[1]+af[2]+af[3];
+}
+
+/* TODO optimize a bit more with blocks */
+static void cross_distances_chi2_vec(int d,int na,int nb,
+                                     const float *a,int lda,
+                                     const float *b,int ldb,
+                                     float *c,int ldc) {  
+  int i,j;
+  const float *al=a;
+  float *cl=c;  
+  for(i=0;i<na;i++) {
+    const float *bl=b;
+    for(j=0;j<nb;j++) {
+      cl[j]=vec_chi2(al,bl,d);
+      bl+=ldb;
+    }
+    al+=lda;
+    cl+=ldc;
+  } 
+}
+
+#endif  
 
 static double sqr (double x)
 {
   return x * x;
 }
 
-/* alternative distance functions (not optimized) */
+/* alternative distance functions */
 
 void compute_cross_distances_alt_nonpacked (int distance_type, int d, int na, int nb,
                                             const float *a, int lda,
                                             const float *b, int ldb,
                                             float *dist2, int ldd) {
+  /* special cases for optimized versions */
+#ifdef __SSE2__
+  if(distance_type==3 && d%4==0) {
+    cross_distances_chi2_vec(d,na,nb,a,lda,b,ldb,dist2,ldd);
+    return;
+  }
+#endif  
+
   int i,j,k;
 
   for(j=0;j<nb;j++) {

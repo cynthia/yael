@@ -179,6 +179,7 @@ long ivec_count_inrange(const int * v, long n, int vmin, int vmax);
 
 /*! count the number of nan values */
 long fvec_count_nan (const float * v, long n);
+long fvec_count_nonfinite (const float * v, long n);
 
 
 /*---------------------------------------------------------------------------*/
