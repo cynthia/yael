@@ -367,7 +367,8 @@ void fvec_div (float * v1, const float * v2, long n);
 /*!  Normalize the vector for the given Minkowski norm. 
   The function return the norm of the original vector. 
   If the vector is all 0, it will be filled with NaNs. 
-  This case can be identified when the return value is 0. */
+  This case can be identified when the return value is 0. 
+  Infinty norm can be obtained with norm=-1 */
 double fvec_normalize (float * v, long n, double norm);
 
 /*!  This function normalize a set of n d-dimensional vectors. 
@@ -398,7 +399,7 @@ void ivec_add_scalar (int * v, long n, int scal);
 
 /*! Replace the "Not a number" values by a given value */
 int fvec_purge_nans(float * v, long n, float replace_value);
-
+int fvec_purge_nonfinite(float * v, long n, float replace_value);
 
 /*!  Shrink the vector, removing "Not a number" and inf values. 
   Returns new size */
@@ -427,7 +428,7 @@ long long ivec_sum_sqr (const int * v, long n);
 double fvec_mean (const float * v, long n);
 long long ivec_mean (const int * v, long n);
 
-/*!  compute the norm of a given vector */
+/*!  compute the norm of a given vector (norm=-1 => infinty norm) */
 double fvec_norm (const float * v, long n, double norm);
 
 /*!  compute squared norm 2 */

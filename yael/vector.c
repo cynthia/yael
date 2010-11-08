@@ -1519,6 +1519,17 @@ int fvec_purge_nans(float * v, long n, float replace_value) {
   return count;
 }
 
+int fvec_purge_nonfinite(float * v, long n, float replace_value) {
+  long i, count=0;
+  
+  for(i=0;i<n;i++) if(!finite(v[i])) {
+    count++;
+    v[i]=replace_value;
+  }
+  
+  return count;
+}
+
 long fvec_shrink_nonfinite(float * v, long n) {
   long i,j=0;
   
@@ -1724,6 +1735,12 @@ double fvec_norm (const float * v, long n, double norm)
       s += v[i]*v[i];
     
     return sqrt(s);
+  } 
+
+  if(norm==-1) {
+    for (i = 0 ; i < n ; i++)
+      if(fabs(v[i])>s) s=fabs(v[i]);
+    return s;
   }
 
   for (i = 0 ; i < n ; i++) {

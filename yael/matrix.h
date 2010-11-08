@@ -156,6 +156,10 @@ float *fmat_get_rows (const float *a, int ncol, int nrowout, const int *rows);
 /*! RM  per-column sum of matrix elements */
 float *fmat_sum_columns (const float *a, int ncol, int nrow);
 
+float *fmat_new_vstack(const float *a,int da,
+                       const float *b,int db,
+                       int n);
+
 /*! Matrix transposition
  * 
  * @param a         the matrix (nrow by ncol

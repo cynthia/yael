@@ -384,7 +384,21 @@ void fmat_rev_subtract_from_columns(int d,int n,float *v,const float *avg) {
 }
 
 
-
+float *fmat_new_vstack(const float *a,int da,
+                       const float *b,int db,
+                       int n) {
+  int i;
+  float *c=fmat_new(da+db,n),*ret=c;
+  for(i=0;i<n;i++) {
+    memcpy(c,a,da*sizeof(float));
+    c+=da;
+    a+=da;
+    memcpy(c,b,db*sizeof(float));
+    c+=db;
+    b+=db;
+  }
+  return ret;
+}
 
 
 void fmat_splat_separable(const float *a,int nrow,int ncol,
@@ -506,7 +520,8 @@ float* fmat_new_transp (const float *a, int ncol, int nrow)
   return vt;
 }
 
-/* algo from http://cheshirekow.com/blog/?p=4 */
+/* algo from http://cheshirekow.com/blog/?p=4 
+   complexity in O((ncol*nrow)^2) ??? */
 void fmat_inplace_transp(float *a, int ncol, int nrow)
 {
   int length,k_start,k_new,k,i,j;
