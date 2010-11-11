@@ -214,16 +214,18 @@ float *fmat_get_submatrix (const float *a, int nrow,
   return b;
 }
 
-float *fmat_get_rows (const float *a, int ncol, int nrowout, const int *rows)
-{
-  int i;
-  float *b = fmat_new (nrowout, ncol);
-
-  for (i = 0; i < nrowout; i++)
-    memcpy (b + i * ncol, a + rows[i] * ncol, sizeof (*a) * ncol);
-
+float *fmat_get_rows (const float *a, int d, int n,                              
+                      int nrowout, const int *rows) {
+  float *b=fmat_new(nrowout,n);
+  int i,j;
+  int ii=0;
+  for(j=0;j<n;j++) 
+    for(i=0;i<nrowout;i++) 
+      b[ii++]=a[rows[i]+d*j];
+  
   return b;
 }
+
 
 float *fmat_get_columns (const float *a, int ncola, int nrow, int ncolout, const int *cols) {
   int i,j;

@@ -150,8 +150,9 @@ float *fmat_get_submatrix (const float *a, int nrow,
 /* RM return the submatrix defined by a list of columns  */
 float *fmat_get_columns (const float *a, int ncola, int nrow, int ncolout, const int *cols);
 
-/*! RM  produce a matrix composed of the rows indicated by the vector rows */
-float *fmat_get_rows (const float *a, int ncol, int nrowout, const int *rows);
+/*!  produce a matrix composed of the rows indicated by the vector rows */
+float *fmat_get_rows (const float *a, int d, int n,                              
+                      int nrowout, const int *rows);
 
 /*! RM  per-column sum of matrix elements */
 float *fmat_sum_columns (const float *a, int ncol, int nrow);
