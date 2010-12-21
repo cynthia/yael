@@ -63,7 +63,7 @@ knowledge of the CeCILL license and that you accept its terms.
  *                     - flags & KMEANS_NORMALIZE_SOPHISTICATED: ditto, more sophisticated
  *                     - flags & KMEANS_INIT_USER: the user gives the initialization
  *                          -> provided by user with parameter centroids_out)
- * @param seed              random seed for intialization
+ * @param seed              random seed for intialization (used only if !=0)
  * @param redo              perform clustering this many times and keep clusters with smallest quantization error
  * @param dis(n)            squared distance to assigned centroid of each input vector (may be NULL)
  * @param assign(n)         index of assigned centroid in 0..k-1 (may be NULL) 

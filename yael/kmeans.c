@@ -50,20 +50,24 @@ knowledge of the CeCILL license and that you accept its terms.
 static void nn_full (int d, int n, int nb, const float * v, const float *b, 
 	      int nt, int * assign, float * dis)
 {
-  knn_full_thread (2, n, nb, d, 1, b, v, NULL, 
-				 assign, dis, nt, NULL, NULL);
+  knn_full_thread (2, n, nb, d, 1, b, v, NULL, assign, dis, nt, NULL, NULL);
 }
 
 
-static void random_init(long d, int n, int k, const float * v, int * sel) {
-  int *perm=ivec_new_random_perm(n);
+static void random_init(long d, int n, int k, const float * v, int * sel, 
+                        unsigned int seed) {
+  int *perm=ivec_new_random_perm_r(n,seed);
   ivec_cpy(sel,perm,k);
   free(perm);
 }
 
+static double drand_r(unsigned int *seed) {
+  return rand_r(seed)/(double)(RAND_MAX+1L);
+}
+
 /* the kmeans++ initialization (see wikipedia) */
 static void kmeanspp_init (long d, int n, int k, const float * v, 
-			   int * sel, int verbose)
+			   int * sel, int verbose, unsigned int seed)
 {
   /* select the first centroid and set the others unitialized*/
 
@@ -75,7 +79,7 @@ static void kmeanspp_init (long d, int n, int k, const float * v,
   float * disbest = fvec_new_set (n, HUGE_VAL);
   float * distmp = fvec_new (n);
 
-  sel[0] = lrand48() % k;
+  sel[0] = rand_r(&seed) % k;
 
   for (i = 1 ; i < k ; i++) {
     int newsel = sel[i - 1];
@@ -102,7 +106,7 @@ static void kmeanspp_init (long d, int n, int k, const float * v,
     /* convert the best distances to probabilities */
     memcpy (distmp, disbest, n * sizeof (*distmp));
     fvec_normalize (distmp, n, 1);
-    double rd = drand48();
+    double rd = drand_r(&seed);
     
     for (j = 0 ; j < n - 1 ; j++) {
       rd -= distmp[j];
@@ -121,7 +125,7 @@ static void kmeanspp_init (long d, int n, int k, const float * v,
 
 /* Manage the empty clusters. Return the number of re-assigned clusters */
 static int kmeans_reassign_empty (int d, int n, int k, float * centroids,
-				  int * assign, int * nassign)
+				  int * assign, int * nassign, unsigned int seed)
 {
   int c, j, nreassign = 0;
   float * proba_split = fvec_new (k);
@@ -136,7 +140,7 @@ static int kmeans_reassign_empty (int d, int n, int k, float * centroids,
     if(nassign[c]==0) {
       nreassign++;
 
-      double rd = drand48();
+      double rd = drand_r(&seed);
     
       /* j is the cluster that is selected for splitting */
       for (j = 0 ; j < k - 1 ; j++) {
@@ -148,7 +152,7 @@ static int kmeans_reassign_empty (int d, int n, int k, float * centroids,
     
       /* generate a random perturbation vector, taking into account vector norm */
       double s = fvec_norm (centroids + j * d, d, 2) * 0.0000001;
-      fvec_randn (vepsilon, d);
+      fvec_randn_r (vepsilon, d, rand_r(&seed));
       fvec_mul_by (vepsilon, d, s);
       fvec_add (centroids + j * d, vepsilon, d);
       fvec_sub (centroids + c * d, vepsilon, d);
@@ -166,8 +170,9 @@ static int kmeans_reassign_empty (int d, int n, int k, float * centroids,
 
 
 /* the core of the kmeans function (no initialization) */
-static void kmeans_core (int d, int n, int k, int niter, int nt, int flags, int verbose, 
+static int kmeans_core (int d, int n, int k, int niter, int nt, int flags, int verbose, 
 			 float * centroids, const float * v, 
+                         unsigned int seed,
 			 int * assign, int * nassign,
 			 float * dis, 
 			 double * qerr_out, long * iter_tot)
@@ -177,6 +182,8 @@ static void kmeans_core (int d, int n, int k, int niter, int nt, int flags, int 
 
   /* the quantization error */
   double qerr = HUGE_VAL, qerr_old;
+
+  int tot_nreassign=0;
 
   for (iter = 1 ; iter <= niter ; iter++) {
     (*iter_tot)++;
@@ -207,8 +214,7 @@ static void kmeans_core (int d, int n, int k, int niter, int nt, int flags, int 
       }
 
       free(norms);
-    } 
-    else {
+    } else {
       fvec_0 (centroids, d * k);
         
       for (i = 0 ; i < n ; i++)
@@ -225,12 +231,18 @@ static void kmeans_core (int d, int n, int k, int niter, int nt, int flags, int 
     }
 
     /* manage empty clusters and update nassign */
-    nreassign = kmeans_reassign_empty (d, n, k, centroids, assign, nassign);
+    nreassign = kmeans_reassign_empty (d, n, k, centroids, assign, nassign, rand_r(&seed));
     if (nreassign > 0)
-      fprintf (stderr, "# Warning: %d empty clusters -> split\n", nreassign);
+      fprintf (stderr, "# kmeans warning: %d empty clusters -> split\n", nreassign);
+
+    tot_nreassign+=nreassign;
+
+    if(tot_nreassign>n/100 && tot_nreassign>1000) {
+      fprintf (stderr,"# kmeans: reassigned %d times, abandoning\n", tot_nreassign);
+      return -1;
+    }      
 
     /* compute the quantization error */
-    assert(qerr>=0);
     qerr_old = qerr;
     qerr = fvec_sum (dis, n);
 
@@ -243,11 +255,13 @@ static void kmeans_core (int d, int n, int k, int niter, int nt, int flags, int 
     fprintf (stderr, "\n");
 
   *qerr_out = qerr;
+  
+  return 0;
 }
 
 
 float kmeans (int di, int n, int k, int niter, 
-	      const float * v, int flags, long seed, int redo, 
+	      const float * v, int flags, long seed_in, int redo, 
 	      float * centroids_out, float * dis_out, 
 	      int * assign_out, int * nassign_out)
 {
@@ -292,9 +306,11 @@ float kmeans (int di, int n, int k, int niter,
   int * selected = ivec_new (k);
   
 
-  /* seeding if seed != 0 */
-  if (seed != 0)
-    srand48 ((long) seed);
+  if (seed_in == 0) 
+    seed_in=lrand48();
+
+  unsigned int seed=seed_in;
+  int core_ret=0;
 
   for (run = 0 ; run < redo ; run++) {
     if(verbose)
@@ -302,12 +318,10 @@ float kmeans (int di, int n, int k, int niter,
 
     if (is_user_init) {
       fvec_cpy (centroids, centroids_out, d * k);
-    }
-    else {
+    } else {
       if (flags & KMEANS_INIT_RANDOM) {
-	random_init(d,n,k,v,selected);
-      } 
-      else {
+	random_init(d,n,k,v,selected,rand_r(&seed));
+      } else {
 	int nsubset = n;
       
 	if (n > k * 8 && n > 8192) { 
@@ -315,15 +329,18 @@ float kmeans (int di, int n, int k, int niter,
 	  if(verbose) 
 	    printf ("Restricting k-means++ initialization to %d points\n", nsubset);
 	}
-	kmeanspp_init (d, nsubset, k, v, selected, verbose);
+	kmeanspp_init (d, nsubset, k, v, selected, verbose, rand_r(&seed));
       }
       for (i = 0 ; i < k ; i++) 
 	fvec_cpy (centroids + i * d, v + selected[i] * d, d);
     }
 
-    kmeans_core (d, n, k, niter, nt, flags, verbose, 
-		 centroids, v, assign, nassign, dis, 
-		 &qerr, &iter_tot);
+    core_ret=kmeans_core (d, n, k, niter, nt, flags, verbose, 
+                          centroids, v, rand_r(&seed), assign, nassign, dis, 
+                          &qerr, &iter_tot);
+    
+    if(core_ret<0) 
+      break;
 
 
     /* If this run is the best encountered, save the results */
@@ -341,7 +358,7 @@ float kmeans (int di, int n, int k, int niter,
     }
   }
 
-  if(verbose) {
+  if(verbose && core_ret>=0) {
     printf ("Total number of iterations: %d\n", (int)iter_tot);
     printf ("Unbalanced factor of last iteration: %g\n",ivec_unbalanced_factor(nassign,k));
   }
@@ -353,7 +370,10 @@ float kmeans (int di, int n, int k, int niter,
   free (assign);
   free (nassign);
 
-  return qerr_best / n; 
+  if(core_ret<0) 
+    return -1;
+  else 
+    return qerr_best / n; 
 }
 
 
@@ -378,9 +398,9 @@ float kmeans_jegou (int d, int n, int k, int dstep, int niterstep,
   int * selected = ivec_new (k);
 
   /* seeding if seed != 0 */
-  if (seed != 0)
-    srand48 ((long) seed);
-
+  if (seed == 0)
+    seed = lrand48();
+    
   /* compute PCA and express the vectors in this new basis */
   float * vc = fvec_new_cpy (v, d * n);
   float * vavg = fmat_center_columns (d, n, vc);   /* mean values of points in vavg*/
@@ -406,7 +426,7 @@ float kmeans_jegou (int d, int n, int k, int dstep, int niterstep,
 
     /* first k-means choose random points */
     if (dd == dstep || dd == 2) {
-      random_init (dd, n, k, vp, selected);
+      random_init (dd, n, k, vp, selected, seed);
 
       for (i = 0 ; i < k ; i++) 
 	fvec_cpy (centroids + i * dd, vp + selected[i] * dd, dd);
@@ -421,7 +441,7 @@ float kmeans_jegou (int d, int n, int k, int dstep, int niterstep,
     }
     
     kmeans_core (dd, n, k, niterstep, nt, flags, verbose, 
-		 centroids, vp, assign, nassign, dis, 
+		 centroids, vp, (unsigned int)seed, assign, nassign, dis, 
 		 &qerr, &iter_tot);
 
     if (verbose)
@@ -470,11 +490,17 @@ float *clustering_kmeans_assign_with_score (int n, int di,
 /*    printf("redo: %d iter: %d\n",nredo,nb_iter_max); */
   }   
 
-  kmeans(di,n,k,nb_iter_max,points,n_thread,0,nredo,centroids,NULL,ca,NULL);
+  float ret=kmeans(di,n,k,nb_iter_max,points,n_thread,0,nredo,centroids,NULL,ca,NULL);
 
-  if(clust_assign_out) *clust_assign_out=ca;
-  
-  return centroids;
+  if(ret>=0) {
+    if(clust_assign_out) *clust_assign_out=ca;
+    return centroids;
+  } else {
+    free(centroids);
+    free(ca);
+    *clust_assign_out=NULL;
+    return NULL;
+  }
 
 }
 

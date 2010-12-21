@@ -124,6 +124,16 @@ float *fvec_new_rand (long n);
 /*!  create a vector initialized with gaussian samples */
 float *fvec_new_randn (long n);
 
+
+/*!  same as fvec_randn, with seed for thread-safety */
+void fvec_randn_r (float * v, long n, unsigned int seed); 
+
+/*!  same as fvec_new_rand, with seed for thread-safety */
+float *fvec_new_rand_r (long n, unsigned int seed);
+
+/*!  same as fvec_new_randn, with seed for thread-safety */
+float *fvec_new_randn_r (long n, unsigned int seed);
+
 /*!  new vector [a,a+1,...b-1] */
 int * ivec_new_range (long a, long b);
 
@@ -136,9 +146,14 @@ float * fvec_new_cpy (const float * v, long n);
 /*!  random permutation of 0..n-1 */ 
 int *ivec_new_random_perm (int n);
 
-
 /*!  select k random indexes among n (without repetition) */ 
 int *ivec_new_random_idx  (int n, int k);
+
+/*!  same as ivec_new_random_perm, thread-safe, with a random seed */ 
+int *ivec_new_random_perm_r (int n, unsigned int seed);
+
+/*!  same as ivec_new_random_idx, thread-safe with a random seed  */ 
+int *ivec_new_random_idx_r  (int n, int k, unsigned int seed);
 
 /*! resize a vector (realloc). Usage: v = fvec_resize (v, n). */
 float * fvec_resize (float * v, long n);
@@ -217,8 +232,7 @@ int fvecs_write_txt (const char * fname, int d, int n, const float *vf);
 
 /*!  load float vectors from file.
  *
- * Returns nb of vectors read, or <0 on error
- */
+ * Returns nb of vectors read, or <0 on error */
 int fvecs_new_read (const char *fname, int *d_out, float **vf);
 
 int fvecs_new_fread_max (FILE *f, int *d_out, float **vf, long nmax);
@@ -324,6 +338,10 @@ void fvec_randn (float * v, long n);
 /*!  are all values 0? */
 int fvec_all_0 (const float * v, long n);
 int ivec_all_0 (const int * v, long n);
+
+/*! are all vals >= 0? */
+int fvec_all_ge0 (const float * v, long n);
+int ivec_all_ge0 (const int * v, long n);
 
 /*!  are all values finite? */
 int fvec_all_finite (const float * v, long n);

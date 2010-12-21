@@ -57,23 +57,33 @@ static void *memalign(size_t ignored,size_t nbytes) {
 /* Standard operations                                                       */
 /*-------------------------------------------------------------*/
 
-/* Generate Gaussian random value, mean 0, variance 1 */
+/* Generate Gaussian random value, mean 0, variance 1 (from Python source) */
+
+
+static double drand_r(unsigned int *seed) {
+  return rand_r(seed)/(double)(RAND_MAX+1L);
+}
 
 #define NV_MAGICCONST  1.71552776992141
 
-double gaussrand ()
+static double gaussrand_r (unsigned int *seed)
 {
   double z;
   while (1) {
     float u1, u2, zz;
-    u1 = drand48 ();
-    u2 = drand48 ();
+    u1 = drand_r (seed);
+    u2 = drand_r (seed);
     z = NV_MAGICCONST * (u1 - .5) / u2;
     zz = z * z / 4.0;
     if (zz < -log (u2))
       break;
   }
   return z;
+}
+
+double gaussrand () {
+  unsigned int seed=lrand48();
+  return gaussrand_r(&seed);
 }
 
 
@@ -175,11 +185,19 @@ float *fvec_new_nan (long n)
 }
 
 
+
 void fvec_rand (float * v, long n)
 {
   long i;
   for (i = 0 ; i < n ; i++)
     v[i] = drand48();
+}
+
+void fvec_rand_r (float * v, long n, unsigned int seed)
+{
+  long i;
+  for (i = 0 ; i < n ; i++)
+    v[i] = drand_r(&seed);
 }
 
 
@@ -190,23 +208,39 @@ void fvec_randn (float * v, long n)
     v[i] = gaussrand();
 }
 
+void fvec_randn_r (float * v, long n, unsigned int seed)
+{
+  long i;
+  for (i = 0 ; i < n ; i++)
+    v[i] = gaussrand_r(&seed);
+}
+
 
 float *fvec_new_rand (long n) 
 {
   float * f = fvec_new (n);
-  long i;
-  for (i = 0 ; i < n ; i++) 
-    f[i] = drand48();
+  fvec_rand (f, n);
   return f;
 }
-
 
 float * fvec_new_randn (long n)
 {
   float * f = fvec_new (n);
-  long i;
-  for (i = 0 ; i < n ; i++)
-    f[i] = gaussrand();
+  fvec_randn(f,n);
+  return f;
+}
+
+float * fvec_new_rand_r (long n, unsigned int seed)
+{
+  float * f = fvec_new (n);
+  fvec_rand_r(f,n,seed);
+  return f;
+}
+
+float * fvec_new_randn_r (long n, unsigned int seed)
+{
+  float * f = fvec_new (n);
+  fvec_randn_r(f,n,seed);
   return f;
 }
 
@@ -289,7 +323,13 @@ float * fvec_new_cpy (const float * v, long n) {
 }
 
 
+
 int * ivec_new_random_idx (int n, int k)
+{
+  return ivec_new_random_idx_r (n, k, lrand48());
+}
+
+int * ivec_new_random_idx_r (int n, int k, unsigned int seed)
 {
   int *idx = ivec_new (n);
   int i;
@@ -298,7 +338,7 @@ int * ivec_new_random_idx (int n, int k)
     idx[i] = i;
 
   for (i = 0; i < k ; i++) {
-    int j = i + lrand48 () % (n - i);
+    int j = i +  rand_r(&seed) % (n - i);
     /* swap i and j */
     int p = idx[i];
     idx[i] = idx[j];
@@ -307,6 +347,7 @@ int * ivec_new_random_idx (int n, int k)
 
   return idx;
 }
+
 
 float * fvec_resize (float * v, long n)
 {
@@ -325,6 +366,11 @@ int * ivec_resize (int * v, long n)
 int *ivec_new_random_perm (int n)
 {
   return ivec_new_random_idx (n, n - 1);
+}
+
+int *ivec_new_random_perm_r (int n, unsigned int seed)
+{
+  return ivec_new_random_idx_r (n, n - 1, seed);
 }
 
 
@@ -1351,6 +1397,16 @@ void ivec_0(int * v, long n)
 
 int fvec_all_0 (const float * v, long n) {
   while(n--) if(v[n]!=0) return 0;
+  return 1;
+}
+
+int fvec_all_ge0 (const float * v, long n) {
+  while(n--) if(v[n]<0) return 0;
+  return 1;
+}
+
+int ivec_all_ge0 (const int * v, long n) {
+  while(n--) if(v[n]<0) return 0;
   return 1;
 }
 
