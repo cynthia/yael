@@ -5,6 +5,8 @@
 # Detect architecture
 if [ `uname` == Darwin ] ; then
   conf=mac
+  echo "# Warning for MAC users: For 64 bits compilation, option --mac64 is explicitely required."
+  echo "  This is mandatory when using a 64-bits version of Matlab (otherwise seg-fault). "
 elif [ `uname -m` == 'x86_64' ] ; then
   conf=linux64
 elif  [ `uname -m` == 'i686' ] || [ `uname -m` == 'i386' ]  ; then
