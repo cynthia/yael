@@ -377,99 +377,6 @@ float kmeans (int di, int n, int k, int niter,
 }
 
 
-/* Jegou's k-means variant (unpublished) */
-float kmeans_jegou (int d, int n, int k, int dstep, int niterstep, 
-		    const float * v, int flags, long seed, float * centroids_out)
-{
-  long i, iter_tot = 0, dd, last_dd;
-
-  int nt = flags & 0xffff;
-  if (nt == 0) nt = 1;
-
-  int verbose = !(flags & KMEANS_QUIET);
-  niterstep = (niterstep == 0 ? 1000000 : niterstep);
-
-  /* Allocate memory (see k-means for details) */
-  float * centroids = fvec_new (k * (size_t) d);
-  float * dis = fvec_new (n);
-  int * assign = ivec_new (n);
-  int * nassign = ivec_new (k);
-  double qerr, qerr_best = HUGE_VAL;
-  int * selected = ivec_new (k);
-
-  /* seeding if seed != 0 */
-  if (seed == 0)
-    seed = lrand48();
-    
-  /* compute PCA and express the vectors in this new basis */
-  float * vc = fvec_new_cpy (v, d * n);
-  float * vavg = fmat_center_columns (d, n, vc);   /* mean values of points in vavg*/
-  float * eigval = fvec_new (d * k);
-  float * pca = fmat_new_pca (d, n, vc, eigval);
-  float * vp = fvec_new_0 (d * n);
-
-  fmat_mul (pca, vc, d, n, d, vp);
-  fvec_cpy (vc, vp, d * n);
-
-  for (dd = dstep ; dd <= d ; dd += dstep) {
-
-    if (dd == 1) {
-      continue;
-    }
-
-    /* use only the dd first components */
-    for (i = 0 ; i < n ; i++)
-      fvec_cpy (vp + i * dd, vc + i * d, dd);
-
-    if(verbose)
-      fprintf (stderr, "<> kmeans incremental dimension / dim %d/%d <>\n", (int) dd, (int) d);
-
-    /* first k-means choose random points */
-    if (dd == dstep || dd == 2) {
-      random_init (dd, n, k, vp, selected, seed);
-
-      for (i = 0 ; i < k ; i++) 
-	fvec_cpy (centroids + i * dd, vp + selected[i] * dd, dd);
-    }
-
-    /* used centroids from previous iteration */
-    else {
-      fvec_cpy (centroids_out, centroids, (dd - dstep) * k);
-      fvec_0 (centroids, dd * k);
-      for (i = 0 ; i < k ; i++)
-	fvec_cpy (centroids + i * dd, centroids_out + i * last_dd, last_dd);
-    }
-    
-    kmeans_core (dd, n, k, niterstep, nt, flags, verbose, 
-		 centroids, vp, (unsigned int)seed, assign, nassign, dis, 
-		 &qerr, &iter_tot);
-
-    if (verbose)
-      fprintf (stderr, "-> number of iterations: %d\n", (int)iter_tot);
-    last_dd = dd;
-  }
-
-
-  /* Express the centroids in the original basis (inv PCA) */
-  fmat_mul_tl (pca, centroids, d, k, d, centroids_out);
-  for (i = 0 ; i < k ; i++)
-    fvec_add (centroids_out + i * d, vavg, d);
-
-  /* free the variables that are not returned */
-  free (vp);
-  free (vc);
-  free (pca);
-  free (vavg);
-  free (selected);
-  free (centroids);
-  free (dis);
-  free (assign);
-  free (nassign);
-  return qerr_best / n; 
-}
-
-
-
 /*---------- Functions for forward compatibility ----------*/
 
 float *clustering_kmeans_assign_with_score (int n, int di,
@@ -525,6 +432,5 @@ float *clustering_kmeans (int n, int d,
 
   return centroids;
 }
-
 
 

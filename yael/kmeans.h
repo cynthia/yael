@@ -76,12 +76,6 @@ float kmeans (int d, int n, int k, int niter,
 	      float * centroids, float * dis, 
 	      int * assign, int * nassign);
 
-
-/*! Jegou's k-means variant (unpublished). A bit longer, better centroids. */
-float kmeans_jegou (int d, int n, int k, int dstep, int niterstep, 
-		    const float * v, int flags, long seed, float * centroids_out);
-
-
 /*--- Following functions are for forward compatibility (and may be removed in the future) ---*/
 
 /*! simplified call */
