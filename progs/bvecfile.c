@@ -58,7 +58,7 @@ int main (int argc, char **argv)
 {
   int i, j, d, ret;
   int n = INT_MAX;         /* maximum number of vectors to be read */ 
-  int maxd = 100000;       /* maximum number of dimension */	  
+  int maxd = 1000000;      /* maximum number of dimension */	  
   int out_fmt = FMT_TXT;   /* output to text (default) */         
 
   FILE * fi = stdin;
