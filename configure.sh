@@ -28,9 +28,11 @@ lapackldflags='-lblas -llapack'
 if [ -e /usr/lib/libblas.so.3gf ]; then
    # special names for libs on ubuntu
    lapackldflags="/usr/lib/libblas.so.3gf /usr/lib/liblapack.so.3gf"
-elif [ -d /usr/lib64/atlas/ ]; then 
+elif [ -e /usr/lib64/atlas/libblas.so.3 ]; then 
    lapackldflags="/usr/lib64/atlas/libblas.so.3 /usr/lib64/atlas/liblapack.so.3"
-elif [ -d /usr/lib/atlas/ ]; then
+elif [ -e /usr/lib64/libblas.so.3 ]; then 
+   lapackldflags="/usr/lib64/libblas.so.3 /usr/lib64/liblapack.so.3"
+elif [ -e /usr/lib/atlas/libblas.so.3 ]; then
    lapackldflags="/usr/lib/atlas/libblas.so.3 /usr/lib/atlas/liblapack.so.3"
 else
    echo -n "using default locations for blas and lapack"
@@ -87,7 +89,7 @@ EOF
 
 
 # Search latest python version (not 3.x !!!!)
-for pysubver in {6,5,4,x} ; do
+for pysubver in {7,6,5,4,x} ; do
     if [ -f "/usr/include/python2.${pysubver}/Python.h" ] ; then
 	echo "Found python development version 2.$pysubver"
 	break
