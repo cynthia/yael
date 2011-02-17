@@ -165,7 +165,7 @@ int * ivec_resize (int * v, long n);
    @param k is the range of the values that may be encountered (assuming start at 0)
    @param v is the vector of values to be histrogramized, of length n
 */
-int * ivec_new_histogram (int k, int * v, long n);
+int * ivec_new_histogram (int k, const int * v, long n);
 
 /*!  same as ivec_new_histogram, but values falling out of range are clipped */
 int * ivec_new_histogram_clip (int k, int * v, long n);

@@ -374,7 +374,7 @@ int *ivec_new_random_perm_r (int n, unsigned int seed)
 }
 
 
-int *ivec_new_histogram (int k, int *v, long n)
+int *ivec_new_histogram (int k, const int *v, long n)
 {
   long i;
   int *h = ivec_new_0 (k);
