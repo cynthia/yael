@@ -214,6 +214,18 @@ void compute_distances_1_nonpacked (int d, int nb,
                                     const float *b, int ldb, 
                                     float *dist2);
 
+void compute_distances_1_thread (int d, int nb,
+                                 const float *a, 
+                                 const float *b,                         
+                                 float *dist2,
+                                 int n_thread); 
+
+void compute_distances_1_nonpacked_thread (int d, int nb,
+                                           const float *a, 
+                                           const float *b, int ldb, 
+                                           float *dist2,
+                                           int n_thread);
+
 
 
 

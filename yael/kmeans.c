@@ -67,7 +67,7 @@ static double drand_r(unsigned int *seed) {
 
 /* the kmeans++ initialization (see wikipedia) */
 static void kmeanspp_init (long d, int n, int k, const float * v, 
-			   int * sel, int verbose, unsigned int seed)
+			   int * sel, int verbose, unsigned int seed, int n_thread)
 {
   /* select the first centroid and set the others unitialized*/
 
@@ -97,7 +97,8 @@ static void kmeanspp_init (long d, int n, int k, const float * v,
       }
     } 
     else { /* complicated and fast */
-      compute_distances_1(d, n, v + d * newsel, v, distmp);
+      compute_distances_1_thread(d, n, v + d * newsel, v, distmp, n_thread); 
+
       for (j = 0 ; j < n ; j++) 
         if (distmp[j] < disbest[j]) 
 	  disbest[j] = distmp[j];
@@ -329,7 +330,7 @@ float kmeans (int di, int n, int k, int niter,
 	  if(verbose) 
 	    printf ("Restricting k-means++ initialization to %d points\n", nsubset);
 	}
-	kmeanspp_init (d, nsubset, k, v, selected, verbose, rand_r(&seed));
+	kmeanspp_init (d, nsubset, k, v, selected, verbose, rand_r(&seed), nt);
       }
       for (i = 0 ; i < k ; i++) 
 	fvec_cpy (centroids + i * d, v + selected[i] * d, d);

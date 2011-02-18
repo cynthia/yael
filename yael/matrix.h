@@ -147,8 +147,10 @@ float *fmat_get_submatrix (const float *a, int nrow,
                            int ncol);
 
 
-/* RM return the submatrix defined by a list of columns  */
-float *fmat_get_columns (const float *a, int ncola, int nrow, int ncolout, const int *cols);
+/*! return the submatrix defined by a list of columns  */
+float *fmat_new_get_columns (const float *a, int nrow, int ncolout, const int *cols);
+
+void fmat_shuffle_columns(float *a, int nrow, int ncol);
 
 /*!  produce a matrix composed of the rows indicated by the vector rows */
 float *fmat_get_rows (const float *a, int d, int n,                              
@@ -160,6 +162,7 @@ float *fmat_sum_columns (const float *a, int ncol, int nrow);
 float *fmat_new_vstack(const float *a,int da,
                        const float *b,int db,
                        int n);
+
 
 /*! Matrix transposition
  * 

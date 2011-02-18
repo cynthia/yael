@@ -226,13 +226,28 @@ float *fmat_get_rows (const float *a, int d, int n,
   return b;
 }
 
+void fmat_shuffle_columns(float *a, int nrow, int ncol) {
+  int k,i;
+  for (i = 0; i < ncol ; i++) {
+    int j = i +  random() % (ncol - i);
+    /* swap i and j */
+    float *ci=a+i*nrow;
+    float *cj=a+j*nrow;
+    for(k=0;k<nrow;k++) {
+      float tmp=ci[k];
+      ci[k]=cj[k];
+      cj[k]=tmp;
+    }
+  }
+}
 
-float *fmat_get_columns (const float *a, int ncola, int nrow, int ncolout, const int *cols) {
+
+float *fmat_new_get_columns (const float *a, int nrow, int ncolout, const int *cols) {
   int i,j;
   float *b = fmat_new (nrow, ncolout);
-  for(i=0;i<nrow;i++) 
-    for(j=0;j<ncolout;j++)
-      b[i*ncolout+j]=a[i*ncola+cols[j]];
+  for(j=0;j<ncolout;j++)
+    for(i=0;i<nrow;i++) 
+      b[j*nrow+i]=a[i+nrow*cols[j]];
   return b;
 }
 

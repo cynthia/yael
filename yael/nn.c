@@ -195,6 +195,10 @@ void compute_distances_1 (int d, int nb,
 }
 
 
+
+
+
+
 #ifdef __SSE2__
 
 #include <emmintrin.h>
@@ -772,4 +776,54 @@ void compute_cross_distances_alt_thread (int distance_type,int d, int na, int nb
     t.split_a=na>nb;    
     compute_tasks(nt,nt,&compute_cross_distances_task,&t);
   } 
+}
+
+
+
+#ifdef _OPENMP
+
+#include <omp.h>
+
+#define SET_NT  omp_set_num_threads(nt)  
+
+#else 
+
+#define SET_NT
+
+/* #pragma's will be ignored */
+
+#endif
+
+
+
+void compute_distances_1_thread (int d, int nb,
+                                 const float *a, 
+                                 const float *b,                         
+                                 float *dist2,
+                                 int n_thread) {
+
+  compute_distances_1_nonpacked_thread(d,nb,a,b,d,dist2,n_thread);  
+}
+
+
+void compute_distances_1_nonpacked_thread (int d, int nb,
+                                           const float *a, 
+                                           const float *b, int ldb, 
+                                           float *dist2,
+                                           int nt) {
+  int i;
+  
+  SET_NT;
+#pragma omp parallel 
+  {
+#pragma omp for 
+    for(i=0;i<nt;i++) {
+      int i0=i*nb/nt;
+      int i1=(i+1)*nb/nt;
+      compute_distances_1_nonpacked (d,i1-i0,a,
+                                     b+i0*ldb,ldb,
+                                     dist2+i0);
+    }  
+
+  }
 }
