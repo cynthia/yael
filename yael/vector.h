@@ -226,6 +226,7 @@ int fvecs_fwrite (FILE *fo, int d, int n, const float *vf);
 
 /*!  several integer vectors of identifcal length into an file */
 int ivecs_write (const char *fname, int d, int n, const int *v);
+int ivecs_write_txt (const char * fname, int d, int n, const int *v);
 int fvecs_write (const char *fname, int d, int n, const float *vf);
 int fvecs_write_txt (const char * fname, int d, int n, const float *vf);
 
@@ -255,6 +256,10 @@ int fvecs_new_read_sparse (const char *fname, int d, float **vf_out);
  * Returns nb of vectors read, or <0 on error.
  */
 int fvecs_read (const char *fname, int d, int n, float *v);
+
+/*! read some vector from a bvec file and put them into a fvec vector */
+int b2fvecs_read (const char *fname, int d, int n, float *v);
+
 
 /*!  read a vector from a text file (one line per vector) */
 int fvecs_read_txt (const char *fname, int d, int n, float *v);

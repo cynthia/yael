@@ -863,6 +863,23 @@ int fvecs_read (const char *fname, int d, int n, float *a)
   return i;
 }
 
+
+int b2fvecs_read (const char *fname, int d, int n, float *v)
+{
+  int n_new; 
+  int d_new;
+  bvecs_fsize (fname, &d_new, &n_new);
+  assert (d_new == d);
+  assert (n <= n_new);
+
+  FILE * f = fopen (fname, "r");
+  assert (f || "b2fvecs_read: Unable to open the file");
+  b2fvecs_fread (f, v, n);
+  fclose (f);
+  return n;
+}
+
+
 int fvecs_read_txt (const char *fname, int d, int n, float *v)
 {
   long i, ret;
@@ -1176,6 +1193,25 @@ int ivecs_write (const char *fname, int d, int n, const int *v)
   ret = ivecs_fwrite (f, d, n, v);
 
   fclose (f);
+  return ret;
+}
+
+
+int ivecs_write_txt (const char * fname, int d, int n, const int *v)
+{ 
+  int i, j, ret = 0;
+  FILE * fo = fopen (fname, "w");
+  if (!fo) {
+    perror ("ivecs_write_txt: cannot open file");
+    return -1;
+  }
+
+  for (i = 0 ; i < n ; i++) {
+    for (j = 0 ; j < d ; j++)
+      fprintf (fo, "%d ", v[i * d + j]);
+    ret += fprintf (fo, "\n");
+  }
+
   return ret;
 }
 

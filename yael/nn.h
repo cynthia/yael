@@ -64,10 +64,10 @@ knowledge of the CeCILL license and that you accept its terms.
 /*!  Finds nearest neighbors of vectors in a base 
  * 
  * @param    distance_type  2 = L2 distance (see compute_cross_distances_alt for distance_type's)
- * @param    n              number of vectors to assign 
+ * @param    nq             number of query vectors
  * @param    nb             number of base vectors to assign to
  * @param    k              number of neighbors to return
- * @param    v(d, n)        query vectors
+ * @param    q(d, n)        query vectors
  * @param    b(d, nb)       base vectors
  * @param    assign(k, n)   on output, NNs of vector i are assign(:, i) (not sorted!)
  * @param    b_weights(nb)  multiply squared distances by this for each base vector (may be NULL)
@@ -79,8 +79,8 @@ knowledge of the CeCILL license and that you accept its terms.
  */
 
 void knn_full (int distance_type,
-               int n, int nb, int d, int k,
-               const float *b, const float *v,
+               int nq, int nb, int d, int k,
+               const float *b, const float *q,
                const float *b_weights,
                int *assign, float *dis,                                             
                void (*peek_fun) (void *arg,double frac),
@@ -89,8 +89,8 @@ void knn_full (int distance_type,
 /*! multi-threaded version 
  */
 void knn_full_thread (int distance_type,
-                      int n, int nb, int d, int k,
-                      const float *b, const float *v,
+                      int nq, int nb, int d, int k,
+                      const float *b, const float *q,
                       const float *b_weights,
                       int *assign, float *dis,
                       int n_thread,
