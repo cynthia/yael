@@ -152,7 +152,6 @@ int main (int argc, char ** argv)
   fprintf (stderr, "k = %d\nd = %d\nn = %d\nniter = %d\nnredo = %d\n",
 	   k, d, n, niter, nredo);
   fprintf (stderr, "nt = %d\nseed = %d\n", nt, seed);
-
   fprintf (stderr, "fi = %s  (fmt = %s)\n", fi_name, 
 	   (fmt_in == FMT_FVEC ? "fvec" : "txt"));
   fprintf (stderr, "fo = %s  (fmt = %s)\n", fo_name, 
@@ -177,7 +176,6 @@ int main (int argc, char ** argv)
   }
   else exit (1);
 
-  //  fprintf ("
   assert (ret >= n);
 
   /* Remove the Nan values */
