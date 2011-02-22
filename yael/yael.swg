@@ -68,6 +68,29 @@ array_class_plus(unsigned long long,UInt64Array)
   }
 }
 
+
+
+%extend FloatArray {
+  FloatArray(PyObject *list) {
+    if(!PyList_Check(list)) {
+      PyErr_SetString(PyExc_TypeError,"need list as input");
+      return NULL;
+    }  
+    long sz=PyList_Size(list),i;
+    float *ret=malloc(sizeof(float)*sz);
+    for(i=0;i<sz;i++) {
+      PyObject *li=PyList_GetItem(list,i);
+      if(!PyFloat_Check(li))  {
+        PyErr_SetString(PyExc_TypeError,"need floats in list");
+        free(ret);
+        return NULL;
+      }  
+      ret[i]=PyFloat_AsDouble(li);
+    }
+    return ret;
+  }
+}
+
 typedef int * int_pointer_t;
 typedef float * float_pointer_t;
 
