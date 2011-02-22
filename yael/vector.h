@@ -211,7 +211,6 @@ long bvecs_fsize (const char * fname, int *d_out, int *n_out);
 long lvecs_fsize (const char * fname, int *d_out, int *n_out);
 
 
-
 /*!  write a vector into an open file */
 int ivec_fwrite(FILE *f, const int *v, int d);
 int fvec_fwrite(FILE *f, const float *v, int d);
@@ -237,6 +236,26 @@ int fvecs_write_txt (const char * fname, int d, int n, const float *vf);
 int fvecs_new_read (const char *fname, int *d_out, float **vf);
 
 int fvecs_new_fread_max (FILE *f, int *d_out, float **vf, long nmax);
+
+
+/*! mmap vectors from a file. 
+ * 
+ * The returned memory area is read-only. 
+ *
+ * WARNING, the i'th element of vector j of vector array vf, where
+ * 0 <= i < d and 0 <= j < n is
+ * 
+ *   vf[ j * (d + 1) + i ]
+ * 
+ * (mind the d+1)
+ * the file remains open and there is no deallocation function (yet)
+ */
+int fvecs_new_mmap (const char *fname, int *d_out, float **vf);
+
+int ivecs_new_mmap (const char *fname, int *d_out, int **vi);
+
+
+
 
 /* The behavior of bvecs_new_read in not completely consistent 
    with the one of fvecs_new_read (can not read stream)         */

@@ -41,6 +41,14 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <string.h>
 #include <math.h>
 
+/* for mmap */
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <unistd.h>
+
+
 #include "vector.h"
 
 
@@ -819,6 +827,38 @@ int fvecs_new_read_sparse (const char *fname, int d, float **vf_out) {
   fclose(f);
   *vf_out=vf;
   return n;
+}
+
+
+int fvecs_new_mmap (const char *fname, int *d_out, float **vf) {
+  int fd = open (fname, O_RDONLY);
+  if (fd < 0) {
+    fprintf(stderr,"[fi]vecs_new_mmap: could not open %s",fname);
+    perror ("");
+    *d_out=-1; *vf=NULL;
+    return -1;
+  }
+  /* map whole file */
+  struct stat sb;
+  fstat (fd, &sb);
+  void *mm = mmap (NULL, sb.st_size, PROT_READ, MAP_SHARED, fd, 0);
+  if (mm == MAP_FAILED) {
+    fprintf(stderr,"[fi]vecs_new_mmap: could not mmap %s",fname);
+    perror ("");
+    close(fd);
+    *d_out=-1; *vf=NULL;
+    return -1;
+  }
+  int d=(*(int*)mm);
+  *d_out=d;
+  *vf=(void*)(((int*)mm)+1);
+  long unitsz=sizeof(int)+sizeof(float)*d;
+  assert(sb.st_size % unitsz == 0);
+  return sb.st_size / unitsz;
+}
+
+int ivecs_new_mmap (const char *fname, int *d_out, int **vf) {
+  fvecs_new_mmap(fname,d_out,(float**)vf);
 }
 
 
