@@ -858,7 +858,7 @@ int fvecs_new_mmap (const char *fname, int *d_out, float **vf) {
 }
 
 int ivecs_new_mmap (const char *fname, int *d_out, int **vf) {
-  fvecs_new_mmap(fname,d_out,(float**)vf);
+  return fvecs_new_mmap(fname,d_out,(float**)vf);
 }
 
 
