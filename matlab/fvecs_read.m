@@ -22,6 +22,10 @@ vecsizeof = 1 * 4 + d * 4;
 fseek (fid, 0, 1);
 a = 1;
 bmax = ftell (fid) / vecsizeof;
+if bmax == 0
+  v = [];
+  return;
+end
 b = bmax;
 
 if nargin >= 2
