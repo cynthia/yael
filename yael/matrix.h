@@ -152,9 +152,12 @@ float *fmat_new_get_columns (const float *a, int nrow, int ncolout, const int *c
 
 void fmat_shuffle_columns(float *a, int nrow, int ncol);
 
+/*! produce a vector by taking a particular row of a matrix */
+float *fmat_new_get_row (const float *a, int nrow, int ncol, int row);
+
 /*!  produce a matrix composed of the rows indicated by the vector rows */
-float *fmat_get_rows (const float *a, int d, int n,                              
-                      int nrowout, const int *rows);
+float *fmat_new_get_rows (const float *a, int d, int n,                              
+			  int nrowout, const int *rows);
 
 /*! RM  per-column sum of matrix elements */
 float *fmat_sum_columns (const float *a, int ncol, int nrow);

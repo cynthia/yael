@@ -214,8 +214,18 @@ float *fmat_get_submatrix (const float *a, int nrow,
   return b;
 }
 
-float *fmat_get_rows (const float *a, int d, int n,                              
-                      int nrowout, const int *rows) {
+float *fmat_new_get_row (const float *a, int nrow, int ncol, int row)
+{
+  float *v = fvec_new (ncol);
+  int j;
+  for (j = 0 ; j < ncol ; j++) 
+      v[j] = a[row + nrow * j];
+  
+  return v;
+}
+
+float *fmat_new_get_rows (const float *a, int d, int n,                              
+			  int nrowout, const int *rows) {
   float *b=fmat_new(nrowout,n);
   int i,j;
   int ii=0;
