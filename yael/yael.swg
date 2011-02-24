@@ -50,7 +50,7 @@ array_class_plus(unsigned long long,UInt64Array)
 %extend IntArray {
   IntArray(PyObject *list) {
     if(!PySequence_Check(list)) {
-      PyErr_SetString(PyExc_TypeError,"need List as input");
+      PyErr_SetString(PyExc_TypeError,"need sequence as input");
       return NULL;
     }  
     long sz=PySequence_Size(list),i;
@@ -58,7 +58,7 @@ array_class_plus(unsigned long long,UInt64Array)
     for(i=0;i<sz;i++) {
       PyObject *li=PySequence_GetItem(list,i);
       if(!PyInt_Check(li))  {
-        PyErr_SetString(PyExc_TypeError,"need ints in list");
+        PyErr_SetString(PyExc_TypeError,"need ints in sequence");
         free(ret);
         return NULL;
       }  
@@ -73,7 +73,7 @@ array_class_plus(unsigned long long,UInt64Array)
 %extend FloatArray {
   FloatArray(PyObject *list) {
     if(!PySequence_Check(list)) {
-      PyErr_SetString(PyExc_TypeError,"need list as input");
+      PyErr_SetString(PyExc_TypeError,"need sequence as input");
       return NULL;
     }  
     long sz=PySequence_Size(list),i;
@@ -81,7 +81,7 @@ array_class_plus(unsigned long long,UInt64Array)
     for(i=0;i<sz;i++) {
       PyObject *li=PyList_GetItem(list,i);
       if(!PyFloat_Check(li))  {
-        PyErr_SetString(PyExc_TypeError,"need floats in list");
+        PyErr_SetString(PyExc_TypeError,"need floats in sequence");
         free(ret);
         return NULL;
       }  

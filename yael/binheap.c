@@ -235,6 +235,7 @@ void fbinheap_sort_per_labels (fbinheap_t * bh, int * perm, float *v) {
 void fbinheap_sort (fbinheap_t * bh, int * perm, float *v)
 {
   int i, heappos;
+  /* TODO use binheap structure to get in the correct order */
   fvec_sort_index (bh->val + 1, bh->k, perm);
   for (i = 0 ; i < bh->k ; i++) {
     heappos = perm[i] + 1;
