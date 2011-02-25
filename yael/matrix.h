@@ -146,6 +146,10 @@ float *fmat_get_submatrix (const float *a, int nrow,
                            int nrow_out,
                            int ncol);
 
+int *imat_get_submatrix (const int *a, int nrow, 
+                           int nrow_out,
+                           int ncol);
+
 
 /*! return the submatrix defined by a list of columns  */
 float *fmat_new_get_columns (const float *a, int nrow, int ncolout, const int *cols);

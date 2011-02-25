@@ -214,6 +214,20 @@ float *fmat_get_submatrix (const float *a, int nrow,
   return b;
 }
 
+int *imat_get_submatrix (const int *a, int nrow, 
+                         int nrow_out,
+                         int ncol) {
+  long i;
+  int *b=ivec_new(nrow_out*(long)ncol);
+  
+  for(i=0;i<ncol;i++) 
+    memcpy(b+i*nrow_out,a+i*nrow,nrow_out*sizeof(*a));
+
+  return b;
+  
+}
+
+
 float *fmat_new_get_row (const float *a, int nrow, int ncol, int row)
 {
   float *v = fvec_new (ncol);
