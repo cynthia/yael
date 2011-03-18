@@ -4,7 +4,7 @@ include ../makefile.inc
 
 CC=gcc 
 
-all: libyael.a libyael.$(SHAREDEXT) _yael.so
+all: libyael.a libyael.$(SHAREDEXT) _yael.so __init__.py
 
 
 ifeq "$(USEARPACK)" "yes"
@@ -26,16 +26,19 @@ endif
 LIBOBJ=matrix.o vector.o nn.o kmeans.o hkm.o gmm.o eigs.o \
 	spectral_clustering.o sorting.o binheap.o machinedeps.o vlad.o
 
+__init__.py: 
+	touch $@
+
 libyael.a: $(LIBOBJ)
 	ar r libyael.a $^
 
 libyael.$(SHAREDEXT): $(LIBOBJ)
-	gcc $(LDFLAGS) $(YAELSHAREDFLAGS) -o libyael.$(SHAREDEXT) $^ $(LAPACKLDFLAGS) $(THREADLDFLAGS) $(EXTRAYAELLDFLAG)
+	g++ $(LDFLAGS) $(YAELSHAREDFLAGS) -o libyael.$(SHAREDEXT) $^ $(LAPACKLDFLAGS) $(THREADLDFLAGS) $(EXTRAYAELLDFLAG) $(CUBLASLDFLAGS)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@ $(FLAGS) $(EXTRACFLAGS)
 
-nn.o: EXTRACFLAGS=$(LAPACKCFLAGS) $(THREADCFLAGS) $(OPENMPFLAG)
+nn.o: EXTRACFLAGS=$(LAPACKCFLAGS) $(THREADCFLAGS) $(OPENMPFLAG) $(CUBLASCFLAGS)
 
 matrix.o: EXTRACFLAGS=$(LAPACKCFLAGS) $(THREADCFLAGS) $(EXTRAMATRIXFLAG)
 
@@ -63,7 +66,7 @@ yael_wrap.c : yael.swg common.swg nn.h kmeans.h gmm.h eigs.h hkm.h \
 	$(SWIG) -I.. $(NUMPYSWIGFLAGS) $< 
 
 _yael.so: yael_wrap.o libyael.$(SHAREDEXT)
-	$(CC) $(LDFLAGS) -o $@ $(WRAPLDFLAGS) $^ $(PYTHONLDFLAGS) $(LAPACKLDFLAGS) $(THREADLDFLAGS) $(YAELLDFLAGS)
+	g++ $(LDFLAGS) -o $@ $(WRAPLDFLAGS) $^ $(PYTHONLDFLAGS) $(LAPACKLDFLAGS) $(THREADLDFLAGS) $(YAELLDFLAGS)
 
 #############################
 # Dependencies  

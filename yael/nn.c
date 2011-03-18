@@ -42,6 +42,13 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <math.h>
 #include <string.h>
 
+
+#ifdef USE_CUBLAS
+
+#include <cublas.h>
+
+#endif
+
 #include "machinedeps.h"
 #include "vector.h"
 #include "nn.h"
@@ -76,6 +83,37 @@ int sgemv_(char *trans, integer *m, integer *n, real *alpha,
 #undef real
 #undef integer
 
+#ifdef USE_CUBLAS
+
+#warning "using cublas"
+
+#define CUE                                                             \
+  if(st != CUBLAS_STATUS_SUCCESS) {                                      \
+    fprintf(stderr,"cublas failed file %s line %d st = %d \n",__FILE__, __LINE__, st); \
+    exit(1);                                                            \
+  }
+
+
+static int call_cublas_init(void) {
+
+  static int cublas_ok=0 ;
+  
+  if(!cublas_ok) {
+    
+    cublasStatus st = cublasInit (); 
+    
+    if(st == CUBLAS_STATUS_SUCCESS) 
+      cublas_ok=1;
+    else {
+      fprintf(stderr,"cublas init failed st = %d \n", st);      \
+      cublas_ok=2; 
+    }    
+  }
+  return cublas_ok & 1 ;
+}
+#endif
+
+
 
 /*
  * computes dist2 := dist2 - 2 * descs * clusters' 
@@ -86,7 +124,6 @@ int sgemv_(char *trans, integer *m, integer *n, real *alpha,
  * (all matrices stored by lines, à la C, and packed)
  */
 
-
 static void add_matmul (FINTEGER d, FINTEGER na, FINTEGER nb,
                         const float *a, FINTEGER lda, 
                         const float *b, FINTEGER ldb,
@@ -94,11 +131,69 @@ static void add_matmul (FINTEGER d, FINTEGER na, FINTEGER nb,
 {
   /* ldd >= na */
 
+#ifdef USE_CUBLAS
+
+  if(call_cublas_init()==1) {
+    cublasStatus st;
+    float *agpu, *bgpu, *d2gpu;
+
+    double t0,t1,t2,t3,t4;
+    
+    t0=getmillisecs();
+
+    st = cublasAlloc (na * d, sizeof(*a), (void**)&agpu);
+    CUE;
+    st=cublasSetMatrix(d, na, sizeof(*a), a, lda, agpu, d);  
+    CUE;
+    
+    st = cublasAlloc (nb * d, sizeof(*b), (void**)&bgpu);
+    CUE;
+    st=cublasSetMatrix(d, nb, sizeof(*b), b, ldb, bgpu, d);  
+    CUE;
+    
+    st = cublasAlloc (na * nb, sizeof(*b), (void**)&d2gpu);
+    CUE;
+    assert(na<=ldd);
+    st=cublasSetMatrix(na, nb, sizeof(*b), dist2, ldd, d2gpu, na);  
+    CUE;
+    
+    t1=getmillisecs();
+
+    cublasSgemm ('T', 'N', na, nb, d, 
+                 -2.0, agpu, d, bgpu, d, 1.0, 
+                 d2gpu, na); 
+    st=cublasGetError();
+    CUE;
+
+    t2=getmillisecs();
+    
+    st=cublasGetMatrix(na, nb, sizeof(*b), d2gpu, na, dist2, ldd);  
+    CUE;
+
+    t3=getmillisecs();
+    
+
+    cublasFree(agpu); 
+    cublasFree(bgpu); 
+    cublasFree(d2gpu);   
+    
+    t4=getmillisecs();
+
+    printf("times = %.3f ms, %.3f ms, %.3f ms, %.3f ms\n",
+           t1-t0,t2-t1,t3-t2,t4-t3);
+    
+    return;
+  }
+
+#endif
+
+
   float minus_two = -2;
   float one = 1;
 
   sgemm_ ("Transposed", "Not trans", &na, &nb, &d,
           &minus_two, a, &lda, b, &ldb, &one, dist2, &ldd);
+
 
 }
 

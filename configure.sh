@@ -42,6 +42,8 @@ fi
 # by default Fortran integer is int (may be long for MKL used with mexa64)
 lapackcflags="-DFINTEGER=int"
 
+
+usecublas=no
 usearpack=no
 arpackldflags=/usr/lib64/libarpack.so.2
 
@@ -74,6 +76,7 @@ usage: $0
   [--python-cflags=flags_to_compile_with_python_c_api]
   [--enable-openmp]
   [--enable-numpy]
+  [--enable-cublas]
   [--numpy-cflags=includes-for-numpy]
   [--mac64]
 
@@ -121,6 +124,7 @@ while [ $# -gt 0 ] ; do
         --swig=*)   swig=${a#*=} ;;
 	--lapack=*) lapackldflags=${a#*=} ;;
         --enable-arpack) usearpack=yes;;
+        --enable-cublas) usecublas=yes;;
 	--arpack=*) arpackldflags=${a#*=} ;;
 	--fortran-64bit-int) 
             lapackcflags="$lapackcflags -DFINTEGER=long" ;;       
@@ -201,6 +205,11 @@ NUMPYSWIGFLAGS=$numpyswigflags
 
 
 USEOPENMP=$useopenmp
+
+USECUBLAS=$usecublas
+
+USECUBLASCFLAGS=-I /usr/local/cublas/include
+USECUBLASLDFLAGS=-L /usr/local/cublas/lib -lcublas
 
 
 EOF
