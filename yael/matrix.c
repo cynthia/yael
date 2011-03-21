@@ -84,9 +84,15 @@ int ssyrk_(char *uplo, char *trans, integer *n, integer *k,
            ldc);
 
 
-extern void sgemv_(const char *trans, integer *m, integer *n, real *alpha, 
+void sgemv_(const char *trans, integer *m, integer *n, real *alpha, 
                    const real *a, integer *lda, const real *x, integer *incx, real *beta, real *y, 
                    integer *incy);
+
+
+int sgels_(char *trans, integer *m, integer *n, integer *
+           nrhs, float *a, integer *lda, float *b, integer *ldb,
+           float *work, integer *lwork, integer *info);
+
 
 #undef real
 #undef integer
@@ -101,6 +107,11 @@ float *fmat_new (int nrow, int ncol)
 {
   float *m = fvec_new (nrow * (long)ncol);
   return m;
+}
+
+float *fmat_new_0 (int nrow, int ncol)
+{
+  return fvec_new_0 (nrow * (long)ncol);
 }
 
 
@@ -859,3 +870,43 @@ float *fmat_new_pca_part(int d,int n,int nev,
   return pcamat;
 }
 
+
+
+int fmat_solve_ls_t(int mi, int ni, const float *a, const float *b, float *x) {
+  
+  /* work in progress */
+#if 0  
+
+  /* solve system */ 
+  integer info;
+  integer m=mi, nrhs=1, lda=m, lwork=-1;
+  integer n=ni, ldb=n;
+  float work_sz;
+  
+  sgels_("Transposed", &m, &n, &nrhs, mat, &lda, 
+         vec, &ldb, &work_sz, &lwork, &info); 
+  
+
+  
+
+
+  float *work;    
+  lwork = (int)work_sz;
+  work = fvec_new(lwork);
+  
+  sgels_("Transposed", &m, &n, &nrhs, mat, &lda, 
+         vec, &ldb, work, &lwork, &info); 
+  
+  free(work);
+  
+  assert(info>=0); /* there is always a result for coherent input */
+  
+  /* Not documented in LAPACK: info>0 for (some?) rank deficient matrices */
+  
+  ret=-info;
+  
+#endif 
+
+  return 0;
+  
+}

@@ -67,6 +67,7 @@ knowledge of the CeCILL license and that you accept its terms.
 
 /*! Allocate a new nrow x ncol matrix */
 float *fmat_new (int nrow, int ncol);
+float *fmat_new_0 (int nrow, int ncol);
 
 
 
@@ -118,6 +119,17 @@ float* fmat_new_mul_tlr (const float *left, const float *right, int m, int n, in
 
 
 
+/*! solve the linear squares system a*x = b with n unknowns and m equations. 
+ *
+ * @param m      number of unkowns
+ * @param n      number of equations
+ * @param a(m,n) transposed matrix of the system
+ * @param b(n)   right-hand side of the equation
+ * @param x(m)   solution 
+ * 
+ * @return 0 if error in solution
+ */
+int fmat_solve_ls_t(int m, int n, const float *a, const float *b, float *x);
 
 
 /*! display the matrix in matlab-parsable format */
