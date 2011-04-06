@@ -1,9 +1,11 @@
 % Return the k nearest neighbors of a set of query vectors
 %
-% Usage: [ids,dis] = nn(v, q, k)
+% Usage: [ids,dis] = nn(v, q, k, distype)
 %   v                the dataset to be searched (one vector per column)
 %   q                the set of queries (one query per column)
 %   k  (default:1)   the number of nearest neigbors we want
+%   distype          distance type: 1=L1, 2=L2, 3=chi-square, 4=signed chis-squre
+%                    available in Mex-version only
 %
 % Returned values
 %   idx         the vector index of the nearest neighbors
@@ -13,6 +15,8 @@
 function [idx, dis] = yael_nn (v, q, k)
 
 fprintf ('* Warning: this is the slow version of nn\nConsider using the Mex-compiled version instead\n');
+
+if nargin < 3, k = 1; end
 
 assert (size (v, 1) == size (q, 1));
 

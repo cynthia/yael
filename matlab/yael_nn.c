@@ -35,10 +35,14 @@ void mexFunction (int nlhs, mxArray *plhs[],
   float *b = (float*) mxGetPr (prhs[0]);  /* database vectors */
   float *v = (float*) mxGetPr (prhs[1]);  /* query vectors */
   int k = 1; 
+  int distype = 2;
   int nt = 1;
 
   if (nrhs >= 3)
     k = (int) mxGetScalar(prhs[2]);
+
+  if (nrhs >= 4)
+    distype = (int) mxGetScalar(prhs[3]);
 
   if (n < k) 
     mexErrMsgTxt("fewer vectors than number to be returned");    
@@ -52,7 +56,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   plhs[1] = mxCreateNumericMatrix (k, nq, mxSINGLE_CLASS, mxREAL);
   float *dis = (float*) mxGetPr (plhs[1]);
 
-  knn_full (2, nq, n, d, k, b, v, NULL, assign, dis, NULL, NULL);
+  knn_full (distype, nq, n, d, k, b, v, NULL, assign, dis, NULL, NULL);
 
   /* post-processing: convert to matlab indices, and enforce full sort */
   int i, j;
