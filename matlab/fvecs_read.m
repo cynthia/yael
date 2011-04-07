@@ -21,7 +21,12 @@ vecsizeof = 1 * 4 + d * 4;
 % Get the number of vectrors
 fseek (fid, 0, 1);
 a = 1;
-bmax = ftell (fid) / vecsizeof;
+bmax = ftell (fid);
+if bmax == 0
+  v = [];
+  return;
+end
+bmax = bmax / vecsizeof;
 if bmax == 0
   v = [];
   return;

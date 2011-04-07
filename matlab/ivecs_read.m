@@ -21,7 +21,12 @@ vecsizeof = 1 * 4 + d * 4;
 % Get the number of vectrors
 fseek (fid, 0, 1);
 a = 1;
-bmax = ftell (fid) / vecsizeof;
+bmax = ftell (fid);
+if bmax == 0
+  v = [];
+  return;
+end
+bmax = bmax / vecsizeof;
 if bmax == 0
   v = [];
   return;
@@ -54,7 +59,7 @@ n = b - a + 1;
 fseek (fid, (a - 1) * vecsizeof, -1);
 
 % read n vectors
-v = fread (fid, (d + 1) * n, 'int=>double');
+v = fread (fid, (d + 1) * n, 'int=>int32');
 v = reshape (v, d + 1, n);
 
 % Check if the first column (dimension of the vectors) is correct
