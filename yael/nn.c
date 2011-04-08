@@ -268,9 +268,9 @@ void compute_cross_distances_alt_nonpacked (int distance_type, int d, int na, in
   int i,j,k;
 
   for(j=0;j<nb;j++) {
-    float *dline=dist2+j*ldd;
-    const float *bline=b+ldb*j;
-    const float *aline=a;
+    float * dline=dist2+j*ldd;
+    const float * bline=b+ldb*j;
+    const float * aline=a;
     for(i=0;i<na;i++) {
 
       double sum=0;

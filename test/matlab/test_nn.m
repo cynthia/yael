@@ -4,14 +4,14 @@
 
 addpath ('../../matlab')
 
-n = 1000000;              % number of database vectors
+n = 100000;               % number of database vectors
 nq = 1000;                % number of queries
-d = 128;                 % dimension of the vectors
-k = 100;                   % number of nearest neighbors to retrieve
-nt = 8;                  % number of processor cores to be used
-v = single (rand(d,n));  % base vectors
-q = single (rand(d,nq)); % query vectors
+d = 128;                  % dimension of the vectors
+k = 100;                  % number of nearest neighbors to retrieve
+distype = 2;              % number of processor cores to be used
+v = single (rand(d,n));   % base vectors
+q = single (rand(d,nq));  % query vectors
 
 tic
-[idx, dis] = yael_nn (v, q, k, nt);
+[idx, dis] = yael_nn (v, q, k, distype);
 toc

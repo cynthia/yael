@@ -67,7 +67,7 @@ matrix.o: ../yael/matrix.c ../yael/matrix.h
 	gcc -c $(CFLAGS) ../yael/matrix.c
 
 nn.o: ../yael/nn.c ../yael/nn.h
-	gcc -c $(CFLAGS) ../yael/nn.c
+	gcc -c $(CFLAGS) ../yael/nn.c 
 
 sorting.o: ../yael/sorting.c ../yael/sorting.h
 	gcc -c $(CFLAGS) ../yael/sorting.c
