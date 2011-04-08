@@ -59,7 +59,12 @@ void mexFunction (int nlhs, mxArray *plhs[],
   knn_full (distype, nq, n, d, k, b, v, NULL, assign, dis, NULL, NULL);
 
   /* post-processing: convert to matlab indices, and enforce full sort */
+
   int i, j;
+
+#if 0
+  /* reordering not needed any more */
+
   int * order = mxMalloc (k * sizeof (*order));
   float * dissorted = mxMalloc (k * sizeof (*dissorted));
 
@@ -73,9 +78,11 @@ void mexFunction (int nlhs, mxArray *plhs[],
     fvec_cpy (assign + j * k, order, k);
   }
 
-  for (i = 0 ; i < nq * k ; i++)
-    assign[i]++;
-
   mxFree (order);
   mxFree (dissorted);
+
+#endif
+
+  for (i = 0 ; i < nq * k ; i++)
+    assign[i]++;
 }
