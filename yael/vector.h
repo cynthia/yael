@@ -162,13 +162,23 @@ float * fvec_resize (float * v, long n);
 int * ivec_resize (int * v, long n);
 
 /*!  count occurrences
-   @param k is the range of the values that may be encountered (assuming start at 0)
+   @param k is the range of the values that may be encountered (assuming start at 0). Values outside the range trigger an assertion!
    @param v is the vector of values to be histrogramized, of length n
 */
 int * ivec_new_histogram (int k, const int * v, long n);
 
-/*!  same as ivec_new_histogram, but values falling out of range are clipped */
+/*!  same as ivec_new_histogram, but values falling out of range are clipped (counted in the nearest bin) */
 int * ivec_new_histogram_clip (int k, int * v, long n);
+
+
+/*! count occurrences: maps [vmin,vmax) to 0..k-1
+   @param vmin   min val of range
+   @param vmax   max val of range
+   @param k      nb of bins 
+   @param v is the vector of values to be histrogramized, of length n
+*/
+int * fvec_new_histogram_clip (float vmin,float vmax, int k, float *v, long n);
+
 
 /*!  compute a hash value for the vector */
 int ivec_hash (const int * v, long n);
@@ -577,6 +587,15 @@ void fvec_splat_add(const float *a,int n,
 void fvec_isplat_add(const float *a,int n,
                      const int *assign,float *accu); 
 
+/*! return input vector duplicated n times, with a value added each time 
+ * 
+ * @param nrepeat   nb of times to repeat input vector
+ * @param inc       inc*i is added to all elements of i^th repeated vector
+ *
+ * @return          vector of size n*nrepeat
+ */
+int* ivec_repeat_with_inc(const int *a,int n,
+                          int nrepeat, int inc);
 
 /*! @} */
 #endif

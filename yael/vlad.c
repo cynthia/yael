@@ -91,7 +91,7 @@ void vlad_compute_subsets(int k, int d, const float *centroids,
                           const int *subset_indexes, 
                           const int *subset_ends,
                           float *desc) {
-  int i,j;
+  int j;
   int *assign=ivec_new(n);
  
   nn(n,k,d,centroids,v,assign,NULL,NULL);
@@ -106,6 +106,37 @@ void vlad_compute_subsets(int k, int d, const float *centroids,
       int i=subset_indexes[ii];
       for(j=0;j<d;j++) 
         descss[assign[i]*d+j] += v[i*d+j]-centroids[assign[i]*d+j];
+    }
+    ss_begin=ss_end;
+  }
+
+  free(assign);
+  
+}
+
+
+
+
+
+void bof_compute_subsets(int k, int d, const float *centroids, 
+                         int n, const float *v,
+                         int n_subset,
+                         const int *subset_indexes, 
+                         const int *subset_ends,
+                         float *desc) {
+  int *assign=ivec_new(n);
+ 
+  nn(n,k,d,centroids,v,assign,NULL,NULL);
+
+  fvec_0(desc,k*n_subset);
+      
+  int ss,ss_begin=0;
+  for(ss=0;ss<n_subset;ss++) {
+    float *descss=desc+ss*k;
+    int ss_end=subset_ends[ss],ii;
+    for(ii=ss_begin;ii<ss_end;ii++) {
+      int i=subset_indexes[ii];
+      descss[assign[i]] ++;
     }
     ss_begin=ss_end;
   }

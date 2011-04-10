@@ -410,6 +410,33 @@ int * ivec_new_histogram_clip (int k, int * v, long n) {
   return h;
 }
 
+int * fvec_new_histogram_clip (float vmin,float vmax, int k, float *v, long n) {
+  long i;
+  int *h = ivec_new_0 (k);
+  float istep=k/(vmax-vmin);
+
+  for (i = 0; i < n; i++) {
+    float vf=(v[i]-vmin)*istep;
+    if(vf>=k)           h[k-1]++;
+    else if(vf<0)       h[0]++;
+    else if(!isnan(vf)) h[(int)(floor(vf))]++;
+  }
+
+  return h;
+}
+
+int *ivec_repeat_with_inc(const int *a,int n,
+                          int nrepeat, int inc) {
+  int *ret=ivec_new(nrepeat*n); 
+  int i;
+  for(i=0;i<nrepeat;i++) {
+    ivec_cpy(ret+i*n, a, n); 
+    ivec_add_scalar(ret+i*n, n, i*inc);
+  }
+  return ret;
+}
+
+
 void fvec_splat_add(const float *a,int n,
                     const int *assign,float *accu) {
   int i;
