@@ -71,7 +71,7 @@ hkm_t * hkm_new (int d, int nlevel, int bf)
 
 
 hkm_t *hkm_learn (int n, int d, int nlevel, int bf,
-		  float *points, int nb_iter_max, int nt, int verbose, 
+		  const float *points, int nb_iter_max, int nt, int verbose, 
 		  int **clust_assign_out)
 {
   int i, l, parent, k = 1;
@@ -165,10 +165,9 @@ void hkm_delete (hkm_t * hkm)
 
 
 /* Quantization usign the hierarchical clustering */
-int * hkm_quantize (const hkm_t * hkm, const float * v, int npt)
+void hkm_quantize (const hkm_t * hkm, int npt, const float * v, int * idx)
 {
   int i, l, vw, vwtmp;
-  int * vidx = ivec_new (npt);
 
   int nlevel = hkm->nlevel;
   int bf = hkm->bf;
@@ -183,9 +182,9 @@ int * hkm_quantize (const hkm_t * hkm, const float * v, int npt)
 	  v + d * i, &vwtmp, NULL, NULL);
       vw = vw * bf + vwtmp;
     }
-    vidx[i] = vw;
+    idx[i] = vw;
   }
-  return vidx;
+  return idx;
 }
 
 

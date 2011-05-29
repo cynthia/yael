@@ -19,13 +19,13 @@ typedef struct hkm_s {
 /*! create/delete a hierarchical quantizer structure.
    nlevel is the number of levels in the tree and bf the branching factor */
 hkm_t * hkm_learn (int n, int d, int nlevel, int bf, 
-		   float * v, int nb_iter_max, int nt, int verbose, 
+		   const float * v, int nb_iter_max, int nt, int verbose, 
 		   int ** clust_assign_out);
 		 
 void hkm_delete (hkm_t * hkm);
 
 /*! Quantization usign the hierarchical clustering */
-int * hkm_quantize (const hkm_t * hkm, const float * v, int n);
+void hkm_quantize (const hkm_t * hkm, int n, const float * v, int * idx);
 
 /*! I/O function for hkm */
 void hkm_write (const char * filename, const hkm_t * hkm);
