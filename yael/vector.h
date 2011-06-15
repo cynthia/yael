@@ -468,6 +468,10 @@ long fvec_index_nonfinite (float * v, long n);
 double fvec_sum (const float * v, long n);
 long long ivec_sum (const int * v, long n);
 
+/*! cumulative sum */
+void fvec_cumsum(float * v, long n);
+void ivec_cumsum(int *v, long n); 
+
 /*!  compute the sum of the product of the vector */
 double fvec_product (const float * v, long n);
 long long ivec_product (const int * v, long n);

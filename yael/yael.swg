@@ -30,8 +30,9 @@ void common_srandom(int seed) {
   srand48(seed); 
 }
 
- typedef int * int_pointer_t;
- typedef float * float_pointer_t;
+typedef int * int_pointer_t;
+typedef float * float_pointer_t;
+typedef unsigned char * byte_pointer_t;
 
 %}
 
@@ -93,9 +94,11 @@ array_class_plus(unsigned long long,UInt64Array)
 
 typedef int * int_pointer_t;
 typedef float * float_pointer_t;
+typedef unsigned char * byte_pointer_t;
 
 array_class_plus(int_pointer_t,IntPtrArray)
 array_class_plus(float_pointer_t,FloatPtrArray)
+array_class_plus(byte_pointer_t,BytePtrArray)
 
 %pythoncode {
 

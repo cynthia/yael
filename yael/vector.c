@@ -1806,6 +1806,25 @@ double fvec_sum (const float * v, long n)
   return s;
 }
 
+void fvec_cumsum(float * v, long n) {
+  long i;
+  double s = 0;
+  for (i = 0 ; i < n ; i++) {
+    s += v[i];
+    v[i] = s;
+  }
+}
+
+void ivec_cumsum(int *v, long n) {
+  long i;
+  int s = 0;
+  for (i = 0 ; i < n ; i++) {
+    s += v[i];
+    v[i] = s;
+  }
+}
+
+
 
 double fvec_mean (const float * v, long n)
 {
