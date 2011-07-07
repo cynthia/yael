@@ -395,7 +395,6 @@ void ivec_incr (int * v, long n, int scal);
 void ivec_decr (int * v, long n, int scal);
 
 
-
 /*!  Multiply or divide a vector by a scalar */
 void fvec_mul_by (float * v, long n, double scal);
 void fvec_div_by (float * v, long n, double scal);
@@ -409,7 +408,7 @@ void fvec_sub (float * v1, const float * v2, long n);
 /*! v1 := v2-v1 */
 void fvec_rev_sub (float * v1, const float * v2, long n);
 
-/*! v1:= v2 * scal */
+/*! v1 := v1 + v2 * scal */
 void fvec_add_mul (float * v1, const float * v2, long n, double scal);
 
 /*!  Component-wise multiplication or division of two vectors (result in v1) */

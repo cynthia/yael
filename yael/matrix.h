@@ -89,7 +89,7 @@ float *fmat_new_0 (int nrow, int ncol);
 
 void fmat_mul_full(const float *left, const float *right,
                    int m, int n, int k,
-                   char *transp,
+                   const char *transp,
                    float *result);
 
 
@@ -97,7 +97,7 @@ void fmat_mul_full(const float *left, const float *right,
  */
 float* fmat_new_mul_full(const float *left, const float *right,
                          int m, int n, int k,
-                         char *transp);
+                         const char *transp);
 
 /*! same as fmat_mul_full, all in standard order */
 void fmat_mul (const float *left, const float *right, int m, int n, int k, float *mout);
@@ -234,6 +234,9 @@ float *fmat_center_columns(int d,int n,float *v);
 
 /* subtract a vector from all columns of a matrix m_i := m_i - avg*/
 void fmat_subtract_from_columns(int d,int n,float *m,const float *avg);
+
+/* add a vector from all columns of a matrix m_i := m_i - avg*/
+void fmat_add_to_columns(int d,int n,float *m,const float *avg);
 
 /* reverse: m_i := avg - m_i */
 void fmat_rev_subtract_from_columns(int d,int n,float *m,const float *avg);

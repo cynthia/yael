@@ -117,7 +117,7 @@ float *fmat_new_0 (int nrow, int ncol)
 
 void fmat_mul_full(const float *left, const float *right,
                    int mi, int ni, int ki,
-                   char *transp,
+                   const char *transp,
                    float *result) {
 
   float alpha = 1;
@@ -126,14 +126,14 @@ void fmat_mul_full(const float *left, const float *right,
   FINTEGER lda = (transp[0] == 'N' ? m : k);
   FINTEGER ldb = (transp[1] == 'N' ? k : n);
   
-  sgemm_ (transp, transp+1, &m, &n, &k,
+  sgemm_ ((char*)transp, (char*)(transp+1), &m, &n, &k,
           &alpha, left, &lda, right, &ldb, &beta, result, &m);
 
 }
 
 float* fmat_new_mul_full(const float *left, const float *right,
                          int m, int n, int k,
-                         char *transp) {
+                         const char *transp) {
   float *result=fmat_new(m,n);
 
   fmat_mul_full(left, right, m, n, k, transp, result);
@@ -427,6 +427,13 @@ void fmat_subtract_from_columns(int d,int n,float *v,const float *avg) {
   for(i=0;i<n;i++) 
     fvec_sub(v+i*d,avg,d);
 }
+
+void fmat_add_to_columns(int d,int n,float *v,const float *avg) {
+  long i;
+  for(i=0;i<n;i++) 
+    fvec_add(v+i*d,avg,d);
+}
+
 
 void fmat_rev_subtract_from_columns(int d,int n,float *v,const float *avg) {
   long i;

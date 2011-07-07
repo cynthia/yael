@@ -69,7 +69,7 @@ static void *memalign(size_t ignored,size_t nbytes) {
 
 
 static double drand_r(unsigned int *seed) {
-  return rand_r(seed)/(double)(RAND_MAX+1L);
+  return rand_r(seed)/((double)RAND_MAX + 1.0);
 }
 
 #define NV_MAGICCONST  1.71552776992141
