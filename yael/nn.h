@@ -69,7 +69,7 @@ knowledge of the CeCILL license and that you accept its terms.
  * @param    k              number of neighbors to return
  * @param    q(d, n)        query vectors
  * @param    b(d, nb)       base vectors
- * @param    assign(k, n)   on output, NNs of vector i are assign(:, i) (not sorted!)
+ * @param    assign(k, n)   on output, the NNs of vector i are assign(:, i) (sorted by increasing distances)
  * @param    b_weights(nb)  multiply squared distances by this for each base vector (may be NULL)
  * @param    dis(k, n)      squared distances of i to its NNs are dis(0, i) to dis(k-1, i)
  * @param    peek_fun, peek_arg  the function calls peek_fun with frac set
