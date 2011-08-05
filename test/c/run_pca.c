@@ -17,8 +17,8 @@ void usage (const char * cmd)
 	  "    -n #              number of vectors\n"
           "    -d #              dimension of the vectors\n"
           "    -dout #           dimension of the output vectors\n"
-          "    -powerlaw #       pre-process vector using power-law component-wise normalization\n"
-          "    -L2               pre-normalization of input vector (may be after powerlaw)\n\n"
+          "    -plaw #           pre-process vector using sqrt component-wise normalization\n"
+          "    -norm #           pre-normalization of input vector (may be after powerlaw)\n\n"
 	  "    -fi filename      file of input vectors (raw format)\n"
 	  "    -fo filename      file of PCA-transformed output vectors (raw format)\n"
 	  "    -favg filename    raw file containing the mean values\n"
@@ -56,6 +56,9 @@ int main (int argc, char **argv)
   int d = -1;
   int dout = -1;
   int n = -1;
+  
+  float  plaw = -1;
+  float norm = -1;
 
   const char * vec_fname = NULL;     /* input vector file */
   const char * ovec_fname = NULL;    /* output vector file */
@@ -83,6 +86,14 @@ int main (int argc, char **argv)
       ret = sscanf (argv[++i], "%d", &dout);
       assert (ret);
     }
+    else if (!strcmp (a, "-plaw") && i+1 < argc) {
+      ret = sscanf (argv[++i], "%f", &plaw);
+      assert (ret);
+    }
+    else if (!strcmp (a, "-norm") && i+1 < argc) {
+      ret = sscanf (argv[++i], "%f", &norm);
+      assert (ret);
+    }
     else if (!strcmp (a, "-fi") && i+1 < argc) {
       vec_fname = argv[++i];
     }
@@ -107,18 +118,18 @@ int main (int argc, char **argv)
   if (verbose) {
     printf ("d=%d\nn=%d\nvec=%s\navg=%s\nevec=%s\neval=%s\n",
 	    d, n, vec_fname, avg_fname, evec_fname, eval_fname);
+    if (ovec_fname)  printf ("outvec=%s\n", ovec_fname);
     if (avg_fname)  printf ("avg=%s\n", avg_fname);
     if (evec_fname) printf ("evec=%s\n", evec_fname);
     if (eval_fname) printf ("eval=%s\n", eval_fname);
   }
 
-  /* By default, keep all dimensions */
-  if (dout == -1)
-    dout = d;
-
   if (d == -1 || n == -1 || !vec_fname)
     usage (argv[0]);
 
+  /* By default, keep all dimensions */
+  if (dout == -1)
+    dout = d;
 
   float *v = fvec_new(n*d);
 
@@ -130,6 +141,24 @@ int main (int argc, char **argv)
   ret = fread (v, sizeof (*v), n*d, fv);
   assert (ret == n*d);
   fclose (fv);
+
+  /* Pre-processing: power-law on components */
+  if (plaw >= 0) {
+    if (verbose)
+      printf ("* Apply powerlaw normalization with exponent %.3f\n", plaw);
+    fvec_spow (v, n * d, plaw);
+  }
+  
+  /* Pre-processing: normalization */
+  if (norm >= 0) {
+    if (verbose)
+      printf ("* Apply normalization for norm %.3f\n", norm);
+    int nNaN = fvecs_normalize (v, n, d, norm);
+
+    if (verbose)
+      printf ("Found %d vectors of norm=0 -> replaced by 0\n", nNaN);
+    fvec_purge_nans (v, n * d, 0);
+  }
 
   /* compute the mean and subtract it from the vectors */
   if (verbose)
@@ -159,7 +188,7 @@ int main (int argc, char **argv)
   if (ovec_fname) {
     /* compute the projection of the database vector on the PCA basis */
     float * ovec = fmat_new_mul_tl(evec,v,dout,n,d);
-    write_raw_floats (ovec_fname, ovec, d*dout);
+    write_raw_floats (ovec_fname, ovec, n*dout);
 
     if (verbose) {
       /* compute energy of input and outpt vectors */
