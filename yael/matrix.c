@@ -286,12 +286,44 @@ float *fmat_new_get_columns (const float *a, int nrow, int ncolout, const int *c
   return b;
 }
 
-float *fmat_sum_columns (const float *a, int ncol, int nrow) {
-  long i,j;
-  float *sums=fvec_new_0(ncol);
-  for(i=0;i<nrow;i++) 
-    for(j=0;j<ncol;j++)
-      sums[j]+=a[ncol*i+j];
+
+void fmat_sum_columns (const float * a, int nrow, int ncol, float * sums)
+{
+  long i, j;
+  fvec_0 (sums, ncol);
+
+  for(j=0 ; j<ncol ; j++)
+    for (i=0 ; i<nrow ; i++) 
+      sums[j] += a[nrow*j+i];
+}
+
+
+float *fmat_new_sum_columns (const float *a, int nrow, int ncol) 
+{
+  float *sums = fvec_new(ncol);
+
+  fmat_sum_columns (a, nrow, ncol, sums);
+  return sums;
+}
+
+
+
+void fmat_sum_rows (const float * a, int nrow, int ncol, float * sums)
+{
+  long i, j;
+  fvec_0 (sums, nrow);
+
+  for(j=0 ; j<ncol ; j++)
+    for (i=0 ; i<nrow ; i++) 
+      sums[i] += a[nrow*j+i];
+}
+
+
+float *fmat_new_sum_rows (const float *a, int nrow, int ncol) 
+{
+  float *sums = fvec_new(nrow);
+
+  fmat_sum_rows (a, nrow, ncol, sums);
   return sums;
 }
 
@@ -633,8 +665,8 @@ void fmat_inplace_transp(float *a, int ncol, int nrow)
 
 
 
-static float *fmat_new_pca_from_covariance(int d,const float *cov,
-                                float *singvals) {
+float *fmat_new_pca_from_covariance(int d,const float *cov, float *singvals) 
+{
 
   float *pcamat=fvec_new(d*d);
   float *evals=singvals;
@@ -894,9 +926,6 @@ int fmat_solve_ls_t(int mi, int ni, const float *a, const float *b, float *x) {
          vec, &ldb, &work_sz, &lwork, &info); 
   
 
-  
-
-
   float *work;    
   lwork = (int)work_sz;
   work = fvec_new(lwork);
@@ -917,3 +946,4 @@ int fmat_solve_ls_t(int mi, int ni, const float *a, const float *b, float *x) {
   return 0;
   
 }
+

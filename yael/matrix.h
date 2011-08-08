@@ -174,8 +174,14 @@ float *fmat_new_get_row (const float *a, int nrow, int ncol, int row);
 /*!  produce a matrix composed of the rows indicated by the vector rows */
 float *fmat_new_get_rows (const float *a, int d, int n, int nrowout, const int *rows);
 
-/*! RM  per-column sum of matrix elements */
-float *fmat_sum_columns (const float *a, int ncol, int nrow);
+/*! per-column sum of matrix elements. Output is a vector of length ncol */
+void fmat_sum_columns (const float * a, int nrow, int ncol, float * sums);
+float *fmat_new_sum_columns (const float *a, int nrow, int ncol);
+
+/*! per-row sum of matrix elements */
+void fmat_sum_rows (const float * a, int nrow, int ncol, float * sums);
+float *fmat_new_sum_rows (const float *a, int nrow, int ncol);
+
 
 float *fmat_new_vstack(const float *a,int da,
                        const float *b,int db,
@@ -232,10 +238,10 @@ float * hadamard (int d);
 /* compute average of v matrix columns, subtract it to v and return average */
 float *fmat_center_columns(int d,int n,float *v);
 
-/* subtract a vector from all columns of a matrix m_i := m_i - avg*/
+/* subtract a vector from all columns of a matrix, m_i := m_i - avg*/
 void fmat_subtract_from_columns(int d,int n,float *m,const float *avg);
 
-/* add a vector from all columns of a matrix m_i := m_i - avg*/
+/* add a vector from all columns of a matrix, m_i := m_i + avg*/
 void fmat_add_to_columns(int d,int n,float *m,const float *avg);
 
 /* reverse: m_i := avg - m_i */
@@ -294,6 +300,10 @@ int fmat_svd_partial(int d,int n,int ns,const float *a,
  */
 int fmat_svd_partial_full(int n,int m,int nev,const float *a,int a_transposed,
                           float *s,float *vout,float *uout,int nt);
+
+
+/*! Compute the PCA eigenvalues and eigenvectors from covariance matrix */
+float *fmat_new_pca_from_covariance(int d,const float *cov, float *singvals);
 
 
 /*---------------------------------------------------------------------------*/
