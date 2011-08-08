@@ -12,6 +12,13 @@
 
 #include "mex.h"
 
+#define PARAM_V        prhs[0]
+#define PARAM_W        prhs[1]
+#define PARAM_MU       prhs[2]
+#define PARAM_SIGMA    prhs[3]
+
+
+
 
 void mexFunction (int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray*prhs[])
@@ -26,22 +33,22 @@ void mexFunction (int nlhs, mxArray *plhs[],
   int verbose = 0;
   int fishernorm1 = 1;
   
-  if(mxGetClassID(prhs[0])!=mxSINGLE_CLASS)
+  if(mxGetClassID(PARAM_V)!=mxSINGLE_CLASS)
     mexErrMsgTxt("need single precision array.");
 
-  if(mxGetClassID(prhs[1])!=mxSINGLE_CLASS)
+  if(mxGetClassID(PARAM_W)!=mxSINGLE_CLASS)
     mexErrMsgTxt("need single precision array.");
 
-  if(mxGetClassID(prhs[2])!=mxSINGLE_CLASS)
+  if(mxGetClassID(PARAM_MU)!=mxSINGLE_CLASS)
     mexErrMsgTxt("need single precision array.");
 
-  if(mxGetClassID(prhs[2])!=mxSINGLE_CLASS)
+  if(mxGetClassID(PARAM_MU)!=mxSINGLE_CLASS)
     mexErrMsgTxt("need single precision array.");
 
-  float *v = (float*) mxGetPr (prhs[0]);
-  float *w = (float*) mxGetPr (prhs[1]);
-  float *mu = (float*) mxGetPr (prhs[2]);
-  float *sigma = (float*) mxGetPr (prhs[3]);
+  float *v = (float*) mxGetPr (PARAM_V);
+  float *w = (float*) mxGetPr (PARAM_W);
+  float *mu = (float*) mxGetPr (PARAM_MU);
+  float *sigma = (float*) mxGetPr (PARAM_SIGMA);
 
   {
     int i;
@@ -60,7 +67,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
         flags |= GMM_FLAGS_W;
 
       else if (!strcmp(varname,"nomu")) 
-        flags ^= GMM_FLAGS_MU;
+        flags &= ~ GMM_FLAGS_MU;
 
       else if (!strcmp(varname,"verbose")) 
         verbose = 1;
@@ -74,21 +81,22 @@ void mexFunction (int nlhs, mxArray *plhs[],
   }
 
   if (verbose) {
-    fprintf (stdout, "v     -> %ld x %ld\n", mxGetM (prhs[0]), mxGetN (prhs[0]));
-    fprintf (stdout, "w     -> %ld x %ld\n", mxGetM (prhs[1]), mxGetN (prhs[1]));
-    fprintf (stdout, "mu    -> %ld x %ld\n", mxGetM (prhs[2]), mxGetN (prhs[2]));
-    fprintf (stdout, "sigma -> %ld x %ld\n", mxGetM (prhs[3]), mxGetN (prhs[3]));
+    fprintf (stdout, "v     -> %ld x %ld\n", mxGetM (PARAM_V), mxGetN (PARAM_V));
+    fprintf (stdout, "w     -> %ld x %ld\n", mxGetM (PARAM_W), mxGetN (PARAM_W));
+    fprintf (stdout, "mu    -> %ld x %ld\n", mxGetM (PARAM_MU), mxGetN (PARAM_MU));
+    fprintf (stdout, "sigma -> %ld x %ld\n", mxGetM (PARAM_SIGMA), mxGetN (PARAM_SIGMA));
   }
 
-  int d = mxGetM (prhs[0]);  /* vector dimensionality */
-  int n = mxGetN (prhs[0]);  /* number of fisher vector to produce */
-  int k = mxGetN (prhs[1]);  /* number of gaussian */
+  int d = mxGetM (PARAM_V);  /* vector dimensionality */
+  int n = mxGetN (PARAM_V);  /* number of fisher vector to produce */
+  int k = mxGetN (PARAM_W);  /* number of gaussian */
 
   if (verbose)
     fprintf (stdout, "d       = %d\nn       = %d\nk       = %d\n", d, n, k);
 
-  if (mxGetM (prhs[2]) != d || mxGetM (prhs[3]) != d || mxGetN (prhs[2]) !=k 
-      || mxGetN (prhs[3]) != k || mxGetM (prhs[1]) != 1)
+  if (mxGetM (PARAM_MU) != d || mxGetM (PARAM_SIGMA) != d || 
+      mxGetN (PARAM_MU) !=k || mxGetN (PARAM_SIGMA) != k || 
+      (mxGetM (PARAM_W) != 1 && mxGetN (PARAM_W) != 1) )
     mexErrMsgTxt("Invalid input dimensionalities.");
 
   

@@ -1,5 +1,3 @@
-% * NOTE* This matlab implementation has NOT been validated up to now
-%
 % This function computes the fisher vector representation of a set of vectors
 % See "Fisher kernels on visual vocabularies for image categorization"
 %     by F. Perronnin and C. Dance, CVPR'2007

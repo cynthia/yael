@@ -127,7 +127,7 @@ float* knn (int n, int nb, int d, int k,
             void *peek_arg);
 
 
-float* knn_thread (int n, int nb, int d, int k,
+float* knn_thread (int nq, int nb, int d, int k,
                    const float *b, const float *v,
                    int *assign,    
                    int n_thread,

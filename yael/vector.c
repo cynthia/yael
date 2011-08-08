@@ -1662,6 +1662,26 @@ double fvec_normalize (float * v, long n, double norm)
   return nr;
 }
 
+void fvec_normalize_2stage(float * v, long n, double scal) {
+  double nr = fvec_normalize (v, n, 2);
+  
+  if(nr == 0) return; 
+
+  int renorm = 0;
+  int i;
+
+  for(i=0; i<n; i++) 
+    if(v[i] > scal) {
+      v[i] = scal; 
+      renorm = 1; 
+    }
+  
+  if(renorm) 
+    fvec_normalize (v, n, 2);
+    
+}
+
+
 
 int fvecs_normalize (float * v, long n, long d, double norm)
 {
