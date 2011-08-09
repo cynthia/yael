@@ -1,6 +1,6 @@
 /*
-Copyright © INRIA 2010. 
-Authors: Matthijs Douze & Herve Jegou 
+		Copyright © INRIA 2010. 
+	Authors: Matthijs Douze & Herve Jegou 
 Contact: matthijs.douze@inria.fr  herve.jegou@inria.fr
 
 This software is a computer program whose purpose is to provide 
@@ -660,8 +660,6 @@ void fmat_inplace_transp(float *a, int ncol, int nrow)
     a[k_new]=aux;
   }
 }
-
-
 
 
 

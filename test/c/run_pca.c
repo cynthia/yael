@@ -29,6 +29,27 @@ void usage (const char * cmd)
 }
 
 
+/* read an input file in raw file format */
+float * read_raw_floats (const char * fname, int n)
+{
+  int ret;
+  float *v = fvec_new (n);
+  FILE * fv = fopen (fname, "r");
+  if (!fv) {
+    fprintf (stderr, "# Unable to open file %s for reading\nAborting...\n", fname);
+    exit (4);
+  }
+
+  ret = fread (v, sizeof (*v), n, fv);
+  if (ret != n) {
+    fprintf (stderr, "# Unable to read the n=%d bytes from file %s\nAborting...\n", n, fname);
+    exit (4);
+  }
+  fclose (fv);
+  return v;
+}
+
+
 /* write output file in raw file format */
 void write_raw_floats (const char * fname, const float * v, int d)
 {
@@ -131,16 +152,10 @@ int main (int argc, char **argv)
   if (dout == -1)
     dout = d;
 
-  float *v = fvec_new(n*d);
 
   if (verbose)
     printf ("* Read data from file %s -> %d vectors of dimension %d\n", vec_fname, n, d);
-
-  FILE * fv = fopen (vec_fname, "r");
-  assert (fv);
-  ret = fread (v, sizeof (*v), n*d, fv);
-  assert (ret == n*d);
-  fclose (fv);
+  float * v = read_raw_floats (vec_fname, n*d);
 
   /* Pre-processing: power-law on components */
   if (plaw >= 0) {

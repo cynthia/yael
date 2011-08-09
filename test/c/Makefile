@@ -4,7 +4,7 @@ include ../../makefile.inc
 
 CC=gcc 
 
-all: test_pca run_pca test_binheap test_eigs test_spectral_clustering test_gmm test_kmeans
+all: test_pca run_pca run_eig test_binheap test_eigs test_spectral_clustering test_gmm test_kmeans
 
 
 ifeq "$(USEARPACK)" "yes"
@@ -29,6 +29,9 @@ test_pca: test_pca.o
 	$(CC) -o $@ $^ $(LDFLAGS) $(LAPACKLDFLAGS) $(THREADLDFLAGS) $(EXTRAYAELLDFLAG) $(YAELLDFLAGS)
 
 run_pca: run_pca.o 
+	$(CC) -o $@ $^ $(LDFLAGS) $(LAPACKLDFLAGS) $(THREADLDFLAGS) $(EXTRAYAELLDFLAG) $(YAELLDFLAGS)
+
+run_eig: run_eig.o 
 	$(CC) -o $@ $^ $(LDFLAGS) $(LAPACKLDFLAGS) $(THREADLDFLAGS) $(EXTRAYAELLDFLAG) $(YAELLDFLAGS)
 
 test_binheap: test_binheap.o 
@@ -60,6 +63,7 @@ test_kmeans.o: test_kmeans.c ../../yael/vector.h ../../yael/kmeans.h \
   ../../yael/machinedeps.h
 test_pca.o: test_pca.c ../../yael/vector.h ../../yael/matrix.h
 run_pca.o: run_pca.c ../../yael/vector.h ../../yael/matrix.h
+run_eig.o: run_eig.c ../../yael/vector.h ../../yael/matrix.h
 test_spectral_clustering.o: test_spectral_clustering.c \
   ../../yael/spectral_clustering.h ../../yael/vector.h
 
