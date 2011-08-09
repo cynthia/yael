@@ -303,7 +303,7 @@ int fmat_svd_partial_full(int n,int m,int nev,const float *a,int a_transposed,
 
 
 /*! Compute the PCA eigenvalues and eigenvectors from covariance matrix */
-float *fmat_new_pca_from_covariance(int d,const float *cov, float *singvals);
+float *fmat_new_pca_from_covariance(int d, const float *cov, float *singvals);
 
 
 /*---------------------------------------------------------------------------*/
