@@ -29,27 +29,6 @@ void usage (const char * cmd)
 }
 
 
-/* read an input file in raw file format */
-float * read_raw_floats (const char * fname, int n)
-{
-  int ret;
-  float *v = fvec_new (n);
-  FILE * fv = fopen (fname, "r");
-  if (!fv) {
-    fprintf (stderr, "# Unable to open file %s for reading\nAborting...\n", fname);
-    exit (4);
-  }
-
-  ret = fread (v, sizeof (*v), n, fv);
-  if (ret != n) {
-    fprintf (stderr, "# Unable to read the n=%d bytes from file %s\nAborting...\n", n, fname);
-    exit (4);
-  }
-  fclose (fv);
-  return v;
-}
-
-
 /* write output file in raw file format */
 void write_raw_floats (const char * fname, const float * v, long n)
 {
@@ -70,11 +49,26 @@ void write_raw_floats (const char * fname, const float * v, long n)
 }
 
 
+/* Pre-processing */
+void preprocess (float * v, int d, long n, float plaw, float norm)
+{
+  /* Pre-processing: power-law on components */
+  if (plaw >= 0) {
+     fvec_spow (v, n * d, plaw);
+  }
+  
+  /* Pre-processing: normalization */
+  if (norm >= 0) {
+    int nNaN = fvecs_normalize (v, n, d, norm);
+    fvec_purge_nans (v, n * d, 0);
+  }
+}
+
 
 /* Online PCA -> accumulating covariance matrice on-the-fly, using blocks of data */
 #define PCA_BLOCK_SIZE 256
 
-pca_online_t * pca_online (long n, int d, const char * fname)
+pca_online_t * pca_online (long n, int d, const char * fname, float plaw, float norm)
 {
   long i;
 
@@ -95,10 +89,11 @@ pca_online_t * pca_online (long n, int d, const char * fname)
     long ntmp = iend - i;
 
     int ret = fread (vbuf, sizeof (*vbuf), ntmp * d, f);
-    if (ret != ntmp) {
-      fprintf (stderr, "Unable to readd %ld floats in file %s\n", n, fname);
+    if (ret != ntmp * d) {
+      fprintf (stderr, "Unable to read %ld floats in file %s\n", n, fname);
       exit (2);
     }
+    preprocess (vbuf, d, ntmp, plaw, norm);
 
     pca_online_accu (pca, vbuf, ntmp);
   }
@@ -116,7 +111,7 @@ pca_online_t * pca_online (long n, int d, const char * fname)
 /* Apply the matrix multiplication by block */
 void apply_pca (const struct pca_online_s * pca, 
 		const char * finame, const char * foname, 
-		int d, long n, int dout)
+		int d, long n, int dout, float plaw, float norm)
 {
   int ret;
   long i, ntmp = -1;
@@ -142,20 +137,22 @@ void apply_pca (const struct pca_online_s * pca,
     ntmp = iend - i;
     
     ret = fread (vibuf, sizeof (*vibuf), ntmp * d, fi);
-    if (ret != ntmp) {
+    if (ret != d * ntmp) {
       fprintf (stderr, "Unable to read %ld floats in file %s\n", n, finame);
       exit (2);
     }
 
+    preprocess (vibuf, d, ntmp, plaw, norm);
     pca_online_project (pca, vibuf, vobuf, d, ntmp, dout);
 
     ret = fwrite (vobuf, sizeof (*vobuf), ntmp * dout, fo);
-    if (ret != ntmp) {
+    if (ret != dout * ntmp) {
       fprintf (stderr, "Unable to write %ld floats in file %s\n", n, foname);
       exit (2);
     }
   }  
 
+  fmat_center_columns (d, ntmp, vibuf);
   double energy_in = fvec_sum_sqr (vibuf, ntmp * d);
   double energy_out = fvec_sum_sqr (vobuf, ntmp * dout);
   printf ("Last block: Energy preserved = %.3f\n", (float) (energy_out / energy_in));
@@ -233,7 +230,7 @@ int main (int argc, char **argv)
   }
 
   if (verbose) {
-    printf ("d=%d\nn=%ld\nvec=%s\navg=%s\nevec=%s\neval=%s\novec=%s",
+    printf ("d=%d\nn=%ld\nvec=%s\navg=%s\nevec=%s\neval=%s\novec=%s\n",
 	    d, n, vec_fname, avg_fname, evec_fname, eval_fname, ovec_fname);
   }
 
@@ -245,31 +242,8 @@ int main (int argc, char **argv)
     dout = d;
 
 
-  if (verbose)
-    printf ("* Read data from file %s -> %ld vectors of dimension %d\n", vec_fname, n, d);
-  float * v = read_raw_floats (vec_fname, n*d);
-
-  /* Pre-processing: power-law on components */
-  if (plaw >= 0) {
-    if (verbose)
-      printf ("* Apply powerlaw normalization with exponent %.3f\n", plaw);
-    fvec_spow (v, n * d, plaw);
-  }
-  
-  /* Pre-processing: normalization */
-  if (norm >= 0) {
-    if (verbose)
-      printf ("* Apply normalization for norm %.3f\n", norm);
-    int nNaN = fvecs_normalize (v, n, d, norm);
-
-    if (verbose)
-      printf ("Found %d vectors of norm=0 -> replaced by 0\n", nNaN);
-    fvec_purge_nans (v, n * d, 0);
-  }
-
-
   /* Online PCA learning */
-  pca_online_t * pca = pca_online (n, d, vec_fname);
+  pca_online_t * pca = pca_online (n, d, vec_fname, plaw, norm);
 
 
   if (verbose) {
@@ -289,10 +263,9 @@ int main (int argc, char **argv)
 
   /* Optionnally, apply the PCA */
   if (ovec_fname) {
-    apply_pca (pca, vec_fname, ovec_fname, d, n, dout);    
+    apply_pca (pca, vec_fname, ovec_fname, d, n, dout, plaw, norm);    
   }
 
-  free(v);
   pca_online_delete (pca);
   return 0;
 }
