@@ -26,13 +26,16 @@ yaelprefix=$PWD
 lapackldflags='-lblas -llapack'
 
 # for some reason, the atlas libs are not accessible via -lblas
-# -llapack on Ubuntu and Fedora Core Linux.
+# -llapack on Ubuntu and Fedora Core Linux. Warn: on FC14, -lblas is
+# available but very slow. 
 
 if [ -e /usr/lib/libblas.so.3gf ]; then
    # special names for libs on ubuntu
    lapackldflags="/usr/lib/libblas.so.3gf /usr/lib/liblapack.so.3gf"
 elif [ -e /usr/lib64/atlas/libblas.so.3 ]; then 
    lapackldflags="/usr/lib64/atlas/libblas.so.3 /usr/lib64/atlas/liblapack.so.3"
+elif [ -e /usr/lib64/atlas/libf77blas.so.3 ]; then 
+   lapackldflags="/usr/lib64/atlas/libf77blas.so.3 /usr/lib64/atlas/liblapack.so.3"
 elif [ -e /usr/lib64/libblas.so.3 ]; then 
    lapackldflags="/usr/lib64/libblas.so.3 /usr/lib64/liblapack.so.3"
 elif [ -e /usr/lib/atlas/libblas.so.3 ]; then
