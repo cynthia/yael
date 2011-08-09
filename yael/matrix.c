@@ -945,3 +945,82 @@ int fmat_solve_ls_t(int mi, int ni, const float *a, const float *b, float *x) {
   
 }
 
+
+
+
+/*--- Another way to do it by accumulating covariance matrice on-the-fly, using blocks of data ---*/
+
+pca_online_t * pca_online_new (int d)
+{
+  pca_online_t * pca = (pca_online_t *) malloc (sizeof (pca_online_t));
+  pca->d = d;
+  pca->n = 0;
+  pca->mu = fvec_new_0 (d);
+  pca->cov = fvec_new_0 (d*d);
+  pca->eigvec = NULL;
+  pca->eigval = fvec_new (d);
+  return pca;
+}
+
+
+void pca_online_delete (struct pca_online_s * pca)
+{
+  free (pca->mu);
+  free (pca->cov);
+  free (pca->eigvec);
+  free (pca->eigval);
+  free (pca);
+}
+
+
+/* Accumulate information for PCA for n input vectors */
+void pca_online_accu (struct pca_online_s * pca, const float * v, long n)
+{
+  int d = pca->d;
+  float * cov = fvec_new (d*d);
+  float * mu = fvec_new (d);
+
+  fmat_sum_rows (v, d, n, mu);
+  fmat_mul_tr (v, v, d, d, n, cov);
+
+  fvec_add (pca->mu, mu, d);
+  fvec_add (pca->cov, cov, d*d);
+
+  pca->n += n;
+
+  free (cov);
+  free (mu);
+}
+
+
+/* compute the mean, the covariance matrix, and the eigenvectors.
+   They are stored in the structure itself  */
+void pca_online_complete (struct pca_online_s * pca)
+{
+  int d = pca->d;
+  int n = pca->n;
+
+  fvec_div_by (pca->mu, d, n);
+  fvec_div_by (pca->cov, d * d, n);
+
+  float * mumut = fvec_new (d*d);
+  fmat_mul_tr (pca->mu, pca->mu, d, d, 1, mumut);
+  fvec_sub (pca->cov, mumut, d*d);
+  free (mumut);
+
+  assert(fvec_all_finite(pca->cov,d*d));
+  pca->eigvec = fmat_new_pca_from_covariance (d, pca->cov, pca->eigval);
+}
+
+
+void pca_online_project (const pca_online_t * pca, const float * v, float * vo, int d, long n, int dout)
+{
+  const char trmat[2] = {'T', 'N'};
+  float * vb = fvec_new_cpy (v, n*d);
+  assert (d == pca->d);
+
+  fmat_subtract_from_columns (pca->d, n, vb, pca->mu);
+  fmat_mul_full (pca->eigvec, vb, dout, n, pca->d, trmat, vo);
+  free (vb);
+}
+

@@ -305,6 +305,43 @@ int fmat_svd_partial_full(int n,int m,int nev,const float *a,int a_transposed,
 /*! Compute the PCA eigenvalues and eigenvectors from covariance matrix */
 float *fmat_new_pca_from_covariance(int d, const float *cov, float *singvals);
 
+
+/* Online version of PCA */
+
+/* a structure to perform an online PCA */
+struct pca_online_s {
+  int n;
+  int d;
+  float * mu;
+  float * cov;
+  float * eigvec;
+  float * eigval;
+};
+
+typedef struct pca_online_s pca_online_t;
+
+/*! Construct the online PCA structure */
+pca_online_t * pca_online_new (int d);
+
+/*! Free memory associated with the online PCA structure */
+void pca_online_delete (struct pca_online_s * pca);
+
+/*! Accumulate information for PCA for n input vectors */
+void pca_online_accu (struct pca_online_s * pca, const float * v, long n);
+
+/*! Online PCA: compute the mean, the covariance matrix, and the eigenvectors.
+   They are stored in the structure itself  */
+void pca_online_complete (struct pca_online_s * pca);
+
+/*! Project some vectors according to a PCA structure */
+void pca_online_project (const pca_online_t * pca, const float * v, float * vo, int d, long n, int dout);
+
+
+
+
+
+
+
 /*---------------------------------------------------------------------------*/
 /*! @} */
 /*---------------------------------------------------------------------------*/

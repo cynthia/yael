@@ -38,99 +38,70 @@ void test_std (long n, long d, float *v)
   
   printf("\neig_f=");
   fmat_print(eig_f,d,d);
-
   free(eig_f);
 }
 
 
 
-/* Another way to do it by accumulating covariance matrice on-the-fly, using blocks of data */
-#define PCA_BLOCK_SIZE 4
+#define PCA_BLOCK_SIZE 256
 
-void cov_accu (const float * v, long d, long n, float * cov, float * mu)
+
+
+pca_online_t * pca_online (long n, int d, const float *v)
 {
-  fmat_sum_rows (v, d, n, mu);
-  fmat_mul_tr (v, v, d, d, n, cov);
+  long i;
+
+  pca_online_t * pca = pca_online_new (d);
+
+  for (i = 0 ; i < n ; i += PCA_BLOCK_SIZE) {
+    long iend = i + PCA_BLOCK_SIZE;
+    if (iend > n) iend = n;
+    long ntmp = iend - i;
+    const float * vb = v + i * d;
+
+    pca_online_accu (pca, vb, ntmp);
+  }
+
+  /* compute the PCA decomposition itself */
+  pca_online_complete (pca);
+
+  return pca;
 }
 
 
 
 /* Apply the matrix multiplication by block */
-void apply_pca (const float * eigs, const float * mu, float * v, float * vo, long n, long d)
+void apply_pca (const struct pca_online_s * pca, const float * v, float * vo, int d, int n, int dout)
 {
   long i;
-  int dout = d;
-  const char trmat[2] = {'T', 'N'};
 
   for (i = 0 ; i < n ; i += PCA_BLOCK_SIZE) {
     long iend = i + PCA_BLOCK_SIZE;
     if (iend > n) iend = n;
     long ntmp = iend - i;
-    
-    float * vb = v + i * d;
 
-    fmat_subtract_from_columns (d, ntmp, vb, mu);
-
-    fmat_mul_full (eigs, v, dout, n, d, trmat, vo);
+    pca_online_project (pca, v + i * d, vo + i * dout, d, ntmp, dout);
   }  
-}
 
+  printf("\ncentered_v=");
+  fmat_center_columns(d,n,v);
+  fmat_print(v,d,n);
 
-void test_online (long n, long d, float *v)
-{
-  long i;
-
-  float * cov = fvec_new_0 (d*d);
-  float * cov_tmp = fvec_new (d*d);
-  float * mu = fvec_new_0 (d);
-  float * mu_tmp = fvec_new (d * d);
-
-  for (i = 0 ; i < n ; i += PCA_BLOCK_SIZE) {
-    long iend = i + PCA_BLOCK_SIZE;
-    if (iend > n) iend = n;
-    long ntmp = iend - i;
-    float * vb = v + i * d;
-
-    cov_accu (vb, d, ntmp, cov_tmp, mu_tmp);
-
-    fvec_add (mu, mu_tmp, d);
-    fvec_add (cov, cov_tmp, d*d);
-  }
-
-  /* compute the covariance matrix */
-  fvec_div_by (mu, d, n);
-  fvec_div_by (cov, d * d, n);
-  
-  fmat_mul_tr (mu, mu, d, d, 1, mu_tmp);
-  fvec_sub (cov, mu_tmp, d*d);
-
-  assert(fvec_all_finite(cov,d*d));
-
-  float * eigval = fvec_new (d);
-  float * eigvec = fmat_new_pca_from_covariance (d, cov, eigval);
-
-  printf("\neig_f=");
-  fmat_print(eigvec,d,d);
-
-  float * vo = fvec_new (n*d);
-
-  apply_pca (eigvec, mu, v, vo, n, d);
-
-  free (eigvec);
-  free (eigval);
+  double energy_in = fvec_sum_sqr (v, n * d);
+  double energy_out = fvec_sum_sqr (vo, n * dout);
+  printf ("Energy preserved = %.3f\n", (float) (energy_out / energy_in));
 }
 
 
 
 int main (int argc, char **argv)
 {
-  int d,n;
+  int d, n;
 
   if(argc!=3 || sscanf(argv[1],"%d",&n)!=1 || sscanf(argv[2],"%d",&d)!=1) {
     fprintf(stderr,"usage: test_pca npt ndim\n");
     return 1;
   }
-
 
   long i;
   float *v = fvec_new(n*d);
@@ -142,9 +113,19 @@ int main (int argc, char **argv)
   test_std(n, d, v1);
 
   /* version with on-line reading of vectors */
-  test_online(n, d, v);
+  pca_online_t * pca = pca_online(n, d, v);
+  
+  printf("\ncov2=");
+  fmat_print(pca->cov,d,d);
+
+  printf("\neigvec=");
+  fmat_print(pca->eigvec,d,d);
+
 
   /* Project the vector using the PCA matrix */
+  int dout = d;
+  float * vo = fvec_new (n*d);
+  apply_pca (pca, v, vo, d, n, dout);
 
   free(v);
 

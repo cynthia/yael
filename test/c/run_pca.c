@@ -51,7 +51,7 @@ float * read_raw_floats (const char * fname, int n)
 
 
 /* write output file in raw file format */
-void write_raw_floats (const char * fname, const float * v, int d)
+void write_raw_floats (const char * fname, const float * v, long n)
 {
   int ret;
 
@@ -61,13 +61,109 @@ void write_raw_floats (const char * fname, const float * v, int d)
     exit (1);
   }
 
-  ret = fwrite (v, sizeof (*v), d, f);
-  if (ret != d) {
-    fprintf (stderr, "Unable to write %d floats in file %s\n", d, fname);
+  ret = fwrite (v, sizeof (*v), n, f);
+  if (ret != n) {
+    fprintf (stderr, "Unable to write %ld floats in file %s\n", n, fname);
     exit (2);
   }
   fclose (f);
 }
+
+
+
+/* Online PCA -> accumulating covariance matrice on-the-fly, using blocks of data */
+#define PCA_BLOCK_SIZE 256
+
+pca_online_t * pca_online (long n, int d, const char * fname)
+{
+  long i;
+
+  FILE * f = fopen (fname, "r");
+  if (!f) { 
+    fprintf (stderr, "Unable to open file %s for reading\n", fname);
+    exit (1);
+  }
+
+  printf ("* PCA: accumulate mean and covariance matrix\n");
+
+  pca_online_t * pca = pca_online_new (d);
+  float * vbuf = fvec_new (PCA_BLOCK_SIZE * d);
+
+  for (i = 0 ; i < n ; i += PCA_BLOCK_SIZE) {
+    long iend = i + PCA_BLOCK_SIZE;
+    if (iend > n) iend = n;
+    long ntmp = iend - i;
+
+    int ret = fread (vbuf, sizeof (*vbuf), ntmp * d, f);
+    if (ret != ntmp) {
+      fprintf (stderr, "Unable to readd %ld floats in file %s\n", n, fname);
+      exit (2);
+    }
+
+    pca_online_accu (pca, vbuf, ntmp);
+  }
+
+  printf ("* PCA: perform the eigen-decomposition\n");
+  pca_online_complete (pca);
+
+  free (vbuf);
+  fclose (f);
+  return pca;
+}
+
+
+
+/* Apply the matrix multiplication by block */
+void apply_pca (const struct pca_online_s * pca, 
+		const char * finame, const char * foname, 
+		int d, long n, int dout)
+{
+  int ret;
+  long i, ntmp = -1;
+
+  FILE * fi = fopen (finame, "r");
+  if (!fi) { 
+    fprintf (stderr, "Unable to open file %s for reading\n", finame);
+    exit (1);
+  }
+
+  FILE * fo = fopen (foname, "w");
+  if (!fo) { 
+    fprintf (stderr, "Unable to open file %s for writing\n", foname);
+    exit (1);
+  }
+
+  float * vibuf = fvec_new (PCA_BLOCK_SIZE * d);
+  float * vobuf = fvec_new (PCA_BLOCK_SIZE * dout);
+
+  for (i = 0 ; i < n ; i += PCA_BLOCK_SIZE) {
+    long iend = i + PCA_BLOCK_SIZE;
+    if (iend > n) iend = n;
+    ntmp = iend - i;
+    
+    ret = fread (vibuf, sizeof (*vibuf), ntmp * d, fi);
+    if (ret != ntmp) {
+      fprintf (stderr, "Unable to read %ld floats in file %s\n", n, finame);
+      exit (2);
+    }
+
+    pca_online_project (pca, vibuf, vobuf, d, ntmp, dout);
+
+    ret = fwrite (vobuf, sizeof (*vobuf), ntmp * dout, fo);
+    if (ret != ntmp) {
+      fprintf (stderr, "Unable to write %ld floats in file %s\n", n, foname);
+      exit (2);
+    }
+  }  
+
+  double energy_in = fvec_sum_sqr (vibuf, ntmp * d);
+  double energy_out = fvec_sum_sqr (vobuf, ntmp * dout);
+  printf ("Last block: Energy preserved = %.3f\n", (float) (energy_out / energy_in));
+
+  free (vibuf);
+  free (vobuf);
+}
+
 
 
 int main (int argc, char **argv)
@@ -76,9 +172,9 @@ int main (int argc, char **argv)
   int verbose = 0;
   int d = -1;
   int dout = -1;
-  int n = -1;
+  long n = -1;
   
-  float  plaw = -1;
+  float plaw = -1;
   float norm = -1;
 
   const char * vec_fname = NULL;     /* input vector file */
@@ -96,7 +192,7 @@ int main (int argc, char **argv)
       verbose = 2;
     }
     else if (!strcmp (a, "-n") && i+1 < argc) {
-      ret = sscanf (argv[++i], "%d", &n);
+      ret = sscanf (argv[++i], "%ld", &n);
       assert (ret);
     }
     else if (!strcmp (a, "-d") && i+1 < argc) {
@@ -137,12 +233,8 @@ int main (int argc, char **argv)
   }
 
   if (verbose) {
-    printf ("d=%d\nn=%d\nvec=%s\navg=%s\nevec=%s\neval=%s\n",
-	    d, n, vec_fname, avg_fname, evec_fname, eval_fname);
-    if (ovec_fname)  printf ("outvec=%s\n", ovec_fname);
-    if (avg_fname)  printf ("avg=%s\n", avg_fname);
-    if (evec_fname) printf ("evec=%s\n", evec_fname);
-    if (eval_fname) printf ("eval=%s\n", eval_fname);
+    printf ("d=%d\nn=%ld\nvec=%s\navg=%s\nevec=%s\neval=%s\novec=%s",
+	    d, n, vec_fname, avg_fname, evec_fname, eval_fname, ovec_fname);
   }
 
   if (d == -1 || n == -1 || !vec_fname)
@@ -154,7 +246,7 @@ int main (int argc, char **argv)
 
 
   if (verbose)
-    printf ("* Read data from file %s -> %d vectors of dimension %d\n", vec_fname, n, d);
+    printf ("* Read data from file %s -> %ld vectors of dimension %d\n", vec_fname, n, d);
   float * v = read_raw_floats (vec_fname, n*d);
 
   /* Pre-processing: power-law on components */
@@ -175,50 +267,33 @@ int main (int argc, char **argv)
     fvec_purge_nans (v, n * d, 0);
   }
 
-  /* compute the mean and subtract it from the vectors */
-  if (verbose)
-    printf ("* Compute average\n");
-  float * avg = fmat_center_columns(d,n,v);
 
-  /* compute the PCA and write eigenvalues and eigenvectors to disk */
-  if (verbose)
-    printf ("* Compute eigenvectors\n");
-  float * eval = fvec_new (d);
-  float * evec = fmat_new_pca(d,n,v,eval);  
+  /* Online PCA learning */
+  pca_online_t * pca = pca_online (n, d, vec_fname);
+
 
   if (verbose) {
     printf ("eigenval = ");
-    fvec_print (eval, d);
+    fvec_print (pca->eigval, d);
   }
   
   if (avg_fname) 
-    write_raw_floats (avg_fname, avg, d);
+    write_raw_floats (avg_fname, pca->mu, d);
 
   if (eval_fname)
-    write_raw_floats (eval_fname, eval, d);
+    write_raw_floats (eval_fname, pca->eigval, d);
 
   if (evec_fname) 
-    write_raw_floats (evec_fname, evec, d*d);
+    write_raw_floats (evec_fname, pca->eigvec, d*d);
 
+
+  /* Optionnally, apply the PCA */
   if (ovec_fname) {
-    /* compute the projection of the database vector on the PCA basis */
-    float * ovec = fmat_new_mul_tl(evec,v,dout,n,d);
-    write_raw_floats (ovec_fname, ovec, n*dout);
-
-    if (verbose) {
-      /* compute energy of input and outpt vectors */
-      double energy_in = fvec_sum_sqr (v, n * d);
-      double energy_out = fvec_sum_sqr (ovec, n * dout);
-      printf ("Energy preserved = %.3f\n", (float) (energy_out / energy_in));
-    }
-    free (ovec);
+    apply_pca (pca, vec_fname, ovec_fname, d, n, dout);    
   }
 
   free(v);
-  free(avg);
-  free(eval);
-  free(evec);
-
+  pca_online_delete (pca);
   return 0;
 }
 
