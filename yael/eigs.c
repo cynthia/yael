@@ -164,7 +164,7 @@ void eigs_reorder (int d, float * eigval, float * eigvec, int criterion)
   int i;
   int * perm = ivec_new (d);
 
-  float * eigvalst = fvec_new (d * d);
+  float * eigvalst = fvec_new (d);
   float * eigvecst = fvec_new (d * d);
 
   fvec_sort_index (eigval, d, perm);

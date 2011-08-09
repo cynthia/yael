@@ -45,17 +45,13 @@ void test1 (int n, int d, float *v)
 
 void cov_accu (const float * v, int d, int n, float * cov, float * mu)
 {
-  const char sttmp[2]  = {'T', 'N'};
-  fprintf (stderr, "s0-1\n");
   fmat_sum_rows (v, d, n, mu);
-  fprintf (stderr, "s0-2\n");
-  fmat_mul_full (v, v, d, n, d, sttmp, cov);
-  fprintf (stderr, "s0-3\n");
+  fmat_mul_tr (v, v, d, d, n, cov);
 }
 
 
-/* Another way to do it by accumulating covariance matrice on-the-fly */
-# define PCA_BLOCK_SIZE 4
+/* Another way to do it by accumulating covariance matrice on-the-fly, using blocks of data */
+#define PCA_BLOCK_SIZE 4
 
 void test2 (int n, int d, float *v)
 {
@@ -64,9 +60,7 @@ void test2 (int n, int d, float *v)
   float * cov = fvec_new_0 (d*d);
   float * cov_tmp = fvec_new (d*d);
   float * mu = fvec_new_0 (d);
-  float * mu_tmp = fvec_new (d);
-
-  fprintf (stderr, "s0\n");
+  float * mu_tmp = fvec_new (d * d);
 
   for (i = 0 ; i < n ; i += PCA_BLOCK_SIZE) {
     int iend = i + PCA_BLOCK_SIZE;
@@ -74,30 +68,28 @@ void test2 (int n, int d, float *v)
     
     int ntmp = iend - i;
     
-    cov_accu (v, d, ntmp, cov_tmp, mu_tmp);
+    cov_accu (v + i * d, d, ntmp, cov_tmp, mu_tmp);
 
     fvec_add (mu, mu_tmp, d);
     fvec_add (cov, cov_tmp, d*d);
   }
 
-  fprintf (stderr, "s1\n");
-
   /* compute the covariance matrix */
   fvec_div_by (mu, d, n);
-  fvec_div_by (cov, d*d, n-1);
+  fvec_div_by (cov, d * d, n);
   
   fmat_mul_tr (mu, mu, d, d, 1, mu_tmp);
   fvec_sub (cov, mu_tmp, d*d);
 
-  fprintf (stderr, "s2\n");
+  assert(fvec_all_finite(cov,d*d));
 
   float * eigval = fvec_new (d);
   float * eigvec = fmat_new_pca_from_covariance (d, cov, eigval);
 
   printf("\neig_f=");
-  printf("eig_f=");
   fmat_print(eigvec,d,d);
-
+  free (eigvec);
+  free (eigval);
 }
 
 
@@ -121,6 +113,7 @@ int main (int argc, char **argv)
   /* reference version */
   test1(n, d, v1);
 
+  /* version with on-line reading of vectors */
   test2(n, d, v);
 
   free(v);
