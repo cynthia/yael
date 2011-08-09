@@ -203,7 +203,7 @@ void compute_distances_1 (int d, int nb,
 
 #include <emmintrin.h>
 
-#warning "using SSE optimized Chi^2"
+#warning "SSE optimized distance computations"
 
 /* compute chi2 distance between two vectors */
 static float vec_chi2(const float *a,const float *b,int n) {
@@ -224,6 +224,26 @@ static float vec_chi2(const float *a,const float *b,int n) {
   return af[0]+af[1]+af[2]+af[3];
 }
 
+static float vec_L1(const float *a,const float *b,int n) {
+  int i=0;
+  __v4sf accu={0,0,0,0};
+  __v4si signbit = {0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff};  /* to clear out sign bit */
+  __v4sf *av=(void*)a,*bv=(void*)b;
+  n/=4;
+
+  for(i=0;i<n;i++) {
+    __v4sf ai = av[i], bi = bv[i];
+    __v4sf diff = ai - bi;
+    __v4sf diffabs = _mm_and_ps(diff, (__m128)signbit);
+    accu += diffabs;
+  }
+
+  float *af=(void*)&accu;
+      
+  return af[0]+af[1]+af[2]+af[3];
+}
+
+
 /* TODO optimize a bit more with blocks */
 static void cross_distances_chi2_vec(int d,int na,int nb,
                               const float *a,int lda,
@@ -237,6 +257,25 @@ static void cross_distances_chi2_vec(int d,int na,int nb,
     const float *al=a;
     for(i=0;i<na;i++) {
       cl[i]=vec_chi2(al,bl,d);;
+      al+=lda;
+    }
+    cl+=ldc;
+    bl+=ldb;
+  }
+}
+
+static void cross_distances_L1_vec(int d,int na,int nb,
+                              const float *a,int lda,
+                              const float *b,int ldb,
+                              float *c,int ldc) {  
+  int i,j;
+  const float *bl=b;
+  float *cl=c;    
+
+  for(j=0;j<nb;j++) {
+    const float *al=a;
+    for(i=0;i<na;i++) {
+      cl[i]=vec_L1(al,bl,d);;
       al+=lda;
     }
     cl+=ldc;
@@ -259,9 +298,14 @@ void compute_cross_distances_alt_nonpacked (int distance_type, int d, int na, in
                                             float *dist2, int ldd) {
   /* special cases for optimized versions */
 #ifdef __SSE2__
-  if(distance_type==3 && d%4==0) {
-    cross_distances_chi2_vec(d,na,nb,a,lda,b,ldb,dist2,ldd);
-    return;
+  if(d%4==0) {
+    if(distance_type == 3) {
+      cross_distances_chi2_vec(d,na,nb,a,lda,b,ldb,dist2,ldd);
+      return;
+    } else if(distance_type == 1) {
+      cross_distances_L1_vec(d,na,nb,a,lda,b,ldb,dist2,ldd);
+      return;
+    }
   }
 #endif  
 
