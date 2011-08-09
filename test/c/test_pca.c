@@ -27,7 +27,7 @@ Lines should be the same up to the sign as eigs_f output
 */
 
 
-void test1 (int n, int d, float *v) 
+void test_std (long n, long d, float *v) 
 {
   fmat_center_columns(d,n,v);
 
@@ -43,19 +43,42 @@ void test1 (int n, int d, float *v)
 }
 
 
-void cov_accu (const float * v, int d, int n, float * cov, float * mu)
+
+/* Another way to do it by accumulating covariance matrice on-the-fly, using blocks of data */
+#define PCA_BLOCK_SIZE 4
+
+void cov_accu (const float * v, long d, long n, float * cov, float * mu)
 {
   fmat_sum_rows (v, d, n, mu);
   fmat_mul_tr (v, v, d, d, n, cov);
 }
 
 
-/* Another way to do it by accumulating covariance matrice on-the-fly, using blocks of data */
-#define PCA_BLOCK_SIZE 4
 
-void test2 (int n, int d, float *v)
+/* Apply the matrix multiplication by block */
+void apply_pca (const float * eigs, const float * mu, float * v, float * vo, long n, long d)
 {
-  int i, j;
+  long i;
+  int dout = d;
+  const char trmat[2] = {'T', 'N'};
+
+  for (i = 0 ; i < n ; i += PCA_BLOCK_SIZE) {
+    long iend = i + PCA_BLOCK_SIZE;
+    if (iend > n) iend = n;
+    long ntmp = iend - i;
+    
+    float * vb = v + i * d;
+
+    fmat_subtract_from_columns (d, ntmp, vb, mu);
+
+    fmat_mul_full (eigs, v, dout, n, d, trmat, vo);
+  }  
+}
+
+
+void test_online (long n, long d, float *v)
+{
+  long i;
 
   float * cov = fvec_new_0 (d*d);
   float * cov_tmp = fvec_new (d*d);
@@ -63,12 +86,12 @@ void test2 (int n, int d, float *v)
   float * mu_tmp = fvec_new (d * d);
 
   for (i = 0 ; i < n ; i += PCA_BLOCK_SIZE) {
-    int iend = i + PCA_BLOCK_SIZE;
+    long iend = i + PCA_BLOCK_SIZE;
     if (iend > n) iend = n;
-    
-    int ntmp = iend - i;
-    
-    cov_accu (v + i * d, d, ntmp, cov_tmp, mu_tmp);
+    long ntmp = iend - i;
+    float * vb = v + i * d;
+
+    cov_accu (vb, d, ntmp, cov_tmp, mu_tmp);
 
     fvec_add (mu, mu_tmp, d);
     fvec_add (cov, cov_tmp, d*d);
@@ -88,6 +111,11 @@ void test2 (int n, int d, float *v)
 
   printf("\neig_f=");
   fmat_print(eigvec,d,d);
+
+  float * vo = fvec_new (n*d);
+
+  apply_pca (eigvec, mu, v, vo, n, d);
+
   free (eigvec);
   free (eigval);
 }
@@ -104,17 +132,19 @@ int main (int argc, char **argv)
   }
 
 
-  int i;
+  long i;
   float *v = fvec_new(n*d);
   for (i=0;i<n*d;i++) 
     v[i]=drand48()*2-1;
   float * v1 = fvec_new_cpy (v, n*d);
 
   /* reference version */
-  test1(n, d, v1);
+  test_std(n, d, v1);
 
   /* version with on-line reading of vectors */
-  test2(n, d, v);
+  test_online(n, d, v);
+
+  /* Project the vector using the PCA matrix */
 
   free(v);
 
