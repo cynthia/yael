@@ -122,7 +122,7 @@ doc subdirectory and execute the following command line::
 
 
 **Remark:** In order to use the 32 bit mode on MacOS (not recommanded), 
-use the special flag \tc{--mac32}::
+use the special flag ``--mac32``::
 
   ./configure.sh --mac32
 
