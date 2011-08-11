@@ -7,6 +7,7 @@ Welcome to Yael's documentation!
    license
    whatisthis
    gettingstarted
+   cinterface
 
 
 .. These images will have to be included
