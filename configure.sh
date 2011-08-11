@@ -7,9 +7,9 @@ args="$@"
 
 # Detect architecture
 if [ `uname` == Darwin ] ; then
-  conf=mac
-  echo "# Warning for MAC users: For 64 bits compilation, option --mac64 is explicitely required."
-  echo "  This is mandatory when using a 64-bits version of Matlab (otherwise seg-fault). "
+  conf=mac64
+  echo "# Warning for MAC users: For 32 bits compilation, option --mac32 is explicitely required."
+  echo "  This is mandatory when using a 32-bits version of Matlab (otherwise seg-fault). "
 elif [ `uname -m` == 'x86_64' ] ; then
   conf=linux64
 elif  [ `uname -m` == 'i686' ] || [ `uname -m` == 'i386' ]  ; then
@@ -56,7 +56,7 @@ useopenmp=""
 # dynamic libs: force an install path so that the user does not need
 # to set the LD_LIBRARY_PATH for yael
 
-if [ $conf == mac ]; then
+if [ $conf == mac64 ]; then
   wrapldflags="-Wl,-F. -bundle -undefined dynamic_lookup"
   sharedext=dylib
   sharedflags="-dynamiclib"
@@ -81,7 +81,7 @@ usage: $0
   [--enable-openmp]
   [--enable-numpy]
   [--numpy-cflags=includes-for-numpy]
-  [--mac64]
+  [--mac32]
 
 Examples that work: 
 
@@ -131,10 +131,8 @@ while [ $# -gt 0 ] ; do
 	--fortran-64bit-int) 
             lapackcflags="$lapackcflags -DFINTEGER=long" ;;       
 
-	--mac64)    
-	    conf=mac64
-	    cflags="$cflags -m64"
-	    ldflags="$ldflags -m64"
+	--mac32)    
+	    conf=mac32
 	    ;;
 
         --python-cflags=*)     
@@ -157,6 +155,11 @@ while [ $# -gt 0 ] ; do
 	*)  echo "unknown option $a" 1>&2; exit 1;;
     esac
 done
+
+if [ $conf == mac64 ]; then
+    cflags="$cflags -m64"
+    ldflags="$ldflags -m64"
+fi
 
 yaellib=${yaelprefix}/yael
 yaelinc=${yaelprefix}
