@@ -129,5 +129,5 @@ use the special flag ``--mac32``::
 
 .. [#] The mex executable should be in the PATH. 
    This is a typical error. Another one occurs when the ``mex`` 
-   utility of Latex has a higher priority than 
+   utility of Octave has a higher priority than 
    the Matlab command with the same name. 
