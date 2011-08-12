@@ -9,6 +9,10 @@ Welcome to Yael's documentation!
    gettingstarted
    cinterface
    python_interface
+   matlab_interface
+   file_format
+   troubleshooting
+
 
 .. These images will have to be included
   .. image:: figs/logoinria.png

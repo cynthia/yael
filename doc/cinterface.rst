@@ -4,18 +4,15 @@ C interface and basic programs
 The C API is object-oriented whenever applicable, with constructors
 and destructors for each structure.
 
-
 The include directory should be set to the \yroot directory, so that a
 yael file is included using the prefix ``yael/``. For instance,
 including the primitive for vectors is performed by::
 
   #include <yael/vector.h>
 
-
 The documentation of the functions and data structures is in the
 header files. It can be extracted and formatted by ``doxygen``, run by
 invoking ``make`` in the ``doc`` subdirectory.
-
 
 The best thing to do to have an operational Makefile and program is
 probably to look at the test files included in the ``YAELROOT/test/``
@@ -41,7 +38,7 @@ Most of the functions are associated with ``ivec``  and ``fvec`` types.
 Vector sizes are passed explicitly, as long int's to allow for
 large arrays on 64 bit machines. Vectors can be free'd with ``free()``::
 
-  /* Generate a random thread using a thread-safe function */
+  /* Generate a random array using a thread-safe function */
   long n = 100;	\
   seed = 666;
   float * v = fvec_new_randn_r (n, seed);
@@ -50,7 +47,6 @@ large arrays on 64 bit machines. Vectors can be free'd with ``free()``::
   
   /* free the vector */
   free (v);
-
 
 Arrays of vectors are stored contiguously in memory. 
 As shown above, an array of n float vectors of dimension d is simply declared 
@@ -61,12 +57,12 @@ The `i`-th element of vector `j` of vector array `vf`, where :math:`0
 
    vf[j * d + i]
 
-
 It can also be seen as a column-major matrix of size :math:`d * n`:.
 
 Since the library is intended to be fast, 32-bit floating point
 numbers are preferred over 64-bit ones almost everywhere.
 
+We acknowledge the influence of Fortran conventions in this design.
 
 Multi-threading in Yael
 ------------------------
