@@ -45,11 +45,11 @@ knowledge of the CeCILL license and that you accept its terms.
 
 
 /* flags for kmeans */
-#define KMEANS_QUIET                   0x10000
-#define KMEANS_INIT_RANDOM             0x20000
-#define KMEANS_NORMALIZE_CENTS         0x40000
-#define KMEANS_NORMALIZE_SOPHISTICATED 0x80000
+#define KMEANS_QUIET                    0x10000
+#define KMEANS_INIT_RANDOM              0x20000
+#define KMEANS_NORMALIZE_CENTS          0x40000
 #define KMEANS_INIT_USER               0x100000
+#define KMEANS_L1                      0x200000
 
 /*! Compute the k-means centroids. 
  *
@@ -60,8 +60,8 @@ knowledge of the CeCILL license and that you accept its terms.
  *                     - flags & KMEANS_QUIET: suppress kmeans output
  *                     - flags & KMEANS_INIT_RANDOM: random initialization 
  *                     - flags & KMEANS_NORMALIZE_CENTS: normalize centroids to L2=1 after they are computed
- *                     - flags & KMEANS_NORMALIZE_SOPHISTICATED: ditto, more sophisticated
  *                     - flags & KMEANS_INIT_USER: the user gives the initialization
+ *                     - flags & KMEANS_L1: L1 distance kmeans
  *                          -> provided by user with parameter centroids_out)
  * @param seed              random seed for intialization (used only if !=0)
  * @param redo              perform clustering this many times and keep clusters with smallest quantization error

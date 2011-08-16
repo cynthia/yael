@@ -699,7 +699,9 @@ int ivec_sorted_count_unique (const int *v, int n)
 
 float fvec_median (float *f, int n)
 {
-  assert (n > 0);
+  if(n == 0) 
+    return 0.0 / 0.0; 
+
   if (n == 1) 
     return f[0];
 

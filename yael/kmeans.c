@@ -41,17 +41,12 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <assert.h>
 
 #include "vector.h"
+#include "sorting.h"
 #include "matrix.h"
 #include "kmeans.h"
 #include "nn.h"
 #include "machinedeps.h"
 
-
-static void nn_full (int d, int n, int nb, const float * v, const float *b, 
-	      int nt, int * assign, float * dis)
-{
-  knn_full_thread (2, n, nb, d, 1, b, v, NULL, assign, dis, nt, NULL, NULL);
-}
 
 
 static void random_init(long d, int n, int k, const float * v, int * sel, 
@@ -135,6 +130,7 @@ static int kmeans_reassign_empty (int d, int n, int k, float * centroids,
 
   for (c = 0 ; c < k ; c++)
     proba_split[c] = (nassign[c] < 2 ? 0 : nassign[c]*nassign[c] - 1);
+
   fvec_normalize (proba_split, k, 1);
 
   for (c = 0 ; c < k ; c++) {
@@ -178,11 +174,15 @@ static int kmeans_core (int d, int n, int k, int niter, int nt, int flags, int v
 			 float * dis, 
 			 double * qerr_out, long * iter_tot)
 {
-  int i, iter;
+  int i, j, iter;
   int nreassign;
+  int ret = 0; 
 
   /* the quantization error */
   double qerr = HUGE_VAL, qerr_old;
+
+  float *tmp_v = flags & KMEANS_L1 ? fvec_new((long)n * d) : NULL;
+  int *tmp_cumsum = ivec_new(k);
 
   int tot_nreassign=0;
 
@@ -190,46 +190,54 @@ static int kmeans_core (int d, int n, int k, int niter, int nt, int flags, int v
     (*iter_tot)++;
 
     /* Assign point to cluster and count the cluster size */
-    nn_full (d, n, k, v, centroids, nt, assign, dis);
-      
+
+    knn_full_thread (flags & KMEANS_L1 ? 1 : 2, 
+                     n, k, d, 1, centroids, v, NULL, assign, dis, nt, NULL, NULL);
+
+    
     /* compute the number of points assigned to each cluster and a 
        probability to select a given cluster for splitting */
     ivec_0 (nassign, k);
     for (i = 0 ; i < n ; i++)
       nassign[assign[i]]++;
 
-    /* update the centroids */
-    if(flags & KMEANS_NORMALIZE_SOPHISTICATED) {
-        
-      float *norms = fvec_new(k);
-      fvec_0 (centroids, d * k);
-        
-      for (i = 0 ; i < n ; i++) {
-	fvec_add (centroids + assign[i] * d, v + i * d, d);
-	norms[assign[i]]+=fvec_norm(v + i * d,d,2);
-      }
+    if(flags & KMEANS_L1) {
+      ivec_cpy(tmp_cumsum, nassign, k);
+      ivec_cumsum(tmp_cumsum, k); 
 
-      for (i = 0 ; i < k ; i++) {          
-	fvec_normalize(centroids + i * d, d,2);
-	fvec_mul_by (centroids + i * d, d, norms[i] / nassign[i]);
+      /* vector i will be written at column tmp_cumsum[assign[i]] - 1
+         in tmp_v, a row major matrix  */
+      
+      for(i = 0; i < n; i++) {
+        int write_to = --tmp_cumsum[assign[i]]; 
+        for(j = 0; j < d; j++) 
+          tmp_v[write_to + j * n] = v[i * d + j];        
       }
+      
+      /* centroids are medians */
 
-      free(norms);
+      for(i = 0; i < k; i++) 
+        for(j = 0; j < d; j++) 
+          centroids[i * d + j] = fvec_median(tmp_v + tmp_cumsum[i] + j * n, nassign[i]); 
+
     } else {
+
+      /* update the centroids */
       fvec_0 (centroids, d * k);
-        
+      
       for (i = 0 ; i < n ; i++)
-	fvec_add (centroids + assign[i] * d, v + i * d, d);
-        
+        fvec_add (centroids + assign[i] * d, v + i * d, d);
+      
       /* normalize */
       for (i = 0 ; i < k ; i++) {          
-	fvec_mul_by (centroids + i * d, d, 1.0 / nassign[i]);
+        fvec_mul_by (centroids + i * d, d, 1.0 / nassign[i]);
       }
-        
-      if(flags & KMEANS_NORMALIZE_CENTS) 
-	for (i = 0 ; i < k ; i++) 
-	  fvec_normalize(centroids + i * d, d, 2.0);
-    }
+    
+    } 
+
+    if(flags & KMEANS_NORMALIZE_CENTS) 
+      for (i = 0 ; i < k ; i++) 
+        fvec_normalize(centroids + i * d, d, flags & KMEANS_L1 ? 1.0 : 2.0);
 
     /* manage empty clusters and update nassign */
     nreassign = kmeans_reassign_empty (d, n, k, centroids, assign, nassign, rand_r(&seed));
@@ -240,7 +248,8 @@ static int kmeans_core (int d, int n, int k, int niter, int nt, int flags, int v
 
     if(tot_nreassign>n/100 && tot_nreassign>1000) {
       fprintf (stderr,"# kmeans: reassigned %d times, abandoning\n", tot_nreassign);
-      return -1;
+      ret = -1;
+      goto out; 
     }      
 
     /* compute the quantization error */
@@ -250,14 +259,18 @@ static int kmeans_core (int d, int n, int k, int niter, int nt, int flags, int v
     if (qerr_old == qerr && nreassign == 0)
       break;
     if (verbose)
-      fprintf (stderr, " -> %.3f", qerr / n);
+      printf (" -> %.3f", qerr / n);
   }
   if (verbose)      
-    fprintf (stderr, "\n");
+    printf ("\n");
 
   *qerr_out = qerr;
-  
-  return 0;
+
+ out:
+
+  free(tmp_cumsum);
+  free(tmp_v); 
+  return ret;
 }
 
 
@@ -308,14 +321,14 @@ float kmeans (int di, int n, int k, int niter,
   
 
   if (seed_in == 0) 
-    seed_in=lrand48();
+    seed_in = lrand48();
 
   unsigned int seed=seed_in;
   int core_ret=0;
 
   for (run = 0 ; run < redo ; run++) {
     if(verbose)
-      fprintf (stderr, "<><><><> kmeans / run %d <><><><><>\n", (int)run);
+      printf ("<><><><> kmeans / run %d <><><><><>\n", (int)run);
 
     if (is_user_init) {
       fvec_cpy (centroids, centroids_out, d * k);

@@ -73,7 +73,7 @@ _yael.so: yael_wrap.o libyael.$(SHAREDEXT)
 binheap.o: binheap.c binheap.h sorting.h
 eigs.o: eigs.c eigs.h vector.h sorting.h machinedeps.h 
 gmm.o: gmm.c vector.h matrix.h kmeans.h nn.h gmm.h sorting.h
-kmeans.o: kmeans.c vector.h kmeans.h nn.h
+kmeans.o: kmeans.c vector.h kmeans.h nn.h sorting.h
 hkm.o: hkm.c hkm.h kmeans.h vector.h kmeans.h nn.h
 machinedeps.o: machinedeps.c machinedeps.h
 matrix.o: matrix.c matrix.h vector.h sorting.h machinedeps.h eigs.h
