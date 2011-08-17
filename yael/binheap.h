@@ -1,5 +1,5 @@
 /*
-Copyright © INRIA 2010. 
+Copyright © INRIA 2010-2011. 
 Authors: Matthijs Douze & Herve Jegou 
 Contact: matthijs.douze@inria.fr  herve.jegou@inria.fr
 

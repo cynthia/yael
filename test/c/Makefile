@@ -4,7 +4,7 @@ include ../../makefile.inc
 
 CC=gcc 
 
-all: test_pca run_pca run_eig test_binheap test_eigs test_spectral_clustering test_gmm test_kmeans
+all: test_pca run_pca test_binheap test_eigs test_spectral_clustering test_gmm test_kmeans
 
 
 ifeq "$(USEARPACK)" "yes"

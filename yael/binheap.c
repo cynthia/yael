@@ -251,6 +251,6 @@ void fbinheap_display (fbinheap_t * bh)
   printf ("[nel = %d / maxel = %d] ", bh->k, bh->maxk);
 
   for (i = 1 ; i <= bh->k ; i++)
-    printf ("%d %.6g / ", bh->label[i], bh->val[i]);
+    printf ("%d %.6f / ", bh->label[i], bh->val[i]);
   printf ("\n");
 }

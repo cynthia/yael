@@ -59,7 +59,7 @@ void preprocess (float * v, int d, long n, float plaw, float norm)
   
   /* Pre-processing: normalization */
   if (norm >= 0) {
-    int nNaN = fvecs_normalize (v, n, d, norm);
+    fvecs_normalize (v, n, d, norm);
     fvec_purge_nans (v, n * d, 0);
   }
 }

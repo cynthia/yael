@@ -709,12 +709,12 @@ void knn_full_thread (int distance_type, int npt, int nclust, int d, int k,
 /***************** simplified calls */
 
 float *knn_thread (int npt, int nclust, int d, int k,
-                                          const float *codebook, const float *coords,
-                                          int *vw, 
-                                          int n_thread,
-                                          void (*peek_fun) (void *arg,
-                                                                     double frac),
-                                          void *peek_arg) {
+		   const float *codebook, const float *coords,
+		   int *vw, 
+		   int n_thread,
+		   void (*peek_fun) (void *arg, double frac),
+		   void *peek_arg) 
+{
   float *vwdis2=fvec_new(k*npt);
     
   knn_full_thread (2, npt, nclust, d, k, codebook, coords, NULL, vw, vwdis2, n_thread, peek_fun, peek_arg);

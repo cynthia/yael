@@ -16,6 +16,7 @@
 #include "kmeans.h"
 #include "hkm.h"
 #include "sorting.h"
+#include "binheap.h" 
 #include "vector.h"
 #include "matrix.h"
 #include "eigs.h"
@@ -255,6 +256,14 @@ PARALLEL_FUNCTION_PEEK(knn_full_thread)
 
 
 %include "sorting.h"
+
+
+/*************************************************************************
+ * binheap.h
+ */
+
+%include "binheap.h" 
+
 
 /*************************************************************************
  * vector.h
