@@ -19,9 +19,12 @@ nt = 1
 assign = yael.ivec(n)
   
 
+def d_chi2(a, b):
+  return (a - b) ** 2 / (a + b)
+
 print "clustering %d uniform %dD pts in %d centroids" % (n, d, k) 
 
-for name, flags in ("L2", 0), ("L1", yael.KMEANS_L1):
+for name, flags in ("L2", 0), ("L1", yael.KMEANS_L1), ("Chi2", yael.KMEANS_CHI2):
   print "%s clustering" % name 
 
   t0 = time.time()
@@ -35,7 +38,10 @@ for name, flags in ("L2", 0), ("L1", yael.KMEANS_L1):
     # yael.fmat_print(cents, d, k)
 
 
-    print "run %3d err = %g" % (run, sum([abs(cents[assign[i]*d + j]- pts[i*d+j])
+    print "run %3d L1 err = %g" % (run, sum([abs(cents[assign[i]*d + j] - pts[i*d+j])
+                                      for i in range(n) for j in range(d)]))
+
+    print "run %3d Chi2 err = %g" % (run, sum([d_chi2(cents[assign[i]*d + j], pts[i*d+j])
                                       for i in range(n) for j in range(d)]))
 
   print "time: %.3f s" % (time.time() - t0) 

@@ -57,7 +57,7 @@ static void random_init(long d, int n, int k, const float * v, int * sel,
 }
 
 static double drand_r(unsigned int *seed) {
-  return rand_r(seed)/(double)(RAND_MAX+1L);
+  return rand_r(seed)/((double)RAND_MAX + 1.0);
 }
 
 /* the kmeans++ initialization (see wikipedia) */
@@ -117,6 +117,87 @@ static void kmeanspp_init (long d, int n, int k, const float * v,
   free (disbest);
   free (distmp);
 }
+
+/* Minimize 
+
+     sum( (x - a[i])^2 / (x + a[i]), i = 0..n-1) 
+
+in x. Return minimal x st. x > 0. 
+
+Assumes a[i] > 0 for all i.
+
+Uses Newton's method on the derivative of the expression, since the
+function is convex.
+*/
+
+float minimize_sum_chi2(const float *a, int n) {
+
+  if(n == 0) return 0.0/0.0;
+  if(n == 1) return a[0]; 
+
+  float x, prev_x, mag; 
+  int i; 
+  
+  /* typical magnitude  */
+  mag = 0; 
+  for(i = 0; i < n; i++) mag += a[i];
+  mag /= n;
+
+  /* start at 0 */
+  x = 0; 
+
+  /* start loops */
+
+  int niter = 0; 
+
+  do {
+
+    float d, dd; /* derivative and second derivative */
+
+    d = dd = 0;
+
+    for(i = 0; i < n ; i++) {
+      
+      float sum2 = (x + a[i]) * (x + a[i]);
+      float sum3 = (x + a[i]) * sum2;
+      
+      if(sum2 == 0) continue;
+
+      d += (x - a[i]) * (x + 3 * a[i]) / sum2;
+      
+      dd += 8 * a[i] * a[i] / sum3;
+    }
+    
+    if( d == 0 ) /* ok, found minimum */
+      break;
+
+    if( dd == 0 ) {
+      fprintf(stderr, "warn: minimize_sum_chi2 with zero second derivative, a = [");       
+      for(i = 0; i < n; i++) fprintf(stderr, "%g ", a[i]); 
+      fprintf(stderr, "]\n");
+    }
+    
+    prev_x = x; 
+    
+    x -= d / dd; 
+    
+    if(x < 0) x = prev_x / 2.0; 
+    
+    if(++niter==1000) {
+      fprintf(stderr, "warn: minimize_sum_chi2 reached 1000 iterations, a=[" ); 
+      for(i = 0; i < n; i++) fprintf(stderr, "%g ", a[i]); 
+      fprintf(stderr, "]\n");      
+      break;
+    }
+    
+    assert(finite(x));  
+
+  } while(fabs(x - prev_x) > 1e-4 * mag); 
+ 
+
+  return x;
+}
+
 
 
 /* Manage the empty clusters. Return the number of re-assigned clusters */
@@ -181,8 +262,13 @@ static int kmeans_core (int d, int n, int k, int niter, int nt, int flags, int v
   /* the quantization error */
   double qerr = HUGE_VAL, qerr_old;
 
-  float *tmp_v = flags & KMEANS_L1 ? fvec_new((long)n * d) : NULL;
-  int *tmp_cumsum = ivec_new(k);
+  float *tmp_v = NULL; 
+  int *tmp_cumsum = NULL;
+  
+  if(flags & (KMEANS_L1 | KMEANS_CHI2)) {
+    tmp_v = fvec_new((long)n * d);
+    tmp_cumsum = ivec_new(k); 
+  }                          
 
   int tot_nreassign=0;
 
@@ -191,7 +277,8 @@ static int kmeans_core (int d, int n, int k, int niter, int nt, int flags, int v
 
     /* Assign point to cluster and count the cluster size */
 
-    knn_full_thread (flags & KMEANS_L1 ? 1 : 2, 
+    knn_full_thread (flags & KMEANS_L1 ? 1 : 
+                     flags & KMEANS_CHI2 ? 3 : 2, 
                      n, k, d, 1, centroids, v, NULL, assign, dis, nt, NULL, NULL);
 
     
@@ -201,7 +288,7 @@ static int kmeans_core (int d, int n, int k, int niter, int nt, int flags, int v
     for (i = 0 ; i < n ; i++)
       nassign[assign[i]]++;
 
-    if(flags & KMEANS_L1) {
+    if(flags & (KMEANS_L1 | KMEANS_CHI2)) {
       ivec_cpy(tmp_cumsum, nassign, k);
       ivec_cumsum(tmp_cumsum, k); 
 
@@ -218,7 +305,10 @@ static int kmeans_core (int d, int n, int k, int niter, int nt, int flags, int v
 
       for(i = 0; i < k; i++) 
         for(j = 0; j < d; j++) 
-          centroids[i * d + j] = fvec_median(tmp_v + tmp_cumsum[i] + j * n, nassign[i]); 
+          if(flags & KMEANS_L1) 
+            centroids[i * d + j] = fvec_median(tmp_v + tmp_cumsum[i] + j * n, nassign[i]); 
+          else /* if(flags & KMEANS_CHI2) */
+            centroids[i * d + j] = minimize_sum_chi2(tmp_v + tmp_cumsum[i] + j * n, nassign[i]); 
 
     } else {
 
