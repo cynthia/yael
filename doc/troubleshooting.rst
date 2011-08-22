@@ -24,7 +24,7 @@ in ``makefile.inc``.
 * **Python**. The ``PYTHONPATH`` environment variable should
   point to YAELROOT. The ``*_LIBRARY_PATH`` variable does not need to be set.
 
-* Segfault in Mexfile: MacOS 64 bits. If you have a 64 bits Matlab
+* Segfault in Mexfile: MacOS 32/64 bits. If you have a 32 bits Matlab
   version with MacOS, then you should check that you have used the
-  flag ``--mac64`` when configuring Yael.
+  flag ``--mac32`` when configuring Yael. 
 
