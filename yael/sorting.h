@@ -106,9 +106,6 @@ void fvec_ranks_inc_of(const float *tab, int n,
  */
 void find_labels (const int *labels, int nres, int *ilabels, int nilabels);
 
-/*! count nb of 0s in array */
-int fvec_count_0(const float *val,int n); 
-
 /*! return the smallest value of a vector */
 float fvec_min (const float *f, long n);
 int ivec_min (const int * f, long n);

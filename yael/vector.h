@@ -206,6 +206,7 @@ long ivec_count_inrange(const int * v, long n, int vmin, int vmax);
 long fvec_count_nan (const float * v, long n);
 long fvec_count_nonfinite (const float * v, long n);
 
+long fvec_count_0 (const float *val, long n);
 
 /*---------------------------------------------------------------------------*/
 /* Input/Output functions                                                    */

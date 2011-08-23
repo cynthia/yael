@@ -53,26 +53,6 @@ static int compare_for_k_min (const void *v1, const void *v2)
 }
 
 
-#ifdef HAVE_TLS
-
-static __thread const float * tab_to_sort_f;
-
-static int compare_for_sort_index_f (const void *v1, const void *v2)
-{
-#elif defined(HAVE_QSORT_R)
-static int compare_for_sort_index_f (void *thunk, const void *v1, const void *v2)
-{
-  const float *tab_to_sort_f=thunk;
-#else 
-#error "please provide some kind of thread-local storage"
-#endif
-  
-  float dt = tab_to_sort_f[*(int *)v1] - tab_to_sort_f[*(int *)v2];
-  if (dt) 
-    return dt>0 ? 1 : -1;
-  return *(int *)v1 - *(int *)v2;
-}
-
 
 /*--------------------------------------------------------------------------
   The following function are related to the Hoare selection algorithm (also know as quickselect). 
@@ -325,13 +305,24 @@ void find_labels (const int *labels, int nres, int *ilabels, int nilabels)
   }
 }
 
-int fvec_count_0 (const float *val, int n)
+#ifdef HAVE_TLS
+
+static __thread const float * tab_to_sort_f;
+
+static int compare_for_sort_index_f (const void *v1, const void *v2)
 {
-  int n0 = 0;
-  while (n--)
-    if (val[n] == 0)
-      n0++;
-  return n0;
+#elif defined(HAVE_QSORT_R)
+static int compare_for_sort_index_f (void *thunk, const void *v1, const void *v2)
+{
+  const float *tab_to_sort_f=thunk;
+#else 
+#error "please provide some kind of thread-local storage"
+#endif
+  
+  float dt = tab_to_sort_f[*(int *)v1] - tab_to_sort_f[*(int *)v2];
+  if (dt) 
+    return dt>0 ? 1 : -1;
+  return *(int *)v1 - *(int *)v2;
 }
 
 

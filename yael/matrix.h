@@ -123,11 +123,11 @@ float* fmat_new_mul_tlr (const float *left, const float *right, int m, int n, in
  *
  * @param m      number of unkowns
  * @param n      number of equations
- * @param a(m,n) transposed matrix of the system
- * @param b(n)   right-hand side of the equation
+ * @param a(m,n) transposed matrix of the system 
+ * @param b(n)   right-hand side of the equation 
  * @param x(m)   solution 
  * 
- * @return 0 if error in solution
+ * @return 0 if ok, else an error code (see sgels doc)
  */
 int fmat_solve_ls_t(int m, int n, const float *a, const float *b, float *x);
 

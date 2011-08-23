@@ -909,42 +909,52 @@ float *fmat_new_pca_part(int d,int n,int nev,
 
 
 
-int fmat_solve_ls_t(int mi, int ni, const float *a, const float *b, float *x) {
+static int fmat_solve_ls_t_inplace(int mi, int ni, float *a, float *bx) {
   
-  /* work in progress */
-#if 0  
-
   /* solve system */ 
-  integer info;
-  integer m=mi, nrhs=1, lda=m, lwork=-1;
-  integer n=ni, ldb=n;
+  FINTEGER info;
+  FINTEGER m=mi, nrhs=1, lda=mi, lwork=-1;
+  FINTEGER n=ni, ldb=n;
   float work_sz;
   
-  sgels_("Transposed", &m, &n, &nrhs, mat, &lda, 
-         vec, &ldb, &work_sz, &lwork, &info); 
-  
+  sgels_("Transposed", &m, &n, &nrhs, a, &lda, 
+         bx, &ldb, &work_sz, &lwork, &info); 
+ 
+  lwork = (long)work_sz;
 
-  float *work;    
-  lwork = (int)work_sz;
-  work = fvec_new(lwork);
-  
-  sgels_("Transposed", &m, &n, &nrhs, mat, &lda, 
-         vec, &ldb, work, &lwork, &info); 
+  float *work = fvec_new(lwork);
+ 
+  sgels_("Transposed", &m, &n, &nrhs, a, &lda, 
+         bx, &n, work, &lwork, &info); 
   
   free(work);
   
-  assert(info>=0); /* there is always a result for coherent input */
-  
-  /* Not documented in LAPACK: info>0 for (some?) rank deficient matrices */
-  
-  ret=-info;
-  
-#endif 
-
-  return 0;
-  
+  return info;
 }
 
+int fmat_solve_ls_t(int m, int n, const float *a, const float *b, float *x) {
+
+  /* m < n : not enough space in x to store copy of b */
+
+  float *aux = fvec_new(m * n + (m < n ? n : 0)); 
+
+  float *a_copy = aux; 
+  
+  memcpy(a_copy, a, sizeof(float) * n * m); 
+  
+  float *bx = m < n ? aux + n * m : x; 
+
+  memcpy(bx, b, sizeof(float) * n);
+  
+  int info = fmat_solve_ls_t_inplace(m, n, a_copy, bx); 
+
+  if(m < n) 
+    memcpy(x, bx, sizeof(float) * m);
+
+  free(aux);
+
+  return info;
+}
 
 
 
