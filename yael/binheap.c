@@ -158,7 +158,8 @@ void fbinheap_addn (fbinheap_t * bh, int n, const int * label, const float * v)
   int i;
 
   for (i = 0 ; i < n && bh->k < bh->maxk; i++)
-    fbinheap_push (bh, label[i], v[i]);
+    if(!isnan(v[i]))      
+      fbinheap_push (bh, label[i], v[i]);
 
   float lim=bh->val[1];
   for ( ; i < n; i++) {
@@ -176,7 +177,8 @@ void fbinheap_addn_label_range (fbinheap_t * bh, int n, int label0, const float 
   int i;
 
   for (i = 0 ; i < n && bh->k < bh->maxk; i++)
-    fbinheap_push (bh, label0+i, v[i]);
+    if(!isnan(v[i]))
+      fbinheap_push (bh, label0+i, v[i]);
 
   float lim=bh->val[1];
   for ( ; i < n; i++) { /* optimized loop for common case */

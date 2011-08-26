@@ -35,11 +35,15 @@ typedef int * int_pointer_t;
 typedef float * float_pointer_t;
 typedef unsigned char * byte_pointer_t;
 
+/* not available in Python */
+double NaN = 0.0 / 0.0; 
+double Inf = 1.0 / 0.0; 
+
 %}
 
 %include "common.swg"
 
-
+extern double NaN, Inf;
 
 array_class_plus(double,DoubleArray)
 array_class_plus(float,FloatArray)

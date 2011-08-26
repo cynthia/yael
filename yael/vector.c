@@ -2190,8 +2190,9 @@ float * spfvec_to_fvec (int * idx, float * v, int nz, int n)
 {
   int i;
   float * ret = fvec_new_0 (n);
-  for (i = 0 ; i < nz ; i++)
-    ret[idx[i]] = v[i];
+  for (i = 0 ; i < nz ; i++) 
+    if(idx[i] >= 0)  /* ignore bad bins */
+      ret[idx[i]] = v[i];
 
   return ret;
 }
