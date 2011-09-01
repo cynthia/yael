@@ -364,8 +364,8 @@ static int compare_for_sort_index (void *thunk, const void *v1, const void *v2)
 }
 
 
-
-void ivec_sort_index (const int *tab, int n, int *perm) {
+void ivec_sort_index (const int *tab, int n, int *perm) 
+{
   int i;
 
   for (i = 0 ; i < n ; i++) 
@@ -380,7 +380,8 @@ void ivec_sort_index (const int *tab, int n, int *perm) {
 }
 
 
-void ivec_invert_perm (const int *perm, int n, int *iperm) {
+void ivec_invert_perm (const int *perm, int n, int *iperm) 
+{
   int i;
   for (i = 0 ; i < n ; i++) 
     iperm[perm[i]] = i;
@@ -395,20 +396,30 @@ static int compare_for_ivec_sort (const void *v1, const void *v2)
   return v1 - v2;
 }
 
-void ivec_sort(int *tab, int n) {
+void ivec_sort(int *tab, int n) 
+{
   qsort (tab, n, sizeof(int), compare_for_ivec_sort);
 }
-
-static int compare_for_fvec_sort (const void *v1, const void *v2)
+ 
+ static int compare_for_fvec_sort (const void *v1, const void *v2)
 {
   float dt = *(float *)v1 - *(float *)v2;
   return dt>0 ? 1 : dt<0 ? -1 : v1 - v2;
 }
 
-void fvec_sort(float *tab, int n) {
+
+void fvec_sort(float *tab, int n) 
+{
   qsort (tab, n, sizeof(int), compare_for_fvec_sort);
 }
 
+
+void fvecs_sort (float * v, int d, int n)
+{
+  int i;
+  for (i = 0 ; i < n ; i++)
+    fvec_sort (v + i * d, d);
+}
 
 
 /* sort according to the input permutation */

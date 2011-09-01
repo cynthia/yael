@@ -155,11 +155,14 @@ void ivec_sort (int *tab, int n);
 void ivec_sort_index (const int *tab, int n, int *perm);
 
 /*! fill-in iperm so that iperm[perm[i]]=i for i=0..n-1 */
-void ivec_invert_perm(const int *perm, int n, int *iperm); 
+void ivec_invert_perm (const int *perm, int n, int *iperm); 
 
 
 /*! in-place sort */
-void fvec_sort(float *tab, int n);
+void fvec_sort (float *v, int n);
+
+/*! in-place sort for several vectors */
+void fvecs_sort (float *v, int d, int n);
 
 /*! return permutation to sort an array. See ivec_sort_index. */
 void fvec_sort_index (const float *tab, int n, int *perm);
