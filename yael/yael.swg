@@ -39,11 +39,26 @@ typedef unsigned char * byte_pointer_t;
 double NaN = 0.0 / 0.0; 
 double Inf = 1.0 / 0.0; 
 
+/* for interfacing with ctypes */
+
+float * fvec_from_pointer_long(long ptr) { return (float*)ptr; }
+long fvec_to_pointer_long(float *fv) { return (long)fv; }
+
+double * dvec_from_pointer_long(long ptr) { return (double*)ptr; }
+long dvec_to_pointer_long(double *fv) { return (long)fv; }
+
 %}
 
 %include "common.swg"
 
 extern double NaN, Inf;
+
+float * fvec_from_pointer_long(long ptr);
+long fvec_to_pointer_long(float *fv);
+
+double * dvec_from_pointer_long(long ptr);
+long dvec_to_pointer_long(double *fv);
+
 
 array_class_plus(double,DoubleArray)
 array_class_plus(float,FloatArray)

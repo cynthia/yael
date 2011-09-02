@@ -80,3 +80,13 @@ These functions copy their arguments. To share the same data buffer
 between Yael and Numpy, suffix the function with ``_ref``.
 
 See the ``test_numpy.py`` program for an example usage. 
+
+ctypes interface
+----------------
+
+Arrays can also be exchanged with ctypes. This is done by converting
+pointers to integers. See ``test_ctypes.py`` for an example.
+
+
+
+
