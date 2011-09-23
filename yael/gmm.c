@@ -588,23 +588,24 @@ void gmm_fisher(int n, const float *v, const gmm_t * g, int flags, float *dp_dla
         for(i=0;i<n;i++) 
           sum_pj += P(j,i);        
 
-        for(l=0;l<d;l++) 
+        for(l=0;l<d;l++)
           DP_DMU(l,j) = (DP_DMU(l,j) - MU(j,l) * sum_pj) / SIGMA(j,l);
-
       }
 
     }
     /* normalization */
     if(!(flags & GMM_FLAGS_NO_NORM)) {
       for(j=0;j<k;j++) 
-        for(l=0;l<d;l++)           
-          DP_DMU(l,j) /= sqrt(n*g->w[j]/SIGMA(j,l));                
-        
+        for(l=0;l<d;l++) {
+          float nf = sqrt(n*g->w[j]/SIGMA(j,l));
+          if(nf > 0) DP_DMU(l,j) /= nf;                
+        }        
     }
 #undef DP_DMU
     ii+=d*k;
   }
 
+  assert(fvec_count_nan(dp_dlambda, ii) == 0);
 
   if(flags & (GMM_FLAGS_SIGMA | GMM_FLAGS_1SIGMA)) {
 

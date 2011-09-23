@@ -348,8 +348,10 @@ static int kmeans_core (int d, int n, int k, int niter, int nt, int flags, int v
 
     if (qerr_old == qerr && nreassign == 0)
       break;
-    if (verbose)
+    if (verbose) {
       printf (" -> %.3f", qerr / n);
+      fflush(stdout);
+    }
   }
   if (verbose)      
     printf ("\n");
