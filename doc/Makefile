@@ -1,10 +1,6 @@
 
 
-all:yael.pdf reference sphinx_html
-
-yael.pdf: yael.tex
-	pdflatex yael
-	pdflatex yael
+all: reference sphinx_html sphinx_latexpdf
 
 reference: 
 	doxygen Doxyfile
@@ -43,4 +39,5 @@ sphinx_latexpdf:
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through pdflatex..."
 	make -C $(BUILDDIR)/latex all-pdf
-	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
+	mv $(BUILDDIR)/latex/Yael.pdf .
+	@echo "pdflatex finished; the output file is Yael.pdf."
