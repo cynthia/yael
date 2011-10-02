@@ -358,6 +358,7 @@ void gmm_compute_p (int n, const float * v,
     //    fvec_print (p + i * k, k);
   }
 
+  free(logdetnr);
 
 }
 
@@ -496,16 +497,20 @@ size_t gmm_fisher_sizeof(const gmm_t * g,int flags) {
 
 void gmm_fisher(int n, const float *v, const gmm_t * g, int flags, float *dp_dlambda) {
   long d=g->d, k=g->k;
-  float *p=fvec_new(n*k);
+  float *p = fvec_new(n * k);
   long i,j,l;
   long ii=0;
+
+  float * vp = NULL; /* v*p */
+  float * sum_pj = NULL; /* sum of p's for a given j */  
 
   gmm_compute_p(n,v,g,p,flags | GMM_FLAGS_W);
 
 #define P(j,i) p[(i)*k+(j)]
-#define V(i,l) v[(i)*d+(l)]
-#define MU(j,l) g->mu[(j)*d+(l)]
-#define SIGMA(j,l) g->sigma[(j)*d+(l)]
+#define V(l,i) v[(i)*d+(l)]
+#define MU(l,j) g->mu[(j)*d+(l)]
+#define SIGMA(l,j) g->sigma[(j)*d+(l)]
+#define VP(l,j) vp[(j)*d+(l)]
 
   if(flags & GMM_FLAGS_W) {
 
@@ -534,7 +539,7 @@ void gmm_fisher(int n, const float *v, const gmm_t * g, int flags, float *dp_dla
           double accu=0;
           
           for(i=0;i<n;i++) 
-            accu += P(j,i) * (V(i,l)-MU(j,l)) / SIGMA(j,l);
+            accu += P(j,i) * (V(l,i)-MU(l,j)) / SIGMA(l,j);
           
           DP_DMU(l,j)=accu;
         }
@@ -542,16 +547,20 @@ void gmm_fisher(int n, const float *v, const gmm_t * g, int flags, float *dp_dla
       
     } else { /* complicated and fast */
 
-      fmat_mul_tr(v,p,d,k,n,dp_dmu);
+      /* precompute  tables that may be useful for sigma too */
+      vp = fvec_new(k * d);
+      fmat_mul_tr(v,p,d,k,n,vp);
+
+      sum_pj = fvec_new(k);
+      for(j=0;j<k;j++) {        
+        double sum=0;        
+        for(i=0;i<n;i++) sum += P(j,i);        
+        sum_pj[j] = sum;
+      }
 
       for(j=0;j<k;j++) {
-        double sum_pj=0;
-        
-        for(i=0;i<n;i++) 
-          sum_pj += P(j,i);        
-
         for(l=0;l<d;l++)
-          DP_DMU(l,j) = (DP_DMU(l,j) - MU(j,l) * sum_pj) / SIGMA(j,l);
+          DP_DMU(l,j) = (VP(l,j) - MU(l,j) * sum_pj[j]) / SIGMA(l,j);
       }
 
     }
@@ -559,7 +568,7 @@ void gmm_fisher(int n, const float *v, const gmm_t * g, int flags, float *dp_dla
     if(!(flags & GMM_FLAGS_NO_NORM)) {
       for(j=0;j<k;j++) 
         for(l=0;l<d;l++) {
-          float nf = sqrt(n*g->w[j]/SIGMA(j,l));
+          float nf = sqrt(n*g->w[j]/SIGMA(l,j));
           if(nf > 0) DP_DMU(l,j) /= nf;                
         }        
     }
@@ -567,33 +576,93 @@ void gmm_fisher(int n, const float *v, const gmm_t * g, int flags, float *dp_dla
     ii+=d*k;
   }
 
-  assert(fvec_count_nan(dp_dlambda, ii) == 0);
-
   if(flags & (GMM_FLAGS_SIGMA | GMM_FLAGS_1SIGMA)) {
 
-    for(j=0;j<k;j++) {
-      double accu2=0;
-      for(l=0;l<d;l++) {
-        double accu=0;
-        
-        for(i=0;i<n;i++) 
-          accu += P(j,i) * (sqr(V(i,l)-MU(j,l)) / SIGMA(j,l) - 1) / sqrt(SIGMA(j,l));
-        
-        if(flags & GMM_FLAGS_SIGMA) {
+    
+    if(flags & GMM_FLAGS_1SIGMA) { /* fast not implemented for 1 sigma */
 
-          double f=flags & GMM_FLAGS_NO_NORM ? 1.0 : 2*n*g->w[j]/SIGMA(j,l);
+      for(j=0;j<k;j++) {
+        double accu2=0;
+        for(l=0;l<d;l++) {
+          double accu=0;
+        
+          for(i=0;i<n;i++) 
+            accu += P(j,i) * (sqr(V(l,i)-MU(l,j)) / SIGMA(l,j) - 1) / sqrt(SIGMA(l,j));
+        
+          if(flags & GMM_FLAGS_SIGMA) {
+
+            double f=flags & GMM_FLAGS_NO_NORM ? 1.0 : 2*n*g->w[j]/SIGMA(l,j);
           
-          dp_dlambda[ii++]=accu/sqrt(f);
-        } 
-        accu2+=accu;        
+            dp_dlambda[ii++]=accu/sqrt(f);
+          } 
+          accu2+=accu;        
+        }
+
+        if(flags & GMM_FLAGS_1SIGMA) {
+          double f=flags & GMM_FLAGS_NO_NORM ? 1.0 : 2*d*n*g->w[j]/SIGMA(0,j);
+          dp_dlambda[ii++]=accu2/sqrt(f);        
+        }
+
+      }  
+    
+    } else { /* fast and complicated */
+      assert(flags & GMM_FLAGS_SIGMA);
+      float *dp_dsigma = dp_dlambda + ii;
+
+      if(!vp) {
+        vp = fvec_new(k * d);
+        fmat_mul_tr(v,p,d,k,n,vp);
       }
 
-      if(flags & GMM_FLAGS_1SIGMA) {
-        double f=flags & GMM_FLAGS_NO_NORM ? 1.0 : 2*d*n*g->w[j]/SIGMA(j,0);
-        dp_dlambda[ii++]=accu2/sqrt(f);        
+      if(!sum_pj) {
+        sum_pj = fvec_new(k);
+        for(j=0;j<k;j++) {        
+          double sum=0;        
+          for(i=0;i<n;i++) sum += P(j,i);        
+          sum_pj[j] = sum;
+        }
       }
+      float *v2 = fvec_new(n * d);
+      for(i = n*d-1 ; i >= 0; i--) v2[i] = v[i] * v[i];
+      float *v2p = fvec_new(k * d);
+      fmat_mul_tr(v2,p,d,k,n,v2p);
+      free(v2);
 
-    }  
+#define V2P(l,j) v2p[(j)*d+(l)]
+#define DP_DSIGMA(i,j) dp_dsigma[(i)+(j)*d]
+      for(j=0;j<k;j++) {
+
+        for(l=0;l<d;l++) {
+          double accu;
+
+          accu = V2P(l, j);
+
+          accu += VP(l, j) * (- 2 * MU(l,j));
+
+          accu += sum_pj[j] * (sqr(MU(l,j))  - SIGMA(l,j));
+
+          /* normalization */
+
+          double f;
+
+          if(flags & GMM_FLAGS_NO_NORM) {
+            f = pow(SIGMA(l,j), -1.5);
+          } else {
+            f = 1 / (SIGMA(l,j) * sqrt(2*n*g->w[j]));
+          }
+
+          DP_DSIGMA(l,j) = accu * f;
+
+        }
+
+      }  
+      
+      free(v2p);
+
+#undef DP_DSIGMA
+#undef V2P
+      ii += d * k;
+    }
 
   }
   
@@ -603,6 +672,8 @@ void gmm_fisher(int n, const float *v, const gmm_t * g, int flags, float *dp_dla
 #undef MU
 #undef SIGMA
   free(p);
+  free(sum_pj);
+  free(vp);
 }
 
 
