@@ -24,7 +24,7 @@ endif
 # Various  
 
 LIBOBJ=matrix.o vector.o nn.o kmeans.o hkm.o gmm.o eigs.o \
-	spectral_clustering.o sorting.o binheap.o machinedeps.o vlad.o
+	spectral_clustering.o sorting.o binheap.o machinedeps.o vlad.o kmlsh.o
 
 libyael.a: $(LIBOBJ)
 	ar r libyael.a $^
@@ -45,6 +45,8 @@ hkm.o: EXTRACFLAGS=$(THREADCFLAGS)
 
 gmm.o: EXTRACFLAGS=$(THREADCFLAGS) $(LAPACKCFLAGS)
 
+kmlsh.o: EXTRACFLAGS=$(THREADCFLAGS) $(LAPACKCFLAGS)
+
 eigs.o: EXTRACFLAGS=$(LAPACKCFLAGS) $(LAPACKCFLAGS) $(EXTRAEIGSFLAG)
 
 yael_wrap.o: EXTRACFLAGS=$(PYTHONCFLAGS) $(NUMPYCFLAGS)
@@ -59,7 +61,7 @@ mmap_and_lock: mmap_and_lock.c
 
 
 yael_wrap.c : yael.swg common.swg nn.h kmeans.h gmm.h eigs.h hkm.h \
-	sorting.h matrix.h vector.h machinedeps.h vlad.h
+	sorting.h matrix.h vector.h machinedeps.h vlad.h kmlsh.h
 	$(SWIG) -I.. $(NUMPYSWIGFLAGS) $< 
 
 _yael.so: yael_wrap.o libyael.$(SHAREDEXT)
@@ -83,6 +85,8 @@ spectral_clustering.o: spectral_clustering.c spectral_clustering.h nn.h eigs.h v
   matrix.h kmeans.h spectral_clustering.h
 vector.o: vector.c vector.h
 vlad.o: vlad.c vlad.h nn.h vector.h sorting.h
+kmlsh.o: kmlsh.c ../yael/vector.h ../yael/nn.h ../yael/hkm.h \
+ ../yael/sorting.h ../yael/kmeans.h ../yael/machinedeps.h ../yael/kmlsh.h
 
 
 clean:

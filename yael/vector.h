@@ -573,5 +573,15 @@ void fvec_isplat_add(const float *a,int n,
 int* ivec_repeat_with_inc(const int *a,int n,
                           int nrepeat, int inc);
 
+/*! Copy the set of nout vectors in v (seen as a set of vectors), indexed by idx, in vout
+ * @param v         the set of input vectors
+ * @param idx       the indexes of the vectors to be copied
+ * @param d         vectors' dimensionality
+ * @param nout      number of vectors copied
+ * @param vout      output vector (must be allocated externally with size nout)
+ */  
+void fvec_cpy_subvectors (const float * v, int * idx, int d, int nout, float * vout);
+
+
 /*! @} */
 #endif

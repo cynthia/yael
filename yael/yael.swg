@@ -23,6 +23,7 @@
 #include "gmm.h"
 #include "vlad.h"
 #include "machinedeps.h"
+#include "kmlsh.h"
 
 /* seed generators used in the rest */
 void common_srandom(int seed) {
@@ -361,6 +362,12 @@ PARALLEL_FUNCTION_PEEK(knn_full_thread)
 
 %include "vlad.h"
 
+
+/*************************************************************************
+ * kmlsh.h
+ */
+
+%include "kmlsh.h"
 
 /*************************************************************************
  * allows freeing some elements allocated by malloc/calloc in python

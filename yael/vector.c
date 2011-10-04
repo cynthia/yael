@@ -2210,3 +2210,12 @@ long ivec_index(const int * v, long n,int val) {
   return -1;
 }
 
+
+void fvec_cpy_subvectors (const float * v, int * idx, int d, int nout, float * vout)
+{
+  long i;
+  for (i = 0 ; i < nout ; i++)
+    fvec_cpy (vout + i * d, v + (long) idx[i] * d, d);
+}
+
+
