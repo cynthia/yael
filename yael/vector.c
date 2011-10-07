@@ -225,6 +225,18 @@ int *ivec_new_0 (long n)
   return ret;
 }
 
+unsigned char *bvec_new_0 (long n)
+{
+  unsigned char *ret = bvec_new (n);
+  if (!ret) {
+    fprintf (stderr, "ivec_new_0 %ld : out of memory\n", n);
+    abort();
+  }
+  memset (ret, 0, n);
+  return ret;
+}
+
+
 
 float *fvec_new_set (long n, float val)
 {

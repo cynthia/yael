@@ -147,7 +147,6 @@ void hkm_quantize (const hkm_t * hkm, int npt, const float * v, int * idx)
     }
     idx[i] = vw;
   }
-  return idx;
 }
 
 

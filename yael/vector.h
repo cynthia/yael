@@ -68,6 +68,7 @@ double * dvec_new_0 (long n);
 
 /*! create a vector initialized with 0's. */
 int *ivec_new_0 (long n);
+unsigned char *bvec_new_0 (long n);
 
 /*! create a vector initialized with 0's. */
 long long *lvec_new_0 (long n);
