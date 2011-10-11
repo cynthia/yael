@@ -13,7 +13,7 @@
 %   Nassign: the total number of centroids assigned to each cluster
 % 
 % Options: typical usage:
-% C = yael_kmeans (v, k, 'redo', redo, 'verbose', verbose, 'seed', seed)
+% C = yael_kmeans (v, k, 'redo', redo, 'verbose', verbose, 'seed', seed, 'niter', niter)
 %
 % Available options are:
 %    redo       number of times the k-means is run (best clustering returned)
@@ -24,4 +24,5 @@
 %               Warning: do not use nt>1 in that case, at it will cause 
 %               memory leaks
 %    seed       0 by default. Specify a value !=0 to randomize initalization
-%    init       0 by default. 0=kmeans++ initialization, 1=random centers
+%    init       1 by default. 0=kmeans++ initialization, 1=random centers
+%    niter      number of iterations (default: 50)
