@@ -33,6 +33,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   int k = (int) mxGetScalar (prhs[1]);
 
   int niter = 50, redo = 1, nt = 1, verbose = 1;
+  int init_type = 1;
 
   {
     int i;
@@ -57,11 +58,8 @@ void mexFunction (int nlhs, mxArray *plhs[],
         verbose = (int) mxGetScalar (prhs[i+1]);
 
       else if (!strcmp(varname,"init")) {
-	int init_type = (int) mxGetScalar (prhs[i+1]);
-	if (init_type == 0)  /* default: Berkeley */
-	  ;
-	else if (init_type == 1) /* random vectors */
-	  flags = flags | KMEANS_INIT_RANDOM;
+	init_type = (int) mxGetScalar (prhs[i+1]);
+	assert (init_type == 0 || init_type == 1);
       }
 
       else 
@@ -69,6 +67,12 @@ void mexFunction (int nlhs, mxArray *plhs[],
     }
   }
   
+  if (init_type == 0)  /* Berkeley */
+    ;
+  else if (init_type == 1) /* random vectors */
+    flags = flags | KMEANS_INIT_RANDOM;
+  
+
   flags |= nt;
 
   if (verbose > 0)
