@@ -244,6 +244,11 @@ int b2fvecs_new_read (const char *fname, int *d_out, float **v_out);
 /*! reads sparse vectors and return them as dense. d must be known */
 int fvecs_new_read_sparse (const char *fname, int d, float **vf_out);
 
+/*! read siftgeo, return as bvecs + metadata as fvecs */
+int bvecs_new_from_siftgeo(const char *fname, 
+			   int *d_v_out, unsigned char **v_out,
+			   int *d_meta_out, float **meta_out); 
+
 /*!  load float vector without allocating memory 
  *
  * Fills n*d array with as much vectors read from fname as possible.

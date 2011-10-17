@@ -176,6 +176,9 @@ array_class_plus(byte_pointer_t,BytePtrArray)
 }
 
 
+
+
+
 // ivecs_new_read returns a tuple 
 // (ints,n,d)
 // ints= float table
@@ -388,6 +391,54 @@ void free(void*);
  * Numpy wrapper 
  */
 
+
+%define NUMPY_EXCHANGE(xvec, ctype, numpytype)
+
+%{
+
+// declare in C
+
+PyObject * xvec ## _to_numpy(const ctype *src,long di) {
+  npy_intp d = di;
+  PyObject* ob = PyArray_SimpleNew(1, &d, numpytype);
+  ctype *dest = PyArray_DATA(ob);
+  memcpy(dest, src, sizeof(ctype) * d);
+  return ob;
+}
+
+PyObject * xvec ## _to_numpy_ref(ctype *src, long di) {
+  npy_intp d = di;
+  return PyArray_SimpleNewFromData(1, &d, numpytype, src);
+}
+
+
+ctype *numpy_to_ ## xvec(PyObject *a) {
+  CHECK_NUMPY_ARRAY(numpytype)
+  size_t sz = PyArray_SIZE(a) * PyArray_ITEMSIZE(a);
+  void *ret = malloc(sz);
+  memcpy(ret, PyArray_DATA(a), sz);
+  return ret;
+}
+
+ctype *numpy_to_ ## xvec ## _ref(PyObject *a) {
+  CHECK_NUMPY_ARRAY(numpytype)
+  return PyArray_DATA(a);
+}
+
+%}
+
+// re-declare for SWIG
+
+PyObject * xvec ## _to_numpy(const ctype *src,long di);
+PyObject * xvec ## _to_numpy_ref(ctype *src, long di);
+ctype *numpy_to_ ## xvec(PyObject *a);
+ctype *numpy_to_ ## xvec ## _ref(PyObject *a);
+
+%enddef
+
+
+
+
 #ifdef HAVE_NUMPY
 
 
@@ -395,34 +446,6 @@ void free(void*);
 #define SWIG_FILE_WITH_INIT
 
 #include <numpy/arrayobject.h>
-
-
-PyObject *fvec_to_numpy(const float *src,long di) {
-  npy_intp d=di;
-  PyObject* ob=PyArray_SimpleNew(1,&d,NPY_FLOAT);
-  float *dest=PyArray_DATA(ob);
-  memcpy(dest,src,sizeof(float)*d);
-  return ob;
-}
-
-PyObject *ivec_to_numpy(const int *src,long di) {
-  npy_intp d=di;
-  PyObject* ob=PyArray_SimpleNew(1,&d,NPY_INT);
-  int *dest=PyArray_DATA(ob);
-  memcpy(dest,src,sizeof(int)*d);
-  return ob;
-}
-
-PyObject *fvec_to_numpy_ref(float *src,long di) {
-  npy_intp d=di;
-  return PyArray_SimpleNewFromData(1,&d,NPY_FLOAT,src);
-}
-
-PyObject *ivec_to_numpy_ref(int *src,long di) {
-  npy_intp d=di;
-  return PyArray_SimpleNewFromData(1,&d,NPY_INT,src);
-}
-
 
 #define CHECK_NUMPY_ARRAY(expected_npy)                                 \
   if(!a) {                                                              \
@@ -434,45 +457,10 @@ PyObject *ivec_to_numpy_ref(int *src,long di) {
     return NULL;                                                        \
   }                                                                     \
   if(PyArray_TYPE(a)!=expected_npy) {                                   \
-    fprintf(stderr,"%s: input has bad type (type id %d != %d)\n",__PRETTY_FUNCTION__, \
+    fprintf(stderr,"%s: input has bad type (type id %d != expected %d)\n",__PRETTY_FUNCTION__, \
             PyArray_TYPE(a),expected_npy);                              \
     return NULL;                                                        \
   }
-
-/*
-                                                                     \
-  if(((PyArrayObject *)a)->nd!=1) {                                     \
-    fprintf(stderr,"%s: input in %d D (expected 1D)\n",__PRETTY_FUNCTION__, \
-            ((PyArrayObject *)a)->nd);                  \
-    return NULL;                                                        \
-  }
-*/
-float *numpy_to_fvec(PyObject *a) {
-  CHECK_NUMPY_ARRAY(NPY_FLOAT)
-  size_t sz=PyArray_SIZE(a)*PyArray_ITEMSIZE(a);
-  void *ret=malloc(sz);
-  memcpy(ret,PyArray_DATA(a),sz);
-  return ret;
-}
-
-float *numpy_to_fvec_ref(PyObject *a) {
-  CHECK_NUMPY_ARRAY(NPY_FLOAT)
-  return PyArray_DATA(a);
-}
-
-int *numpy_to_ivec(PyObject *a) {
-  CHECK_NUMPY_ARRAY(NPY_INT)
-  size_t sz=PyArray_SIZE(a)*PyArray_ITEMSIZE(a);
-  void *ret=malloc(sz);
-  memcpy(ret,PyArray_DATA(a),sz);
-  return ret;
-}
-
-int *numpy_to_ivec_ref(PyObject *a) {
-  CHECK_NUMPY_ARRAY(NPY_INT)
-  return PyArray_DATA(a);
-}
-
 
 %}
 
@@ -484,23 +472,10 @@ int *numpy_to_ivec_ref(PyObject *a) {
 
 
 
-/* yael -> numpy */
-
-PyObject *fvec_to_numpy(const float *fv,int n);
-PyObject *ivec_to_numpy(const int *fv,int n);
-
-/* numpy -> yael */
-
-float *numpy_to_fvec(PyObject *numpyarray);
-int *numpy_to_ivec(PyObject *a);
-
-/* Ditto, without copying data */
-
-PyObject *fvec_to_numpy_ref(float *fv,int n);
-PyObject *ivec_to_numpy_ref(int *fv,int n);
-
-float *numpy_to_fvec_ref(PyObject *numpyarray);
-int *numpy_to_ivec_ref(PyObject *a);
+NUMPY_EXCHANGE(bvec, unsigned char, NPY_UINT8);
+NUMPY_EXCHANGE(fvec, float, NPY_FLOAT32);
+NUMPY_EXCHANGE(ivec, int, NPY_INT32);
+NUMPY_EXCHANGE(dvec, double, NPY_FLOAT64);
 
 
 #endif

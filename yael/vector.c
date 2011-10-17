@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include <math.h>
+#include <errno.h>
 
 /* for mmap */
 #include <sys/types.h>
@@ -562,18 +563,30 @@ long fvecs_fsize (const char * fname, int *d_out, int *n_out)
   int d, ret; 
   long nbytes;
 
+  *d_out = -1;
+  *n_out = -1;
+
   FILE * f = fopen (fname, "r");
   
+  if(!f) {
+    fprintf(stderr, "{f,i}vecs_size %s: %s\n", fname, strerror(errno));
+    return -1;
+  }
   /* read the dimension from the first vector */
   ret = fread (&d, sizeof (d), 1, f);
-  if (ret == 0)
+  if (ret == 0) { /* empty file */
+    *n_out = 0;
     return ret;
+  }
   
   fseek (f, 0, SEEK_END);
   nbytes = ftell (f);
   fclose (f);
   
-  assert (nbytes % (4 * d + 4) == 0);   /* checksum */
+  if(nbytes % (4 * d + 4) == 0) {
+    fprintf(stderr, "{f,i}vecs_size %s: weird file size %ld for vectors of dimension %d\n", fname, nbytes, d);
+    return -1;
+  }
 
   *d_out = d;
   *n_out = nbytes / (4 * d + 4);
@@ -792,6 +805,77 @@ int fvecs_new_fread_max (FILE *f, int *d_out, float **vf_out, long nmax)
   *d_out = -1;
   return -1;
 }
+
+int bvecs_new_from_siftgeo(const char *fname, 
+			    int *d_out, unsigned char **v_out,
+			    int *d_meta_out, float **meta_out) {
+
+  FILE * f = fopen(fname, "r"); 
+  if(!f) {
+    fprintf(stderr, "could not open %s: %s\n", fname, strerror(errno));
+    return -1;
+  }
+
+#define READANDCHECK(a,n) if(fread(a, sizeof(*(a)), n, f) != n) {fprintf(stderr, "weird format in %s\n", fname); goto err; }
+  
+  int n = 0, na = 0;
+  int d = -1;
+  unsigned char * v = NULL; 
+  float * meta = NULL;
+
+  for(;;) {
+    float buf[9];
+    int header_read = fread(buf, 1, sizeof(buf), f);
+
+    if(header_read == 0 && feof(f)) break;
+    else if(header_read != sizeof(buf)) {
+      fprintf(stderr, "bvecs_new_from_siftgeo: error in point header in %s\n", fname); 
+      goto err;
+    }
+
+    int d2; 
+    READANDCHECK(&d2, 1)
+    if(n == 0 && d2 >= 0 && d2 < 100000) d = d2;
+    else if(d2 != d) {
+      fprintf(stderr, "bvecs_new_from_siftgeo: weird dim in %s (expect %d found %d)\n", fname, d, d2); 
+      goto err;
+    } 
+      
+    if(n >= na) {
+      na = na == 0 ? 512 : na*3/2;
+      if(meta_out) meta = realloc(meta, sizeof(float) * 9 * na);
+      v = realloc(v, d * sizeof(float) * na); 
+    }
+    
+    if(meta_out) memcpy(meta, buf, sizeof(buf));
+    
+    READANDCHECK(v + d * n, d);
+    
+    n++;
+  }
+#undef READANDCHECK
+
+  fclose(f); 
+
+  *d_out = d; 
+  *v_out = v; 
+  if(meta_out) *meta_out = meta;
+  if(d_meta_out) *d_meta_out = 9;
+  return n;
+
+  err: 
+  fclose(f); 
+  free(v); 
+  free(meta); 
+  *d_out = -1; 
+  *v_out = NULL; 
+  if(meta_out) *meta_out = NULL;
+  if(d_meta_out) *d_meta_out = -1;
+  return -1;
+}
+
+
+
 
 int fvecs_new_read_sparse (const char *fname, int d, float **vf_out) {
   float *vf=NULL;

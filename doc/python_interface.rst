@@ -81,6 +81,24 @@ between Yael and Numpy, suffix the function with ``_ref``.
 
 See the ``test_numpy.py`` program for an example usage. 
 
+Numpy interface (high level)
+----------------------------
+
+A few functions of Yael are also made available with pure Numpy
+arguments and return types. They are in the ``ynumpy`` module. They
+include::
+
+  knn
+  kmeans
+  fvecs_read ivecs_read siftgeo_read
+
+All matrix arguments should be in Fortran indexing (defined in the
+``flags`` field). This sometimes requires counter-intuitive
+transpositions, as Numpy has a bias towards C-ordering. See
+``test_ynumpy.py`` for an example.
+
+
+
 ctypes interface
 ----------------
 
