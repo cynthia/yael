@@ -14,6 +14,8 @@
 
 #define NEWA(type,n) (type*)malloc((n)*sizeof(type))
 #define MAX(a,b) ((a)>(b) ? (a) : (b))
+#define MIN(a,b) ((a)<(b) ? (a) : (b))
+
 
 /**********************************************************************************
  * Distance functions  
@@ -295,6 +297,18 @@ void compute_cross_distances_alt_nonpacked (int distance_type, int d, int na, in
           float den=fabs(av+bv);
           sum+=den==0 ? 0 : sqr(av-bv)/den;
         }
+      else if(distance_type == 5) {
+        for(k=0;k<d;k++) {
+          float av = aline[k], bv = bline[k];
+          sum += MIN(av, bv); 
+        }        
+      }
+      else if(distance_type == 6) {
+        for(k=0;k<d;k++) {
+          float av = aline[k], bv = bline[k];
+          sum += av * bv; 
+        }        
+      }
       dline[i]=sum;
 
       aline+=lda;
@@ -547,6 +561,26 @@ void knn_reorder_shortlist(int n, int nb, int d, int k,
   free(diststmp);
   free(subb);
   free(perm);
+}
+
+void knn_recompute_exact_dists(int nq, int nb, int d, int k,
+			       const float *b, const float *v,
+			       int label0, int *kp,
+			       const int *idx, float *dis) {
+  long q, i;
+
+  for(q = 0; q < nq; q++) {
+    const float * vq = v + d * q;
+    for(i = kp[q]; i < k; i++) {
+      long j = idx[q * k + i] - label0;
+      assert(j >= 0); 
+      if(j >= nb) break;      
+      dis[q * k + i] = fvec_distance_L2sqr(vq, b + j * d, d);
+    }
+    kp[q] = i;
+  }
+
+
 }
 
 

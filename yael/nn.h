@@ -98,12 +98,49 @@ float* knn_thread (int nq, int nb, int d, int k,
                    void *peek_arg);
 
 
-/*! 
- * Re-order a short-list based on exact distances 
+/*! Re-order a short-list based on exact distances 
+ * 
+ * @param n             nb of query vectors
+ * @param nb            nb of database vectors
+ * @param d             dimension of vectors
+ * @param k             nb of nearest-neighbors per query vector
+ * @param b(d,nb)       database vector matrix
+ * @param v(d,nb)       query vector matrix
+ * @param idx(k,nq)     - input: idx(:,q) is the
+ *                         array of nearest neighbor indices to rerank
+ *                      - output: idx(:,q) is a permutation of
+ *                         the input array, such that the NNs are
+ *                         ordered by increasing exact distance
+ * @param dis(k,nq)     on output, dis(i,j) contains the 
+ *                      exact squared L2 distance to the i^th NN of query j.
  */
 void knn_reorder_shortlist(int n, int nb, int d, int k,
                            const float *b, const float *v,
-                           int *assign, float *dists);
+                           int *idx, float *dis);
+
+
+/*! same as knn_reorder_shortlist for a partial base matrix
+ *   (eg. because b does not fit in memory)
+ *
+ * @param label0        label of b(:,0) in the idx array
+ * @param idx(k,nq)     idx(i, q) is the index of the i^th neighbor of
+ *                      query j. The array is sorted: 
+ *                      
+ *                        idx(0, q) < idx(1, q) < ... < idx(k-1, q)
+ * 
+ * 			all distances for i st. 
+ *                       
+ *			   label0 <= idx(i,q) < label0 + nb
+ *			
+ * 		        will be recomputed. 
+ * @param kp(nq)        index array of labels for which the distance must be recomputed. 
+ *                      - input: kp[q] is the smallest i st. label0 <= idx(i,q)
+ *                      - output: kp[q] is the smallest i st. label0 + nb <= idx(i,q)
+ */
+void knn_recompute_exact_dists(int n, int nb, int d, int k,
+			       const float *b, const float *v,
+			       int label0, int *kp,
+			       const int *idx, float *dis);
 
 
 /*! Computes all distances between 2 sets of vectors 
@@ -145,6 +182,8 @@ void compute_cross_distances_thread (int d, int na, int nb,
  *    - 2: L2 (use compute_cross_distances for optimized version!) 
  *    - 3: symmetric chi^2  
  *    - 4: symmetric chi^2  with absolute value
+ *    - 5: histogram intersection (sum of min of vals)
+ *    - 6: dot prod
  */
 void compute_cross_distances_alt (int distance_type, int d, int na, int nb,
                                   const float *a,

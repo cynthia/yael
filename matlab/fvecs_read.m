@@ -26,7 +26,7 @@ if bmax == 0
   v = [];
   return;
 end
-bmax = bmax / vecsizeof;
+bmax = floor(bmax / vecsizeof);
 if bmax == 0
   v = [];
   return;

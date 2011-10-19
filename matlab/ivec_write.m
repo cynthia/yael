@@ -1,7 +1,9 @@
-% This function reads a vector from a file in the libit format
+% This function writes a vector from a file in the libit format
 
 function [v,d] = ivec_write (fid, v)
 
+
+  
 % first write the vector size
 count = fwrite (fid, length(v), 'int');
 
