@@ -221,7 +221,7 @@ hkm_t *hkm_read (const char *filename)
   int k = hkm->bf;
   for (l = 0; l < hkm->nlevel; l++) {
     /* need to allocate the memory */
-    ret = fvec_fread (f, hkm->centroids[l]);
+    ret = fvec_fread (f, hkm->centroids[l], k * hkm->d);
     HKM_READ_ERROR (ret, k * hkm->d);
 
     k *= hkm->bf;

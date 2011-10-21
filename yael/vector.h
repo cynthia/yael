@@ -271,20 +271,20 @@ int fvecs_read_txt (const char *fname, int d, int n, float *v);
 int fvec_read (const char *fname, int d, float *a, int o_f);
 
 /*!  load float vectors from an open file. Return the dimension */
-int fvec_fread (FILE * f, float * v);
+int fvec_fread (FILE * f, float * v, int d_alloc);
 
 
 float *fvec_fread_raw(FILE * f, long n);
 
 /*! load a set of n vectors from an open file. 
   Return the number of vectors that have been read. */
-long fvecs_fread (FILE * f, float * v, long n);
+long fvecs_fread (FILE * f, float * v, long n, int d_alloc);
 
-long ivecs_fread (FILE * f, int * v, long n);
+long ivecs_fread (FILE * f, int * v, long n, int d_alloc);
 
-long bvecs_fread (FILE * f, unsigned char * v, long n);
+long bvecs_fread (FILE * f, unsigned char * v, long n, int d_alloc);
 
-long lvecs_fread (FILE * f, long long * v, long n);
+long lvecs_fread (FILE * f, long long * v, long n, int d_alloc);
 
 long b2fvecs_fread (FILE * f, float * v, long n);
 
@@ -293,14 +293,14 @@ long b2fvecs_fread (FILE * f, float * v, long n);
 int * ivec_new_read(const char *fname, int *d_out);
 
 /*!  read an integer vector file from an open file and return the dimension */
-int ivec_fread (FILE *f, int * v);
+int ivec_fread (FILE *f, int * v, int d_alloc);
 
 /*!  read a byte vector file from an open file and return the dimension */
-int bvec_fread (FILE *f, unsigned char * v);
+int bvec_fread (FILE *f, unsigned char * v, int d_alloc);
 int b2fvec_fread (FILE * f, float * v);
 
 /*!  read an long vector file from an open file and return the dimension */
-int lvec_fread (FILE *f, long long * v);
+int lvec_fread (FILE *f, long long * v, int d_alloc);
 
 
 /*!  read several integer vectors from an ivec file. Return number read */

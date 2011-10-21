@@ -435,7 +435,7 @@ void kmlsh_read (const char * filename, const kmlsh_t * lsh)
 
   for (h = 0 ; h < lsh->nhash ; h++) {
     lsh->centroids[h] = fvec_new (lsh->d * lsh->nclust);
-    ret = fvec_fread (f, lsh->centroids[h]);
+    ret = fvec_fread (f, lsh->centroids[h], lsh->d * lsh->nclust);
     KMLSH_READ_ERROR (ret == lsh->nclust * lsh->d);
   }
   fclose (f);
@@ -467,10 +467,10 @@ void kmlsh_idx_read (const char * filename, kmlsh_idx_t * lshidx)
   KMLSH_IDX_READ_ERROR (f);
 
   for (h = 0 ; h < lshidx->nhash ; h++) {
-    ret = ivec_fread (f, lshidx->perm + h * lshidx->n);
+    ret = ivec_fread (f, lshidx->perm + h * lshidx->n, lshidx->n);
     KMLSH_IDX_READ_ERROR (ret == lshidx->n);
 
-    ret = ivec_fread (f, lshidx->boundaries + h * (lshidx->nclust + 1));
+    ret = ivec_fread (f, lshidx->boundaries + h * (lshidx->nclust + 1), lshidx->nclust + 1);
     KMLSH_IDX_READ_ERROR (ret == lshidx->nclust + 1);
   }
 

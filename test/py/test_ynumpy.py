@@ -54,5 +54,23 @@ print "kmeans:"
 centroids = ynumpy.kmeans(v, 3)
 
 print "result centroids ="
-print centroids
+print centroids[:10,:]
 
+print "gmm:"
+
+gmm = ynumpy.gmm_learn(v, 3)
+
+(w, mu, sigma) = gmm
+
+print "mu = "
+print mu[:10,:]
+
+print "sigma = "
+print sigma[:10,:]
+
+muc = mu.transpose().copy().transpose()
+muc += numpy.random.normal(0, 0.2, size = muc.shape)
+
+fish = ynumpy.fisher(gmm, muc)
+
+print fish.shape
