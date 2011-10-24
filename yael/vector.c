@@ -26,40 +26,9 @@ static void *memalign(size_t ignored,size_t nbytes) {
 
 
 /*-------------------------------------------------------------*/
-/* Standard operations                                                       */
+/* Allocation                                                  */
 /*-------------------------------------------------------------*/
 
-/* Generate Gaussian random value, mean 0, variance 1 (from Python source) */
-
-
-static double drand_r(unsigned int *seed) {
-  return rand_r(seed)/((double)RAND_MAX + 1.0);
-}
-
-#define NV_MAGICCONST  1.71552776992141
-
-static double gaussrand_r (unsigned int *seed)
-{
-  double z;
-  while (1) {
-    float u1, u2, zz;
-    u1 = drand_r (seed);
-    u2 = drand_r (seed);
-    z = NV_MAGICCONST * (u1 - .5) / u2;
-    zz = z * z / 4.0;
-    if (zz < -log (u2))
-      break;
-  }
-  return z;
-}
-
-double gaussrand () {
-  unsigned int seed=lrand48();
-  return gaussrand_r(&seed);
-}
-
-
-/*-------------------------------------------------------------*/
 
 
 float *fvec_new (long n)
@@ -156,6 +125,38 @@ float *fvec_new_nan (long n)
   return ret;
 }
 
+/*-------------------------------------------------------------*/
+/* Random                                                      */
+/*-------------------------------------------------------------*/
+
+/* Generate Gaussian random value, mean 0, variance 1 (from Python source) */
+
+
+static double drand_r(unsigned int *seed) {
+  return rand_r(seed)/((double)RAND_MAX + 1.0);
+}
+
+#define NV_MAGICCONST  1.71552776992141
+
+static double gaussrand_r (unsigned int *seed)
+{
+  double z;
+  while (1) {
+    float u1, u2, zz;
+    u1 = drand_r (seed);
+    u2 = drand_r (seed);
+    z = NV_MAGICCONST * (u1 - .5) / u2;
+    zz = z * z / 4.0;
+    if (zz < -log (u2))
+      break;
+  }
+  return z;
+}
+
+double gaussrand () {
+  unsigned int seed=lrand48();
+  return gaussrand_r(&seed);
+}
 
 
 void fvec_rand (float * v, long n)
@@ -216,6 +217,60 @@ float * fvec_new_randn_r (long n, unsigned int seed)
   return f;
 }
 
+
+int * ivec_new_random_idx (int n, int k)
+{
+  return ivec_new_random_idx_r (n, k, lrand48());
+}
+
+int * ivec_new_random_idx_r (int n, int k, unsigned int seed)
+{
+  int *idx = ivec_new (n);
+  int i;
+
+  for (i = 0; i < n; i++)
+    idx[i] = i;
+
+  for (i = 0; i < k ; i++) {
+    int j = i +  rand_r(&seed) % (n - i);
+    /* swap i and j */
+    int p = idx[i];
+    idx[i] = idx[j];
+    idx[j] = p;
+  }
+
+  return idx;
+}
+
+int *ivec_new_random_perm (int n)
+{
+  return ivec_new_random_idx (n, n - 1);
+}
+
+int *ivec_new_random_perm_r (int n, unsigned int seed)
+{
+  return ivec_new_random_idx_r (n, n - 1, seed);
+}
+
+
+void ivec_shuffle (int * v, long n)
+{
+  int i;
+
+  for (i = 0; i < n - 1; i++) {
+    int j = i + random () % (n - i);
+    /* swap i and j */
+    int p = v[i];
+    v[i] = v[j];
+    v[j] = p;
+  }
+}
+
+/*-------------------------------------------------------------*/
+/* Allocate & initialize                                       */
+/*-------------------------------------------------------------*/
+
+
 int *ivec_new_0 (long n)
 {
   int *ret = (int *) calloc (sizeof (*ret), n);
@@ -258,11 +313,7 @@ float *fvec_new_set (long n, float val)
 int *ivec_new_set (long n, int val)
 {
   int i;
-  int *ret = (int *) calloc (sizeof (*ret), n);
-  if (!ret) {
-    fprintf (stderr, "ivec_new_set %ld : out of memory\n", n);
-    abort();
-  }
+  int *ret = ivec_new(n);
 
   for (i = 0 ; i < n ; i++)
     ret[i] = val;
@@ -274,11 +325,7 @@ int *ivec_new_set (long n, int val)
 int * ivec_new_range (long a, long b)
 {
   int i;
-  int *ret = (int *) calloc (sizeof (*ret), b - a);
-  if (!ret) {
-    fprintf (stderr, "ivec_new_range : out of memory\n");
-    abort();
-  }
+  int *ret = ivec_new(b - a);
 
   for (i = a ; i < b ; i++)
     ret[i - a] = i;
@@ -289,12 +336,7 @@ int * ivec_new_range (long a, long b)
 
 int * ivec_new_cpy (const int * v, long n)
 {
-  int *ret = (int *) malloc (sizeof (int) * n);
-  if (!ret) {
-    fprintf (stderr, "ivec_new %ld : out of memory\n", n);
-    abort();
-  }
-  
+  int *ret = ivec_new(n);  
   memcpy (ret, v, n * sizeof (*ret));
   return ret;
 }
@@ -307,30 +349,9 @@ float * fvec_new_cpy (const float * v, long n) {
 }
 
 
-
-int * ivec_new_random_idx (int n, int k)
-{
-  return ivec_new_random_idx_r (n, k, lrand48());
-}
-
-int * ivec_new_random_idx_r (int n, int k, unsigned int seed)
-{
-  int *idx = ivec_new (n);
-  int i;
-
-  for (i = 0; i < n; i++)
-    idx[i] = i;
-
-  for (i = 0; i < k ; i++) {
-    int j = i +  rand_r(&seed) % (n - i);
-    /* swap i and j */
-    int p = idx[i];
-    idx[i] = idx[j];
-    idx[j] = p;
-  }
-
-  return idx;
-}
+/*-------------------------------------------------------------*/
+/* resize                                                      */
+/*-------------------------------------------------------------*/
 
 
 float * fvec_resize (float * v, long n)
@@ -347,15 +368,10 @@ int * ivec_resize (int * v, long n)
 }
 
 
-int *ivec_new_random_perm (int n)
-{
-  return ivec_new_random_idx (n, n - 1);
-}
 
-int *ivec_new_random_perm_r (int n, unsigned int seed)
-{
-  return ivec_new_random_idx_r (n, n - 1, seed);
-}
+/*-------------------------------------------------------------*/
+/* statistics                                                  */
+/*-------------------------------------------------------------*/
 
 
 int *ivec_new_histogram (int k, const int *v, long n)
@@ -399,70 +415,6 @@ int * fvec_new_histogram_clip (float vmin,float vmax, int k, float *v, long n) {
   }
 
   return h;
-}
-
-int *ivec_repeat_with_inc(const int *a,int n,
-                          int nrepeat, int inc) {
-  int *ret=ivec_new(nrepeat*n); 
-  int i;
-  for(i=0;i<nrepeat;i++) {
-    ivec_cpy(ret+i*n, a, n); 
-    ivec_add_scalar(ret+i*n, n, i*inc);
-  }
-  return ret;
-}
-
-
-void fvec_splat_add(const float *a,int n,
-                    const int *assign,float *accu) {
-  int i;
-  for(i=0;i<n;i++) 
-    accu[assign[i]] += a[i];
-}
-
-
-void fvec_isplat_add(const float *a,int n,
-                     const int *assign,float *accu) {
-  int i;
-  for(i=0;i<n;i++) 
-    accu[i] += a[assign[i]];
-  
-}
-
-void fvec_map(const float *src,const int *map,int n,float *dest) {
-  int i;
-  for(i=0;i<n;i++) 
-    dest[i]=src[map[i]];
-}
-
-void ivec_map (const int *src,const int *map,int n,int *dest) {
-  int i;
-  for(i=0;i<n;i++) 
-    dest[i]=src[map[i]];
-}
-
-void fvec_imap(const float *src,const int *imap,int n,float *dest) {
-  int i;
-  for(i=0;i<n;i++) 
-    dest[imap[i]]=src[i];
-}
-
-
-int ivec_hash(const int * v, long n) {
-  unsigned int *k=(unsigned int*)v;
-  unsigned int b    = 378551;
-  unsigned int a    = 63689;
-  unsigned int hash = 0;
-  int i;
-  for(i = 0; i < n; i++) {
-    hash = hash * a + k[i];
-    a    = a * b;
-  }
-  return hash;
-}
-
-void ivec_replace(int * v, long n,int val,int replace_val) {
-  while(n--) if(v[n]==val) v[n]=replace_val;  
 }
 
 long ivec_count_occurrences(const int * v, long n, int val) {
@@ -542,6 +494,76 @@ long fvec_count_0 (const float *val, long n)
   return n0;
 }
 
+/*-------------------------------------------------------------*/
+/* mappings                                                    */
+/*-------------------------------------------------------------*/
+
+
+int *ivec_repeat_with_inc(const int *a,int n,
+                          int nrepeat, int inc) {
+  int *ret=ivec_new(nrepeat*n); 
+  int i;
+  for(i=0;i<nrepeat;i++) {
+    ivec_cpy(ret+i*n, a, n); 
+    ivec_add_scalar(ret+i*n, n, i*inc);
+  }
+  return ret;
+}
+
+
+void fvec_splat_add(const float *a,int n,
+                    const int *assign,float *accu) {
+  int i;
+  for(i=0;i<n;i++) 
+    accu[assign[i]] += a[i];
+}
+
+
+void fvec_isplat_add(const float *a,int n,
+                     const int *assign,float *accu) {
+  int i;
+  for(i=0;i<n;i++) 
+    accu[i] += a[assign[i]];
+  
+}
+
+void fvec_map(const float *src,const int *map,int n,float *dest) {
+  int i;
+  for(i=0;i<n;i++) 
+    dest[i]=src[map[i]];
+}
+
+void ivec_map (const int *src,const int *map,int n,int *dest) {
+  int i;
+  for(i=0;i<n;i++) 
+    dest[i]=src[map[i]];
+}
+
+void fvec_imap(const float *src,const int *imap,int n,float *dest) {
+  int i;
+  for(i=0;i<n;i++) 
+    dest[imap[i]]=src[i];
+}
+
+
+int ivec_hash(const int * v, long n) {
+  unsigned int *k=(unsigned int*)v;
+  unsigned int b    = 378551;
+  unsigned int a    = 63689;
+  unsigned int hash = 0;
+  int i;
+  for(i = 0; i < n; i++) {
+    hash = hash * a + k[i];
+    a    = a * b;
+  }
+  return hash;
+}
+
+void ivec_replace(int * v, long n,int val,int replace_val) {
+  while(n--) if(v[n]==val) v[n]=replace_val;  
+}
+
+
 void ivec_accumulate_slices(const int *v,int *sl,int n) {
   int i;
   int accu=0,j=0;
@@ -556,10 +578,16 @@ void ivec_accumulate_slices(const int *v,int *sl,int n) {
 
 /*---------------------------------------------------------------------------*/
 /* Input/Output functions                                                    */
+/*                                                                           */
+/* To avoid repeating too much code, many functions that are the same        */
+/* for ivec, fvec, bvec, etc. are implemented with prefix xvec_ and          */
+/* take as 1st argument unitsize, ther size of one element of the type       */
+/* at hand                                                                   */
 /*---------------------------------------------------------------------------*/
 
-
-
+/*---------------------------------------------------------------------------*/
+/* Input functions                                                           */
+/*---------------------------------------------------------------------------*/
 
 static long xvecs_fsize(long unitsize, const char * fname, int *d_out, int *n_out)
 {
@@ -617,89 +645,6 @@ long lvecs_fsize (const char * fname, int *d_out, int *n_out)
 }
 
 
-int fvec_fwrite (FILE *fo, const float *v, int d) 
-{
-  int ret;
-  ret = fwrite (&d, sizeof (int), 1, fo);
-  if (ret != 1) {
-    perror ("fvec_fwrite: write error 1");
-    return -1;
-  }
-  ret = fwrite (v, sizeof (float), d, fo);
-  if (ret != d) {
-    perror ("fvec_fwrite: write error 2");
-    return -1;
-  }  
-  return 0;
-}
-
-
-
-
-int fvec_fwrite_raw(FILE *fo, const float *v, long d) {
-  long ret = fwrite (v, sizeof (float), d, fo);
-  if (ret != d) {
-    perror ("fvec_fwrite_raw: write error 2");
-    return -1;
-  }  
-  return 0;
-}
-
-int ivec_fwrite_raw(FILE *fo, const int *v, long d) {
-  long ret = fwrite (v, sizeof (int), d, fo);
-  if (ret != d) {
-    perror ("ivec_fwrite_raw: write error 2");
-    return -1;
-  }  
-  return 0;
-}
-
-
-int fvecs_fwrite (FILE *fo, int d, int n, const float *vf)
-{
-  int i;
-  /* write down the vectors as fvecs */
-  for (i = 0; i < n; i++) {
-    if(fvec_fwrite(fo, vf+i*d, d)<0) 
-      return i;
-  }
-  return n;
-}
-
-
-
-int fvecs_write (const char *fname, int d, int n, const float *vf)
-{
-  FILE *fo = fopen (fname, "w");
-  if (!fo) {
-    perror ("fvecs_write: cannot open file");
-    return -1;
-  }
-
-  int ret = fvecs_fwrite (fo, d, n, vf);
-
-  fclose (fo);
-  return ret;
-}
-
-
-int fvecs_write_txt (const char * fname, int d, int n, const float *vf)
-{ 
-  int i, j, ret = 0;
-  FILE * fo = fopen (fname, "w");
-  if (!fo) {
-    perror ("fvecs_write_txt: cannot open file");
-    return -1;
-  }
-
-  for (i = 0 ; i < n ; i++) {
-    for (j = 0 ; j < d ; j++)
-      fprintf (fo, "%f ", vf[i * d + j]);
-    ret += fprintf (fo, "\n");
-  }
-
-  return ret;
-}
 
 
 int fvecs_new_read (const char *fname, int *d_out, float **vf_out)
@@ -1087,11 +1032,6 @@ int fvec_read (const char *fname, int d, float *a, int o_f) {
 
 
 
-
-
-
-
-
 static long xvecs_fread (long unit_size, FILE * f, void * v, long n, int d_alloc)
 {
   long i = 0, d = -1, ret;
@@ -1234,53 +1174,6 @@ long b2fvecs_fread (FILE * f, float * v, long n)
   return i;
 }
 
-
-
-
-int ivec_fwrite (FILE *f, const int *v, int d)
-{
-  int ret = fwrite (&d, sizeof (d), 1, f);
-  if (ret != 1) {
-    perror ("ivec_fwrite: write error 1");
-    return -1;
-  }
-
-  ret = fwrite (v, sizeof (*v), d, f);
-  if (ret != d) {
-    perror ("ivec_fwrite: write error 2");
-    return -2;
-  }
-  return 0;
-}
-
-
-int ivecs_fwrite(FILE *f, int d, int n, const int *v)
-{
-  int i;
-  for (i = 0 ; i < n ; i++) {    
-    ivec_fwrite (f, v, d);
-    v+=d;
-  }
-  return n;
-}
-
-
-int ivecs_write (const char *fname, int d, int n, const int *v)
-{
-  int ret = 0;
-  FILE *f = fopen (fname, "w");
-  if (!f) {
-    perror ("ivecs_write");
-    return -1;
-  }
-
-  ret = ivecs_fwrite (f, d, n, v);
-
-  fclose (f);
-  return ret;
-}
-
-
 int ivecs_write_txt (const char * fname, int d, int n, const int *v)
 { 
   int i, j, ret = 0;
@@ -1341,73 +1234,6 @@ int *ivec_new_read(const char *fname, int *d_out) {
   return vi;
 }
 
-#if 0
-
-int ivec_fread (FILE * f, int * v)
-{
-  int d;
-  int ret = fread (&d, sizeof (int), 1, f);
-  if (feof (f))
-    return 0;
-
-  if (ret != 1) {
-    perror ("# ivec_fread error 1");
-    return -1;
-  }
-
-  ret = fread (v, sizeof (*v), d, f);
-  if (ret != d) {
-    perror ("# ivec_fread error 2");
-    return -1;
-  }
-  return d;
-}
-
-
-int bvec_fread (FILE * f, unsigned char * v)
-{
-  int d;
-  int ret = fread (&d, sizeof (int), 1, f);
-  if (feof (f))
-    return 0;
-
-  if (ret != 1) {
-    perror ("# bvec_fread error 1");
-    return -1;
-  }
-
-  ret = fread (v, sizeof (*v), d, f);
-  if (ret != d) {
-    perror ("# bvec_fread error 2");
-    return -1;
-  }
-  return d;
-}
-
-
-int lvec_fread (FILE * f, long long * v)
-{
-  int d;
-  int ret = fread (&d, sizeof (int), 1, f);
-  if (feof (f))
-    return 0;
-
-  if (ret != 1) {
-    perror ("# bvec_fread error 1");
-    return -1;
-  }
-
-  ret = fread (v, sizeof (*v), d, f);
-  if (ret != d) {
-    perror ("# bvec_fread error 2");
-    return -1;
-  }
-  return d;
-}
-
-
-
-#endif
 int b2fvec_fread (FILE * f, float * v)
 {
   int d, j;
@@ -1431,6 +1257,139 @@ int b2fvec_fread (FILE * f, float * v)
     v[j] = vb[j];
   free (vb);
   return d;
+}
+
+
+/*---------------------------------------------------------------------------*/
+/* Output functions                                                          */
+/*---------------------------------------------------------------------------*/
+
+int fvec_fwrite (FILE *fo, const float *v, int d) 
+{
+  int ret;
+  ret = fwrite (&d, sizeof (int), 1, fo);
+  if (ret != 1) {
+    perror ("fvec_fwrite: write error 1");
+    return -1;
+  }
+  ret = fwrite (v, sizeof (float), d, fo);
+  if (ret != d) {
+    perror ("fvec_fwrite: write error 2");
+    return -1;
+  }  
+  return 0;
+}
+
+
+
+
+int fvec_fwrite_raw(FILE *fo, const float *v, long d) {
+  long ret = fwrite (v, sizeof (float), d, fo);
+  if (ret != d) {
+    perror ("fvec_fwrite_raw: write error 2");
+    return -1;
+  }  
+  return 0;
+}
+
+int ivec_fwrite_raw(FILE *fo, const int *v, long d) {
+  long ret = fwrite (v, sizeof (int), d, fo);
+  if (ret != d) {
+    perror ("ivec_fwrite_raw: write error 2");
+    return -1;
+  }  
+  return 0;
+}
+
+
+int fvecs_fwrite (FILE *fo, int d, int n, const float *vf)
+{
+  int i;
+  /* write down the vectors as fvecs */
+  for (i = 0; i < n; i++) {
+    if(fvec_fwrite(fo, vf+i*d, d)<0) 
+      return i;
+  }
+  return n;
+}
+
+
+
+int fvecs_write (const char *fname, int d, int n, const float *vf)
+{
+  FILE *fo = fopen (fname, "w");
+  if (!fo) {
+    perror ("fvecs_write: cannot open file");
+    return -1;
+  }
+
+  int ret = fvecs_fwrite (fo, d, n, vf);
+
+  fclose (fo);
+  return ret;
+}
+
+
+int fvecs_write_txt (const char * fname, int d, int n, const float *vf)
+{ 
+  int i, j, ret = 0;
+  FILE * fo = fopen (fname, "w");
+  if (!fo) {
+    perror ("fvecs_write_txt: cannot open file");
+    return -1;
+  }
+
+  for (i = 0 ; i < n ; i++) {
+    for (j = 0 ; j < d ; j++)
+      fprintf (fo, "%f ", vf[i * d + j]);
+    ret += fprintf (fo, "\n");
+  }
+
+  return ret;
+}
+
+
+int ivec_fwrite (FILE *f, const int *v, int d)
+{
+  int ret = fwrite (&d, sizeof (d), 1, f);
+  if (ret != 1) {
+    perror ("ivec_fwrite: write error 1");
+    return -1;
+  }
+
+  ret = fwrite (v, sizeof (*v), d, f);
+  if (ret != d) {
+    perror ("ivec_fwrite: write error 2");
+    return -2;
+  }
+  return 0;
+}
+
+
+int ivecs_fwrite(FILE *f, int d, int n, const int *v)
+{
+  int i;
+  for (i = 0 ; i < n ; i++) {    
+    ivec_fwrite (f, v, d);
+    v+=d;
+  }
+  return n;
+}
+
+
+int ivecs_write (const char *fname, int d, int n, const int *v)
+{
+  int ret = 0;
+  FILE *f = fopen (fname, "w");
+  if (!f) {
+    perror ("ivecs_write");
+    return -1;
+  }
+
+  ret = ivecs_fwrite (f, d, n, v);
+
+  fclose (f);
+  return ret;
 }
 
 
@@ -1514,7 +1473,7 @@ float * ivec2fvec (const int * v, long n)
 
 
 /*---------------------------------------------------------------------------*/
-/* Vector manipulation                                                       */
+/* Elementary operations                                                     */
 /*---------------------------------------------------------------------------*/
 
 void fvec_0(float * v, long n)
@@ -1670,92 +1629,6 @@ void fvec_div (float * v1, const float * v2, long n)
 }
 
 
-double fvec_normalize (float * v, long n, double norm)
-{
-  if(norm==0) 
-    return 0;
-
-  double nr = fvec_norm (v, n, norm);
-
-  /*  if(nr!=0)*/
-  fvec_mul_by (v, n, 1. / nr);
-  return nr;
-}
-
-void fvec_normalize_2stage(float * v, long n, double scal) {
-  double nr = fvec_normalize (v, n, 2);
-  
-  if(nr == 0) return; 
-
-  int renorm = 0;
-  int i;
-
-  for(i=0; i<n; i++) 
-    if(v[i] > scal) {
-      v[i] = scal; 
-      renorm = 1; 
-    }
-  
-  if(renorm) 
-    fvec_normalize (v, n, 2);
-    
-}
-
-
-
-int fvecs_normalize (float * v, long n, long d, double norm)
-{
-  int i, nNaN = 0;
-  if (norm == 0) 
-    return 0;
-
-  for (i = 0 ; i < n ; i++) {
-    double nr = fvec_norm (v + i * d, d, norm);
-    if (nr == 0)
-      nNaN++;
-
-    fvec_mul_by (v + i * d, d, 1 / nr);
-  }
-
-  return nNaN;
-}
-
-
-int fvec_purge_nans(float * v, long n, float replace_value) {
-  long i, count=0;
-  
-  for(i=0;i<n;i++) if(isnan(v[i])) {
-    count++;
-    v[i]=replace_value;
-  }
-  
-  return count;
-}
-
-int fvec_purge_nonfinite(float * v, long n, float replace_value) {
-  long i, count=0;
-  
-  for(i=0;i<n;i++) if(!finite(v[i])) {
-    count++;
-    v[i]=replace_value;
-  }
-  
-  return count;
-}
-
-long fvec_shrink_nonfinite(float * v, long n) {
-  long i,j=0;
-  
-  for(i=0;i<n;i++) if(finite(v[i])) 
-    v[j++]=v[i];
-  return j;  
-}
-
-long fvec_index_nonfinite(float * v, long n) {
-  long i;
-  for(i=0;i<n;i++) if(!finite(v[i])) return i;
-  return -1;  
-}
 
 void fvec_round (float * v, long n)
 {
@@ -1847,8 +1720,100 @@ void ivec_add_scalar (int * v, long n, int scal) {
 
 
 /*---------------------------------------------------------------------------*/
+/* NaN's and non-finite elements                                             */
+/*---------------------------------------------------------------------------*/
+
+
+
+int fvec_purge_nans(float * v, long n, float replace_value) {
+  long i, count=0;
+  
+  for(i=0;i<n;i++) if(isnan(v[i])) {
+    count++;
+    v[i]=replace_value;
+  }
+  
+  return count;
+}
+
+int fvec_purge_nonfinite(float * v, long n, float replace_value) {
+  long i, count=0;
+  
+  for(i=0;i<n;i++) if(!finite(v[i])) {
+    count++;
+    v[i]=replace_value;
+  }
+  
+  return count;
+}
+
+long fvec_shrink_nonfinite(float * v, long n) {
+  long i,j=0;
+  
+  for(i=0;i<n;i++) if(finite(v[i])) 
+    v[j++]=v[i];
+  return j;  
+}
+
+long fvec_index_nonfinite(float * v, long n) {
+  long i;
+  for(i=0;i<n;i++) if(!finite(v[i])) return i;
+  return -1;  
+}
+
+/*---------------------------------------------------------------------------*/
 /* Vector measures and statistics                                            */
 /*---------------------------------------------------------------------------*/
+
+double fvec_normalize (float * v, long n, double norm)
+{
+  if(norm==0) 
+    return 0;
+
+  double nr = fvec_norm (v, n, norm);
+
+  /*  if(nr!=0)*/
+  fvec_mul_by (v, n, 1. / nr);
+  return nr;
+}
+
+void fvec_normalize_2stage(float * v, long n, double scal) {
+  double nr = fvec_normalize (v, n, 2);
+  
+  if(nr == 0) return; 
+
+  int renorm = 0;
+  int i;
+
+  for(i=0; i<n; i++) 
+    if(v[i] > scal) {
+      v[i] = scal; 
+      renorm = 1; 
+    }
+  
+  if(renorm) 
+    fvec_normalize (v, n, 2);
+    
+}
+
+
+
+int fvecs_normalize (float * v, long n, long d, double norm)
+{
+  int i, nNaN = 0;
+  if (norm == 0) 
+    return 0;
+
+  for (i = 0 ; i < n ; i++) {
+    double nr = fvec_norm (v + i * d, d, norm);
+    if (nr == 0)
+      nNaN++;
+
+    fvec_mul_by (v + i * d, d, 1 / nr);
+  }
+
+  return nNaN;
+}
 
 double fvec_sum (const float * v, long n)
 {
@@ -1893,12 +1858,7 @@ double fvec_mean (const float * v, long n)
 
 double fvec_sum_sqr (const float * v, long n)
 {
-  long i;
-  double s = 0;
-  for (i = 0 ; i < n ; i++)
-    s += v[i] * (double) v[i];
-
-  return s;
+  return fvec_norm2sqr(v, n);
 }
 
 
@@ -1988,7 +1948,7 @@ double fvec_norm2sqr (const float * v, long n) {
   double s=0;
   long i;
   for (i = 0 ; i < n ; i++)
-    s += v[i]*v[i];
+    s += v[i] * v[i];
   return s;
 }
 
@@ -2046,19 +2006,6 @@ int ivec_find (const int *v, int n, int ** nzpos_out)
   return nz;
 }
 
-
-void ivec_shuffle (int * v, long n)
-{
-  int i;
-
-  for (i = 0; i < n - 1; i++) {
-    int j = i + random () % (n - i);
-    /* swap i and j */
-    int p = v[i];
-    v[i] = v[j];
-    v[j] = p;
-  }
-}
 
 
 

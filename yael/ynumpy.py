@@ -94,25 +94,13 @@ def fvecs_fsize(filename):
 
 def fvecs_read(filename):
     (fvecs, n, d) = yael.fvecs_new_read(filename)
-    if d == -1: 
+    if n == -1: 
         raise IOError("could not read " + filename)
+    elif n == 0: d = 0
     fvecs = yael.acquirepointer(fvecs)
     # TODO find a way to avoid copy
     a = yael.fvec_to_numpy(fvecs, n * d)
     return a.reshape((d, n), order='FORTRAN')
-
-def fvecs_read_subset(filename, subset, d = -1): 
-    if d == -1:
-        d, tot_len = fvecs_fsize(filename)
-
-    f = open(filename, 'r')
-    
-    v_numpy = numpy.zeros((d, len(subset)), dtype = numpy.float32, order = 'FORTRAN')    
-    v = yael.fvec.frompointer(yael.numpy_to_fvec_ref(v_numpy))
-    
-    for i, j in enumerate(subset): 
-        f.seek(j * (4 + 4 * d))
-        
 
 
 def fvecs_write(filename, matrix): 
@@ -228,7 +216,7 @@ def fisher(gmm_npy, v,
 
     d_fisher = yael.gmm_fisher_sizeof(gmm, flags)
 
-    fisher_out = numpy.zeros((d_fisher, n), dtype = numpy.float32, order = 'FORTRAN')    
+    fisher_out = numpy.zeros(d_fisher, dtype = numpy.float32)    
 
     yael.gmm_fisher(n, yael.numpy_to_fvec_ref(v), gmm, flags, yael.numpy_to_fvec_ref(fisher_out))
 

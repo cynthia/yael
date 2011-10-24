@@ -37,15 +37,18 @@ try:
 except Exception, e: 
     print e
     print "generating random data"
-    v = numpy.random.normal(0, 1, size = (20, 4)).transpose()
+    v = numpy.random.normal(0, 1, size = (20, 4)).astype(numpy.float32).transpose()
+    
     v[:,10:] += numpy.tile(numpy.random.uniform(-10, 10, size = (4, 1)), (1, 10))
+    
 else: 
     print "vectors = "
     print v
     print "meta info = "
     print meta
     
-    # numpy has a bias en favor of C-ordered arrays, hence this 
+    # numpy has a bias en favor of C-ordered arrays, hence this
+    pdb.set_trace()
     v = v.transpose().astype(numpy.float32).transpose()
 
 
@@ -63,14 +66,20 @@ gmm = ynumpy.gmm_learn(v, 3)
 (w, mu, sigma) = gmm
 
 print "mu = "
-print mu[:10,:]
+print mu[:,:]
 
 print "sigma = "
-print sigma[:10,:]
+print sigma[:,:]
 
-muc = mu.transpose().copy().transpose()
-muc += numpy.random.normal(0, 0.2, size = muc.shape)
+
+
+muc = numpy.hstack((mu[:,0:1], mu[:,0:1], mu[:,1:2], mu[:,1:2], mu[:,1:2]))
+
+
+print "mu=", mu
+muc += numpy.random.normal(-0.2, 0.2, size = muc.shape)
+print "muc=", muc
 
 fish = ynumpy.fisher(gmm, muc)
 
-print fish.shape
+print fish
