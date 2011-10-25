@@ -329,6 +329,10 @@ long ivec_index (const int * v, long n,int val);
 /*! cast a vector of int into a (new) vector of floats */
 float * ivec2fvec (const int * v, long n);
 
+/*! cast a vector of int into a (new) vector of floats */
+float * bvec2fvec (const unsigned char * v, long n);
+
+
 /*---------------------------------------------------------------------------*/
 /* Vector manipulation and elementary operations                             */
 /*---------------------------------------------------------------------------*/

@@ -1472,6 +1472,18 @@ float * ivec2fvec (const int * v, long n)
 }
 
 
+float * bvec2fvec (const unsigned char * v, long n)
+{
+  long i;
+  float * vo = fvec_new (n);
+  for (i = 0 ; i < n ; i++)
+    vo[i] = (float) v[i];
+
+  return vo;
+}
+
+
+
 /*---------------------------------------------------------------------------*/
 /* Elementary operations                                                     */
 /*---------------------------------------------------------------------------*/
