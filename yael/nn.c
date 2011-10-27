@@ -336,8 +336,8 @@ void compute_cross_distances_alt (int distance_type, int d, int na, int nb,
  * blocks are BLOCK_NPT * BLOCK_CLUST
  */
 
-#define BLOCK_N1 512
-#define BLOCK_N2 512
+#define BLOCK_N1 256
+#define BLOCK_N2 256
 
 
 
