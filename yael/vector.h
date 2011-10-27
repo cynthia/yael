@@ -332,6 +332,8 @@ float * ivec2fvec (const int * v, long n);
 /*! cast a vector of int into a (new) vector of floats */
 float * bvec2fvec (const unsigned char * v, long n);
 
+/*! cast a vector of int into a (new) vector of floats. No internal allocation. */
+void bvectofvec (const unsigned char * v, float * vb, long n);
 
 /*---------------------------------------------------------------------------*/
 /* Vector manipulation and elementary operations                             */

@@ -1483,6 +1483,14 @@ float * bvec2fvec (const unsigned char * v, long n)
 }
 
 
+void bvectofvec (const unsigned char * v, float * vb, long n)
+{
+  long i;
+  for (i = 0 ; i < n ; i++)
+    vb[i] = (float) v[i];
+}
+
+
 
 /*---------------------------------------------------------------------------*/
 /* Elementary operations                                                     */
