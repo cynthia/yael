@@ -222,7 +222,7 @@ class RunOnSet:
       self.lock=thread.allocate_lock()
       self.lock2=thread.allocate_lock()
       self.lock2.acquire()      
-      for i in range(min(n, len(self.l)):
+      for i in range(min(n, len(self.l))):
         thread.start_new_thread(self.loop,())
       self.lock2.acquire()
       if self.exception:
