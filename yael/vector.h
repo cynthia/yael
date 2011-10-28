@@ -273,8 +273,10 @@ int fvec_read (const char *fname, int d, float *a, int o_f);
 /*!  load float vectors from an open file. Return the dimension */
 int fvec_fread (FILE * f, float * v, int d_alloc);
 
-
+/* Read raw vectors from disk */
 float *fvec_fread_raw(FILE * f, long n);
+int * ivec_fread_raw(FILE * f, long d);
+unsigned char *bvec_fread_raw(FILE * f, long n);
 
 /*! load a set of n vectors from an open file. 
   Return the number of vectors that have been read. */

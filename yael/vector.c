@@ -1136,8 +1136,37 @@ int b2fvecs_new_read (const char *fname, int *d_out, float **v_out)
 
 
 
-float *fvec_fread_raw(FILE * f, long d) {
-  float *v=fvec_new(d);
+float * fvec_fread_raw(FILE * f, long d) 
+{
+  float *v = fvec_new(d);
+
+  int ret = fread (v, sizeof (*v), d, f);
+  if (ret != d) {
+    free(v);
+    perror ("# fvec_fread error 2");
+    return NULL;
+  }
+  return v;
+}
+
+
+int * ivec_fread_raw(FILE * f, long d) 
+{
+  int * v = ivec_new(d);
+
+  int ret = fread (v, sizeof (*v), d, f);
+  if (ret != d) {
+    free(v);
+    perror ("# fvec_fread error 2");
+    return NULL;
+  }
+  return v;
+}
+
+
+unsigned char *bvec_fread_raw(FILE * f, long d) 
+{
+  unsigned char *v = bvec_new(d);
 
   int ret = fread (v, sizeof (*v), d, f);
   if (ret != d) {
@@ -1167,12 +1196,13 @@ long b2fvecs_fread (FILE * f, float * v, long n)
       d = ret;
 
     if (d != ret) {
-      perror ("# bvecs_fread: dimension of the vectors is not consistent\n");
+      perror ("# b2fvecs_fread: dimension of the vectors is not consistent\n");
       return 0;
     }
   }
   return i;
 }
+
 
 int ivecs_write_txt (const char * fname, int d, int n, const int *v)
 { 
