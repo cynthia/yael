@@ -176,6 +176,22 @@ array_class_plus(byte_pointer_t,BytePtrArray)
 }
 
 
+// // bvecs_new_read returns a tuple 
+// // (bts,n,d)
+
+// %typemap(in,numinputs=0) 
+//   (int *d_out,unsigned char **vb)
+//   (int d,unsigned char *vb) {
+//   $1=&d;
+//   $2=&vi;
+// }
+
+// %typemap(argout) (int *d_out,unsigned char **vb)  {
+//   $result=Py_BuildValue
+//         ("(NNi)",
+//          SWIG_NewPointerObj(*$2,SWIGTYPE_p_byte,0),
+//          $result,*$1);
+// } 
 
 
 
@@ -212,7 +228,6 @@ array_class_plus(byte_pointer_t,BytePtrArray)
         ("(Ni)",
          $result,*$1);
 }
-
 
 
 
