@@ -334,7 +334,7 @@ float * ivec2fvec (const int * v, long n);
 /*! cast a vector of int into a (new) vector of floats */
 float * bvec2fvec (const unsigned char * v, long n);
 
-/*! cast a vector of int into a (new) vector of floats. No internal allocation. */
+/*! cast a vector of int into a vector of floats. No internal allocation. */
 void bvectofvec (const unsigned char * v, float * vb, long n);
 
 /*---------------------------------------------------------------------------*/
@@ -372,6 +372,7 @@ void ivec_set (int * v, long n, int val);
 /*!  copy the vector from v2 to v1 */
 void ivec_cpy (int * vdest, const int * vsource, long n);
 void fvec_cpy (float * vdest, const float * vsource, long n);
+void bvec_cpy (unsigned char * vdest, const unsigned char * vsource, long n);
 
 /*!  Increment or decrement a vector by a scalar value */
 void fvec_incr (float * v, long n, double scal);

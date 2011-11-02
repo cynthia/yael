@@ -1594,6 +1594,12 @@ void fvec_cpy (float * vdest, const float * vsource, long n)
 }
 
 
+void bvec_cpy (unsigned char * vdest, const unsigned char * vsource, long n)
+{
+  memmove (vdest, vsource, n * sizeof (*vdest));
+}
+
+
 void fvec_incr (float * v, long n, double scal)
 {
   long i = 0;

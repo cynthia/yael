@@ -589,9 +589,9 @@ void knn_recompute_exact_dists(int nq, int nb, int d, int k,
 
 
 void nn (int npt, int nclust, int d,
-                        const float *codebook, const float *coords, int *vw,
-                        void (*peek_fun) (void *arg, double frac),
-                        void *peek_arg) {
+	 const float *codebook, const float *coords, int *vw,
+	 void (*peek_fun) (void *arg, double frac),
+	 void *peek_arg) {
   
   /* The distances to centroids that will be returned */
   float *vwdis = fvec_new(npt);
@@ -602,10 +602,8 @@ void nn (int npt, int nclust, int d,
 }
 
 float *knn (int npt, int nclust, int d, int k,
-                                   const float *codebook, const float *coords,
-                                   int *vw, void (*peek_fun) (void *arg,
-                                                              double frac),
-                                   void *peek_arg)
+	    const float *codebook, const float *coords,
+	    int *vw, void (*peek_fun) (void *arg, double frac),  void *peek_arg)
 {
   /* The distances to centroids that will be returned */
   float *vwdis = fvec_new(npt * k);
