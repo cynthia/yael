@@ -429,6 +429,7 @@ long fvec_count_occurrences(const float * v, long n, float val) {
   return count;
 }
 
+
 long fvec_count_lt(const float * v, long n, float val) {
   long count=0;
   while(n--) if(v[n]<val) count++;
@@ -1900,6 +1901,26 @@ void ivec_cumsum(int *v, long n) {
 }
 
 
+void fvec_cumdiff(float *v, long n) {
+  long i;
+  float prev = 0;
+  for (i = 0 ; i < n ; i++) {
+    float pprev = v[i];
+    v[i] -= prev;
+    prev = pprev;
+  }
+}
+
+void ivec_cumdiff(int *v, long n) {
+  long i;
+  int prev = 0;
+  for (i = 0 ; i < n ; i++) {
+    int pprev = v[i];
+    v[i] -= prev;
+    prev = pprev;
+  }
+}
+
 
 double fvec_mean (const float * v, long n)
 {
@@ -2270,6 +2291,10 @@ void fvec_cpy_subvectors (const float * v, int * idx, int d, int nout, float * v
     fvec_cpy (vout + i * d, v + (long) idx[i] * d, d);
 }
 
+
+void ivec_to_fvec(const int *v, float *f, long n) {
+  while(n--) f[n] = v[n];
+}
 
 /* copy a subset of byte vectors and cast them to float vectors in the same time */
 void b2fvec_cpy_subvectors (const unsigned char * v, int * idx, int d, int nout, float * vout)

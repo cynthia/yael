@@ -153,6 +153,7 @@ void ivec_replace (int * v, long n, int val, int replace_val);
 /*!  count occurences of a value in the vector */
 long ivec_count_occurrences (const int * v, long n, int val);
 long fvec_count_occurrences (const float * v, long n, float val);
+long lvec_count_occurrences (const long long * v, long n, unsigned long long val);
 
 /*!  count the number of values below a threshold */
 long fvec_count_lt(const float * v, long n, float val);
@@ -459,6 +460,10 @@ long long ivec_sum (const int * v, long n);
 void fvec_cumsum(float * v, long n);
 void ivec_cumsum(int *v, long n); 
 
+/*! opposite of cumsum: v[i] := v[i] - v[i-1] */
+void fvec_cumdiff(float *v, long n);
+void ivec_cumdiff(int *v, long n);
+
 /*!  compute the sum of the product of the vector */
 double fvec_product (const float * v, long n);
 long long ivec_product (const int * v, long n);
@@ -598,6 +603,9 @@ int* ivec_repeat_with_inc(const int *a,int n,
 void fvec_cpy_subvectors (const float * v, int * idx, int d, int nout, float * vout);
 
 void b2fvec_cpy_subvectors (const unsigned char * v, int * idx, int d, int nout, float * vout);
+
+/*! simple type conversion */
+void ivec_to_fvec(const int *v, float *f, long n); 
 
 
 /*! @} */
