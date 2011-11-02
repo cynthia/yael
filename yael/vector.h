@@ -153,7 +153,6 @@ void ivec_replace (int * v, long n, int val, int replace_val);
 /*!  count occurences of a value in the vector */
 long ivec_count_occurrences (const int * v, long n, int val);
 long fvec_count_occurrences (const float * v, long n, float val);
-long lvec_count_occurrences (const long long * v, long n, unsigned long long val);
 
 /*!  count the number of values below a threshold */
 long fvec_count_lt(const float * v, long n, float val);
