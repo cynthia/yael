@@ -48,6 +48,12 @@ void nnlist_addn (nnlist_t * l, int lno, int n, int * idx, float * dis);
 #define KMLSH_WRITE_INTER_NHASH     0x00020000   /* write all intermediate versions 
 						    of all functions and idx structures */
 
+#define KMLSH_BLOCK_SIZE     256
+#define KMLSH_NB_ITER_MAX    20
+
+#define KMLSH_VECTYPE_FVEC   0
+#define KMLSH_VECTYPE_BVEC   1
+
 
 /*! The structure that contains the parameters of the KM-LSH */
 struct kmlsh_s {
@@ -83,12 +89,15 @@ void kmlsh_delete (kmlsh_t * lsh);
 /* Learn several k-means using different sampling strategies on the learning vectors */
 /* n is the number of vectors possibly used as input of k-means, while 
    nlearn is the number of vectors actually used for the k-means (typically n/2). */
-void kmlsh_learn (kmlsh_t * lsh, int n, int nlearn, const float * v, int flags, int nb_iter_max);
-
+void kmlsh_learn_xvec (kmlsh_t * lsh, int n, int nlearn, const void * v, 
+		       int flags, int vec_type);
 
 /* Same as kmlsh_learn, but also create the structure */
-kmlsh_t * kmlsh_new_learn (int nhash, int nclust, int d, 
-			   int n, int nlearn, const float * v, int flags, int nb_iter_max);
+kmlsh_t * kmlsh_new_learn_bvec (int nhash, int nclust, int d, int n, int nlearn, 
+				const unsigned char * v, int flags);
+
+kmlsh_t * kmlsh_new_learn_fvec (int nhash, int nclust, int d, int n, int nlearn, 
+				const float * v, int flags);
 
 /*! A function that performs the match assuming that the codes are pre-computed */
 nnlist_t * kmlsh_match (const kmlsh_t * lsh,  
@@ -124,8 +133,15 @@ int * kmlsh_idx_get_vecids (const kmlsh_idx_t * lshidx, int h, int c);
 
 
 /* Quantize the descriptors and order them by cell. */
-void kmeans_cohash (const kmlsh_t * lsh, int h, const float * v, int n, 
-		    int * perm, int * boundaries, int nt);
+void kmeans_cohash_xvec (const kmlsh_t * lsh, int h, const void * v, int n, 
+			 int * perm, int * boundaries, int nt, int vec_type);
+
+void kmeans_cohash_bvec (const kmlsh_t * lsh, int h, const unsigned char * v, int n, 
+			 int * perm, int * boundaries, int nt);
+
+void kmeans_cohash_fvec (const kmlsh_t * lsh, int h, const float * v, int n, 
+			 int * perm, int * boundaries, int nt);
+
 
 /*-----------------------------------------------------------------*/
 /* I/O                                                             */

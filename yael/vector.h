@@ -597,6 +597,8 @@ int* ivec_repeat_with_inc(const int *a,int n,
  */  
 void fvec_cpy_subvectors (const float * v, int * idx, int d, int nout, float * vout);
 
+void b2fvec_cpy_subvectors (const unsigned char * v, int * idx, int d, int nout, float * vout);
+
 
 /*! @} */
 #endif

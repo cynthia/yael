@@ -114,19 +114,28 @@ void kmlsh_delete (kmlsh_t * lsh)
 }
 
 
+
 /* Learn several k-means using different sampling strategies on the learning vectors */
 /* n is the number of vectors possibly used as input of k-means, while 
    nlearn is the number of vectors actually used for the k-means.       */
-void kmlsh_learn (kmlsh_t * lsh, int n, int nlearn, const float * v, int flags, int nb_iter_max)
+/* WARNING: this function is called "bvec" for the moment to avoid name conflict 
+   with Yael's function. The name will change when the function will be integrated in yael */
+void kmlsh_learn_xvec (kmlsh_t * lsh, int n, int nlearn, const void * v, 
+		       int flags, int vec_type)
 {
   int h;
 
   /* k-means parameters */
+  int nb_iter_max = KMLSH_NB_ITER_MAX;
   int d = lsh->d;
   int nclust = lsh->nclust;
   int nt = flags & KMLSH_NT;
   int kmeans_flags = nt | KMEANS_INIT_RANDOM;
   int verbose = !(flags & KMLSH_QUIET);
+
+  /* Weird way to do polymorphism in C*/
+  const float * vf = (float *) v;
+  const unsigned char * vb = (unsigned char *) v;
 
   if (nlearn == 0) {
     nlearn = lsh->nclust * 50; 
@@ -142,7 +151,12 @@ void kmlsh_learn (kmlsh_t * lsh, int n, int nlearn, const float * v, int flags, 
   for (h = 0 ; h < lsh->nhash ; h++) {
     /* Construct a first subset of vectors for learning with target size */
     int * perm = ivec_new_random_idx (n, nlearn);
-    fvec_cpy_subvectors (v, perm, d, nlearn, vlearn);
+
+    if (vec_type == KMLSH_VECTYPE_FVEC)
+      fvec_cpy_subvectors (vf, perm, d, nlearn, vlearn);
+    else if (vec_type == KMLSH_VECTYPE_BVEC)
+      b2fvec_cpy_subvectors (vb, perm, d, nlearn, vlearn);
+    else assert (0);
     free (perm);
 
     /* perform the k-means based on the selected vectors */
@@ -164,33 +178,67 @@ void kmlsh_learn (kmlsh_t * lsh, int n, int nlearn, const float * v, int flags, 
  
 
 /* Same as kmlsh_learn, but also create the structure */
-kmlsh_t * kmlsh_new_learn (int nhash, int nclust, int d, 
-			   int n, int nlearn, const float * v, int flags, int nb_iter_max)
+kmlsh_t * kmlsh_new_learn_bvec (int nhash, int nclust, int d, int n, int nlearn, 
+				const unsigned char * v, int flags)
 {
   kmlsh_t * lsh = kmlsh_new (nhash, nclust, d);
-  kmlsh_learn (lsh, n, nlearn, v, flags, nb_iter_max);
+  kmlsh_learn_xvec (lsh, n, nlearn, v, flags, KMLSH_VECTYPE_BVEC);
   return lsh;
 }
 
 
+/* Same as kmlsh_learn, but also create the structure */
+kmlsh_t * kmlsh_new_learn_fvec (int nhash, int nclust, int d, int n, int nlearn, 
+				const float * v, int flags)
+{
+  kmlsh_t * lsh = kmlsh_new (nhash, nclust, d);
+  kmlsh_learn_xvec (lsh, n, nlearn, v, flags, KMLSH_VECTYPE_FVEC);
+  return lsh;
+}
+
 
 /* Quantize the descriptors and order them by cell. */
-void kmeans_cohash (const kmlsh_t * lsh, int h, const float * v, int n, 
-		    int * perm, int * boundaries, int nt)
+void kmeans_cohash_xvec (const kmlsh_t * lsh, int h, const void * v, int n, 
+			 int * perm, int * boundaries, int nt, int vec_type)
 {
-  int * idx = ivec_new (n);         /* To store index id */
-  float * dis = fvec_new (n);       /* to store (unused) distances to k-NN */
+  int i, j;
+  int * idx = ivec_new (n);    /* To store index id */
+  float * dis = fvec_new (n);  /* to store (unused) distances to k-NN */
 
   /* Kmeans config */
   int d = lsh->d;
   int nclust = lsh->nclust;
 
+  /* Weird way to do polymorphism in C*/
+  float * vf = (float *) v;
+  const unsigned char * vb = (unsigned char *) v;
+  float * vbuf = NULL;
+
+  if (vec_type != KMLSH_VECTYPE_FVEC)
+    vbuf = fvec_new (n * d);   /* buffer to store the vectors cast to float */
+
+
   /* assign all the vectors using this space partitioning */
   fprintf (stderr, "Quantize %d descriptors\n", n);
-  knn_full_thread (2, n, nclust, d, 1, lsh->centroids[h], v, NULL, idx, dis, nt, NULL, NULL);
- 
+
+  for (i = 0 ; i < n ; i += KMLSH_BLOCK_SIZE) {
+    int ninblock = KMLSH_BLOCK_SIZE;
+    if (i + ninblock > n)
+      ninblock = n - i;
+
+    if (vec_type == KMLSH_VECTYPE_BVEC)
+      for (j = 0 ; j < ninblock * d; j++)
+	vbuf[j] = vb[i*d+j];
+    else if (vec_type == KMLSH_VECTYPE_FVEC)
+      vbuf = vf + i * d;
+    knn_full_thread (2, ninblock, nclust, d, 1, lsh->centroids[h], 
+		     vbuf, NULL, idx + i, dis + i, nt, NULL, NULL);
+  } 
+  if (vec_type != KMLSH_VECTYPE_FVEC)
+    free (vbuf);
+
   int * histoidx = ivec_new_histogram (nclust + 1, idx, n);
-  int a = histoidx[0], b, c, i; 
+  int a = histoidx[0], b, c; 
   histoidx[0] = 0;
 
   for (c = 1 ; c <= nclust ; c++) {
@@ -216,6 +264,20 @@ void kmeans_cohash (const kmlsh_t * lsh, int h, const float * v, int n,
   free (dis);
   free (histoidx);
   free (nocc);
+}
+
+
+void kmeans_cohash_bvec (const kmlsh_t * lsh, int h, const unsigned char * v, int n, 
+			 int * perm, int * boundaries, int nt)
+{
+  kmeans_cohash_xvec (lsh, h, (void *) v, n, perm, boundaries, nt, KMLSH_VECTYPE_BVEC);
+}
+
+
+void kmeans_cohash_fvec (const kmlsh_t * lsh, int h, const float * v, int n, 
+			 int * perm, int * boundaries, int nt)
+{
+  kmeans_cohash_xvec (lsh, h, (void *) v, n, perm, boundaries, nt, KMLSH_VECTYPE_FVEC);
 }
 
 
@@ -250,7 +312,7 @@ kmlsh_idx_t * kmlsh_idx_new_compile (const kmlsh_t * lsh, const float * v, int n
     int * perm = lshidx->perm + h * n;
     int * boundaries = lshidx->boundaries + h * (lsh->nclust + 1);
     
-    kmeans_cohash (lsh, h, v, n, perm, boundaries, nt);
+    kmeans_cohash_fvec (lsh, h, v, n, perm, boundaries, nt);
     
     /* Optionnally, write the intermediate quantization indexes */
     if (flags & KMLSH_WRITE_INTER_NHASH) {
@@ -367,7 +429,6 @@ nnlist_t * kmlsh_ann (const float * vb, int nb,
 		      int d, int k, int nhash, int nt)
 {
   /* pre-defined parameters */
-  int nb_iter_max = 8;
   int nclust = (int) sqrt (nb);
   int nlearn = nclust * 100;
   if (nlearn > nb) {
@@ -375,7 +436,7 @@ nnlist_t * kmlsh_ann (const float * vb, int nb,
     nlearn = nb;
   }
 
-  kmlsh_t * lsh = kmlsh_new_learn (nhash, nclust, d, nb, nlearn, vb, nt, nb_iter_max);
+  kmlsh_t * lsh = kmlsh_new_learn_fvec (nhash, nclust, d, nb, nlearn, vb, nt);
 
   /* compute the hash values for database vectors and queries */
   kmlsh_idx_t * lshidx_b = kmlsh_idx_new_compile (lsh, vb, nb, nt);

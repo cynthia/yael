@@ -2271,3 +2271,11 @@ void fvec_cpy_subvectors (const float * v, int * idx, int d, int nout, float * v
 }
 
 
+/* copy a subset of byte vectors and cast them to float vectors in the same time */
+void b2fvec_cpy_subvectors (const unsigned char * v, int * idx, int d, int nout, float * vout)
+{
+  long i, j;
+  for (i = 0 ; i < nout ; i++)
+    for (j = 0 ; j < d ; j++)
+      vout[i*d+j] = v[idx[i]*d+j];
+}
