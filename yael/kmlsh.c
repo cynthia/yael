@@ -140,13 +140,12 @@ void kmlsh_learn_xvec (kmlsh_t * lsh, int n, int nlearn, const void * v,
 
   if (nlearn == 0) {
     nlearn = lsh->nclust * 50; 
-    if (nlearn > n) n = nlearn;
+    if (nlearn > n) nlearn = (n * 3) / 4;
   }
   assert (nlearn <= n);
-  if (!verbose) {
+  if (verbose)
     fprintf (stderr, "n=%d  nlearn=%d  nclust=%d\n", n, nlearn, lsh->nclust);
-    kmeans_flags |= KMEANS_QUIET;
-  }
+  else kmeans_flags |= KMEANS_QUIET;
 
   float * vlearn = fvec_new (nlearn * d);
   for (h = 0 ; h < lsh->nhash ; h++) {
@@ -200,11 +199,12 @@ kmlsh_t * kmlsh_new_learn_fvec (int nhash, int nclust, int d, int n, int nlearn,
 
 /* Quantize the descriptors and order them by cell. */
 void kmeans_cohash_xvec (const kmlsh_t * lsh, int h, const void * v, int n, 
-			 int * perm, int * boundaries, int nt, int vec_type)
+			 int * perm, int * boundaries, int flags, int vec_type)
 {
   long i, j;
   int * idx = ivec_new (n);    /* To store index id */
   float * dis = fvec_new (n);  /* to store (unused) distances to k-NN */
+  int nt = flags & KMLSH_NT;
 
   /* Kmeans config */
   int d = lsh->d;
@@ -232,9 +232,11 @@ void kmeans_cohash_xvec (const kmlsh_t * lsh, int h, const void * v, int n,
       vbuf = vf + i * d;
     knn_full_thread (2, ninblock, nclust, d, 1, lsh->centroids[h], 
 		     vbuf, NULL, idx + i, dis + i, nt, NULL, NULL);
-    fprintf (stderr, "\rQuantize %d descriptors. %6.2f%%", n, 100.0 * (i + ninblock) / (float) n);
+    if (! (flags & KMLSH_QUIET))
+      fprintf (stdout, "\rQuantize %d descriptors. %6.2f%%", n, 100.0 * (i + ninblock) / (float) n);
   } 
-  printf ("\n");
+  if (! (flags & KMLSH_QUIET))
+    printf ("\n");
   if (vec_type != KMLSH_VECTYPE_FVEC)
     free (vbuf);
 
@@ -269,16 +271,16 @@ void kmeans_cohash_xvec (const kmlsh_t * lsh, int h, const void * v, int n,
 
 
 void kmeans_cohash_bvec (const kmlsh_t * lsh, int h, const unsigned char * v, int n, 
-			 int * perm, int * boundaries, int nt)
+			 int * perm, int * boundaries, int flags)
 {
-  kmeans_cohash_xvec (lsh, h, (void *) v, n, perm, boundaries, nt, KMLSH_VECTYPE_BVEC);
+  kmeans_cohash_xvec (lsh, h, (void *) v, n, perm, boundaries, flags, KMLSH_VECTYPE_BVEC);
 }
 
 
 void kmeans_cohash_fvec (const kmlsh_t * lsh, int h, const float * v, int n, 
-			 int * perm, int * boundaries, int nt)
+			 int * perm, int * boundaries, int flags)
 {
-  kmeans_cohash_xvec (lsh, h, (void *) v, n, perm, boundaries, nt, KMLSH_VECTYPE_FVEC);
+  kmeans_cohash_xvec (lsh, h, (void *) v, n, perm, boundaries, flags, KMLSH_VECTYPE_FVEC);
 }
 
 

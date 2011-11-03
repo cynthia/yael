@@ -49,7 +49,7 @@ void nnlist_addn (nnlist_t * l, int lno, int n, int * idx, float * dis);
 						    of all functions and idx structures */
 
 #define KMLSH_BLOCK_SIZE     256
-#define KMLSH_NB_ITER_MAX    20
+#define KMLSH_NB_ITER_MAX    8
 
 #define KMLSH_VECTYPE_FVEC   0
 #define KMLSH_VECTYPE_BVEC   1
@@ -134,13 +134,13 @@ int * kmlsh_idx_get_vecids (const kmlsh_idx_t * lshidx, int h, int c);
 
 /* Quantize the descriptors and order them by cell. */
 void kmeans_cohash_xvec (const kmlsh_t * lsh, int h, const void * v, int n, 
-			 int * perm, int * boundaries, int nt, int vec_type);
+			 int * perm, int * boundaries, int flags, int vec_type);
 
 void kmeans_cohash_bvec (const kmlsh_t * lsh, int h, const unsigned char * v, int n, 
-			 int * perm, int * boundaries, int nt);
+			 int * perm, int * boundaries, int flags);
 
 void kmeans_cohash_fvec (const kmlsh_t * lsh, int h, const float * v, int n, 
-			 int * perm, int * boundaries, int nt);
+			 int * perm, int * boundaries, int flags);
 
 
 /*-----------------------------------------------------------------*/
