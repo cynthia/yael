@@ -25,6 +25,7 @@ static inline int get_maxincell (const int * boundaries, int nclust)
 }
 
 
+
 /*---------- k-NN list handling ----------*/
 
 nnlist_t * nnlist_new (int n, int k)
@@ -219,8 +220,6 @@ void kmeans_cohash_xvec (const kmlsh_t * lsh, int h, const void * v, int n,
 
 
   /* assign all the vectors using this space partitioning */
-  fprintf (stderr, "Quantize %d descriptors\n", n);
-
   for (i = 0 ; i < n ; i += KMLSH_BLOCK_SIZE) {
     long ninblock = KMLSH_BLOCK_SIZE;
     if (i + ninblock > n)
@@ -233,7 +232,9 @@ void kmeans_cohash_xvec (const kmlsh_t * lsh, int h, const void * v, int n,
       vbuf = vf + i * d;
     knn_full_thread (2, ninblock, nclust, d, 1, lsh->centroids[h], 
 		     vbuf, NULL, idx + i, dis + i, nt, NULL, NULL);
+    fprintf (stderr, "\rQuantize %d descriptors. %6.2f%%", n, 100.0 * (i + ninblock) / (float) n);
   } 
+  printf ("\n");
   if (vec_type != KMLSH_VECTYPE_FVEC)
     free (vbuf);
 
