@@ -49,8 +49,8 @@ void nnlist_delete (nnlist_t * l)
 /* A few function to store and update the list of NN */
 static inline void nnlist_add (nnlist_t * l, int lno, int elidx, float eldis)
 {
-  int * idx = l->idx + lno * l->k;
-  float * dis = l->dis + lno * l->k;
+  int * idx = l->idx + (long) lno * l->k;
+  float * dis = l->dis + (long) lno * l->k;
 
   /* Check if distance is lowest than greatest value */
   if (eldis > dis[0])
@@ -201,7 +201,7 @@ kmlsh_t * kmlsh_new_learn_fvec (int nhash, int nclust, int d, int n, int nlearn,
 void kmeans_cohash_xvec (const kmlsh_t * lsh, int h, const void * v, int n, 
 			 int * perm, int * boundaries, int nt, int vec_type)
 {
-  int i, j;
+  long i, j;
   int * idx = ivec_new (n);    /* To store index id */
   float * dis = fvec_new (n);  /* to store (unused) distances to k-NN */
 
@@ -222,7 +222,7 @@ void kmeans_cohash_xvec (const kmlsh_t * lsh, int h, const void * v, int n,
   fprintf (stderr, "Quantize %d descriptors\n", n);
 
   for (i = 0 ; i < n ; i += KMLSH_BLOCK_SIZE) {
-    int ninblock = KMLSH_BLOCK_SIZE;
+    long ninblock = KMLSH_BLOCK_SIZE;
     if (i + ninblock > n)
       ninblock = n - i;
 
@@ -386,8 +386,8 @@ nnlist_t * kmlsh_match (const kmlsh_t * lsh,
     printf ("Group the vectors based on cell %d / %d, then exact search\n", h + 1, lsh->nhash);
 
     for (c = 0 ; c < nclust ; c++) {
-      int nvecincell_b = kmlsh_idx_get_nvec (lshidx_b, h, c);
-      int nvecincell_q = kmlsh_idx_get_nvec (lshidx_q, h, c);
+      long nvecincell_b = kmlsh_idx_get_nvec (lshidx_b, h, c);
+      long nvecincell_q = kmlsh_idx_get_nvec (lshidx_q, h, c);
       if (nvecincell_q == 0 || nvecincell_b == 0)
 	continue;
        
@@ -505,7 +505,7 @@ void kmlsh_read (const char * filename, const kmlsh_t * lsh)
 
 void kmlsh_idx_write (const char * filename, const kmlsh_idx_t * lshidx)
 {
-  int h, ret;
+  long h, ret;
   FILE * f = fopen (filename, "w");
   KMLSH_IDX_WRITE_ERROR (f);
 
@@ -523,7 +523,7 @@ void kmlsh_idx_write (const char * filename, const kmlsh_idx_t * lshidx)
 
 void kmlsh_idx_read (const char * filename, kmlsh_idx_t * lshidx)
 {
-  int h, ret;
+  long h, ret;
   FILE * f = fopen (filename, "r");
   KMLSH_IDX_READ_ERROR (f);
 

@@ -22,8 +22,8 @@
 /*-----------------------------------------------------------------*/
 /*! A structure to handle the list of KNN                          */
 struct nnlist_s {
-  int n;         /* number of points */
-  int k;         /* number of nearest neighbors */
+  long n;        /* number of points */
+  long k;        /* number of nearest neighbors */
   int * idx;     /* indices of the NN */
   float * dis;   /* corresponding distances */
 };
