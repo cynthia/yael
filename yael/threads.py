@@ -222,7 +222,7 @@ class RunOnSet:
       self.lock=thread.allocate_lock()
       self.lock2=thread.allocate_lock()
       self.lock2.acquire()      
-      for i in range(min(n, len(self.l))):
+      for i in range(n):
         thread.start_new_thread(self.loop,())
       self.lock2.acquire()
       if self.exception:
@@ -316,7 +316,7 @@ class ParallelIter:
     self.k_out=0
     self.results={}
     self.n_run=n
-    for i in range(min(n, len(l))):
+    for i in range(n):
       thread.start_new_thread(self.loop,())
 
   def __iter__(self):
