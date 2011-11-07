@@ -8,10 +8,10 @@
 
 
 /* flags for kmeans */
-#define KMEANS_INIT_RANDOM              0x00000
 #define KMEANS_QUIET                    0x10000
 #define KMEANS_INIT_BERKELEY            0x20000
 #define KMEANS_NORMALIZE_CENTS          0x40000
+#define KMEANS_INIT_RANDOM              0x80000
 #define KMEANS_INIT_USER               0x100000
 
 #define KMEANS_L1                       0x200000
