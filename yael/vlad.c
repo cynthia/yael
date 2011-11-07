@@ -26,6 +26,7 @@ void vlad_compute(int k, int d, const float *centroids,
   free(assign);
 }
 
+
 void vlad_compute_weighted(int k, int d, const float *centroids, 
                            int n, const float *v, const float *weights, 
                            float *desc) {
@@ -77,15 +78,13 @@ void vlad_compute_subsets(int k, int d, const float *centroids,
 }
 
 
-
-
-
 void bof_compute_subsets(int k, int d, const float *centroids, 
                          int n, const float *v,
                          int n_subset,
                          const int *subset_indexes, 
                          const int *subset_ends,
-                         float *desc) {
+                         float *desc) 
+{
   int *assign=ivec_new(n);
  
   nn(n,k,d,centroids,v,assign,NULL,NULL);
@@ -104,10 +103,22 @@ void bof_compute_subsets(int k, int d, const float *centroids,
   }
 
   free(assign);
-  
 }
 
 
+void bof_compute (int k, int d, const float *centroids, 
+		  int n, const float *v, int *desc)
+{
+  int i;
+  int *assign=ivec_new(n);
+ 
+  nn(n,k,d,centroids,v,assign,NULL,NULL);
 
+  ivec_0(desc,k);
 
+  for(i=0;i<n;i++)
+    desc[assign[i]]++;
+
+  free(assign);
+}
 

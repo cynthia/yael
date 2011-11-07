@@ -25,6 +25,7 @@ void vlad_compute_weighted (int k, int d, const float *centroids,
                             int n, const float *v, const float *weights, 
                             float *desc);
 
+
 /*! like vlad_compute, but compute vlads on subsets of the n descriptors. 
  *
  * To compute colorvlads, just set d=3, n=nb of pixels in image, v=all
@@ -43,7 +44,22 @@ void vlad_compute_subsets(int k, int d, const float *centroids,
                           const int *subset_ends,
                           float *desc); 
 
-/*! like vlad_compute_subsets, but compute BOFs on subsets of the n descriptors instead of VLADs (intended for bag-of-colors computation)
+
+/*! Compute bag-of-features (not normalized, just count)
+ *
+ * @param k               nb of centroids
+ * @param d               local descriptor dimension
+ * @param centroids(d,k)  local descriptor centroids 
+ * @param n               nb of local image descriptors
+ * @param v(d,n)          local image descriptors
+ * @param desc(d,k)       global VLAD descriptor for the image (output) 
+ */
+void bof_compute (int k, int d, const float *centroids, 
+		  int n, const float *v, int *desc);
+
+
+/*! like vlad_compute_subsets, but compute BOFs on subsets of the n descriptors 
+ * instead of VLADs (intended for bag-of-colors computation)
  *
  * @param desc(k,n_subset)                      BOF descriptor for all subsets
  */
@@ -53,7 +69,6 @@ void bof_compute_subsets(int k, int d, const float *centroids,
                           const int *subset_indexes, 
                           const int *subset_ends,
                           float *desc); 
-                  
 
 
 
