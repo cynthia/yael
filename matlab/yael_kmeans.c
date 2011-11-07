@@ -69,7 +69,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   
   if (init_type == 1)  /* Berkeley */
     flags = flags | KMEANS_INIT_BERKELEY;
-  else (init_type == 0) /* random vectors */
+  else if (init_type == 0) /* random vectors */
     flags = flags | KMEANS_INIT_RANDOM;
   
 
