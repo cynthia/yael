@@ -33,7 +33,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   int k = (int) mxGetScalar (prhs[1]);
 
   int niter = 50, redo = 1, nt = 1, verbose = 1;
-  int init_type = 1;
+  int init_type = 0;  /* random selection by default */
 
   {
     int i;
@@ -67,9 +67,9 @@ void mexFunction (int nlhs, mxArray *plhs[],
     }
   }
   
-  if (init_type == 0)  /* Berkeley */
-    ;
-  else if (init_type == 1) /* random vectors */
+  if (init_type == 1)  /* Berkeley */
+    flags = flags | KMEANS_INIT_BERKELEY;
+  else (init_type == 0) /* random vectors */
     flags = flags | KMEANS_INIT_RANDOM;
   
 
