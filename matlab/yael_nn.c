@@ -36,7 +36,6 @@ void mexFunction (int nlhs, mxArray *plhs[],
   float *v = (float*) mxGetPr (prhs[1]);  /* query vectors */
   int k = 1; 
   int distype = 2;
-  int nt = 1;
 
   if (nrhs >= 3)
     k = (int) mxGetScalar(prhs[2]);
@@ -61,27 +60,6 @@ void mexFunction (int nlhs, mxArray *plhs[],
   /* post-processing: convert to matlab indices, and enforce full sort */
 
   int i, j;
-
-#if 0
-  /* reordering not needed any more */
-
-  int * order = mxMalloc (k * sizeof (*order));
-  float * dissorted = mxMalloc (k * sizeof (*dissorted));
-
-  for (j = 0 ; j  < nq ; j++) {
-    fvec_sort_index (dis + k * j, k, order);
-    for (i = 0 ; i < k ; i++) {
-      dissorted[i] = dis[k * j + order[i]];
-      order[i] = assign[k * j + order[i]];
-    }
-    ivec_cpy (dis + j * k, dissorted, k);
-    fvec_cpy (assign + j * k, order, k);
-  }
-
-  mxFree (order);
-  mxFree (dissorted);
-
-#endif
 
   for (i = 0 ; i < nq * k ; i++)
     assign[i]++;
