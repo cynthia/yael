@@ -96,15 +96,19 @@ def fvecs_read(filename):
     (fvecs, n, d) = yael.fvecs_new_read(filename)
     if n == -1: 
         raise IOError("could not read " + filename)
-    elif n == 0: d = 0
-    fvecs = yael.acquirepointer(fvecs)
+    elif n == 0: d = 0    
+    fvecs = yael.fvec.acquirepointer(fvecs)
     # TODO find a way to avoid copy
     a = yael.fvec_to_numpy(fvecs, n * d)
     return a.reshape((d, n), order='FORTRAN')
 
 
 def fvecs_write(filename, matrix): 
-    pass
+    _check_col_float32(matrix)
+    d, n = matrix.shape
+    ret = yael.fvecs_write(filename, d, n, yael.numpy_to_fvec_ref(matrix))
+    if ret != n:
+        raise IOError("write error" + filename)
 
 def ivecs_write(filename, matrix): 
     pass
