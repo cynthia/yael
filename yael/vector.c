@@ -860,7 +860,7 @@ int fvecs_new_mmap (const char *fname, int *d_out, float **vf) {
   }
   int d=(*(int*)mm);
   *d_out=d;
-  *vf=(void*)(((int*)mm)+1);
+  *vf=(void*)(((int*)mm));
   long unitsz=sizeof(int)+sizeof(float)*d;
   assert(sb.st_size % unitsz == 0);
   return sb.st_size / unitsz;
@@ -1141,7 +1141,7 @@ float * fvec_fread_raw(FILE * f, long d)
 {
   float *v = fvec_new(d);
 
-  int ret = fread (v, sizeof (*v), d, f);
+  long ret = fread (v, sizeof (*v), d, f);
   if (ret != d) {
     free(v);
     perror ("# fvec_fread error 2");
@@ -1155,7 +1155,7 @@ int * ivec_fread_raw(FILE * f, long d)
 {
   int * v = ivec_new(d);
 
-  int ret = fread (v, sizeof (*v), d, f);
+  long ret = fread (v, sizeof (*v), d, f);
   if (ret != d) {
     free(v);
     perror ("# fvec_fread error 2");
@@ -1169,7 +1169,7 @@ unsigned char *bvec_fread_raw(FILE * f, long d)
 {
   unsigned char *v = bvec_new(d);
 
-  int ret = fread (v, sizeof (*v), d, f);
+  long ret = fread (v, sizeof (*v), d, f);
   if (ret != d) {
     free(v);
     perror ("# fvec_fread error 2");
@@ -2302,5 +2302,5 @@ void b2fvec_cpy_subvectors (const unsigned char * v, int * idx, int d, int nout,
   long i, j;
   for (i = 0 ; i < nout ; i++)
     for (j = 0 ; j < d ; j++)
-      vout[i*d+j] = v[idx[i] * (long) d+j];
+      vout[i* (long)d+j] = v[idx[i] * (long) d+j];
 }
