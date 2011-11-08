@@ -179,11 +179,11 @@ void compute_cross_distances_thread (int d, int na, int nb,
  *
  * @param distance_type    type of distance to compute: 
  *    - 1: L1
- *    - 2: L2 (use compute_cross_distances for optimized version!) 
+ *    - 2: L2 (use 12 for optimized version) 
  *    - 3: symmetric chi^2  
  *    - 4: symmetric chi^2  with absolute value
  *    - 5: histogram intersection (sum of min of vals)
- *    - 6: dot prod
+ *    - 6: dot prod (use 16 for optimized version)
  */
 void compute_cross_distances_alt (int distance_type, int d, int na, int nb,
                                   const float *a,

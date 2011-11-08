@@ -254,6 +254,18 @@ static double sqr (double x)
   return x * x;
 }
 
+static void mat_product(FINTEGER d, FINTEGER na, FINTEGER nb,
+                        const float *a, FINTEGER lda,
+                        const float *b, FINTEGER ldb,
+                        float *dist2, FINTEGER ldd) {
+  float zero = 0; 
+  float one = 1;
+
+  sgemm_("Trans", "Not", &na, &nb, &d, &one, a, &lda, b, &ldb, &zero, dist2, &ldd); 
+
+}
+
+
 /* alternative distance functions */
 
 void compute_cross_distances_alt_nonpacked (int distance_type, int d, int na, int nb,
@@ -272,6 +284,17 @@ void compute_cross_distances_alt_nonpacked (int distance_type, int d, int na, in
     }
   }
 #endif  
+
+
+  if(distance_type == 12) {
+    compute_cross_distances_nonpacked(d, na, nb, a, lda, b, ldb, dist2, ldd);
+    return;
+  } 
+
+  if(distance_type == 16) {
+    mat_product(d, na, nb, a, lda, b, ldb, dist2, ldd);
+    return;
+  }
 
   int i,j,k;
 
