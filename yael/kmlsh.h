@@ -100,17 +100,35 @@ kmlsh_t * kmlsh_new_learn_fvec (int nhash, int nclust, int d, int n, int nlearn,
 				const float * v, int flags);
 
 /*! A function that performs the match assuming that the codes are pre-computed */
-nnlist_t * kmlsh_match (const kmlsh_t * lsh,  
-			const kmlsh_idx_t * lshidx_b, const float * vb, int nb, 
-			const kmlsh_idx_t * lshidx_q, const float * vq, int nq,
-			int k, int nt);
+nnlist_t * kmlsh_match_xvec (const kmlsh_t * lsh,
+			const kmlsh_idx_t * lshidx_b, const void * vb, int nb,
+			const kmlsh_idx_t * lshidx_q, const void * vq, int nq,
+			int k, int nt, int vec_type);
+
+nnlist_t * kmlsh_match_bvec (const kmlsh_t * lsh,
+            const kmlsh_idx_t * lshidx_b, const unsigned char * vb, int nb,
+            const kmlsh_idx_t * lshidx_q, const unsigned char * vq, int nq,
+            int k, int nt);
+
+nnlist_t * kmlsh_match_fvec (const kmlsh_t * lsh,
+            const kmlsh_idx_t * lshidx_b, const float * vb, int nb,
+            const kmlsh_idx_t * lshidx_q, const float * vq, int nq,
+            int k, int nt);
 
 /* Approximate search with pre-defined parameters. 
    The parameter nhash controls the trade-off quality/efficiency/memory (number of hash functions).
    flags is mainly use to set the number of processor cores */
-nnlist_t * kmlsh_ann (const float * vb, int nb, 
-		      const float * vq, int nq,
-		      int d, int k, int nhash, int flags);
+nnlist_t * kmlsh_ann_xvec (const void * vb, int nb,
+		      const void * vq, int nq,
+		      int d, int k, int nhash, int flags, int vec_type);
+
+nnlist_t * kmlsh_ann_bvec (const unsigned char * vb, int nb,
+              const unsigned char * vq, int nq,
+              int d, int k, int nhash, int flags);
+
+nnlist_t * kmlsh_ann_fvec (const float * vb, int nb,
+              const float * vq, int nq,
+              int d, int k, int nhash, int flags);
 
 
 /* Alloc/Free the index associated with a KM-LSH structure */
@@ -119,7 +137,11 @@ void kmlsh_idx_delete (kmlsh_idx_t * lshidx);
 
 
 /* compute the metadata associated with index of a KM-LSH structure */
-kmlsh_idx_t * kmlsh_idx_new_compile (const kmlsh_t * lsh, const float * v, int n, int flags);
+kmlsh_idx_t * kmlsh_idx_new_compile_xvec (const kmlsh_t * lsh, const void * v, int n, int flags, int vec_type);
+
+kmlsh_idx_t * kmlsh_idx_new_compile_bvec (const kmlsh_t * lsh, const unsigned char * v, int n, int flags);
+
+kmlsh_idx_t * kmlsh_idx_new_compile_fvec (const kmlsh_t * lsh, const float * v, int n, int flags);
 
 /* Return the number of vectors assigned to cell c for hash function h */
 int kmlsh_idx_get_nvec (const kmlsh_idx_t * lshidx, int h, int c);
