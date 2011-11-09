@@ -18,7 +18,7 @@ int main (int argc, char **argv)
 {
   int i, j, d, ret;
   int n = INT_MAX;          /* maximum number of vectors to be read */
-  int maxd = 1000000;
+  int maxd = 500000000;
 
   FILE * fi = stdin;
   FILE * fo = stdout;
