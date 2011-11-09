@@ -388,9 +388,7 @@ float kmeans (int di, int n, int k, int niter,
     if (is_user_init) {
       fvec_cpy (centroids, centroids_out, d * k);
     } else {
-      if (flags & KMEANS_INIT_RANDOM) {
-	random_init(d,n,k,v,selected,rand_r(&seed));
-      } else {
+      if (flags & KMEANS_INIT_BERKELEY) {
 	int nsubset = n;
       
 	if (n > k * 8 && n > 8192) { 
@@ -399,6 +397,8 @@ float kmeans (int di, int n, int k, int niter,
 	    printf ("Restricting k-means++ initialization to %d points\n", nsubset);
 	}
 	kmeanspp_init (d, nsubset, k, v, selected, verbose, rand_r(&seed), nt);
+      } else {
+	random_init(d,n,k,v,selected,rand_r(&seed));
       }
       for (i = 0 ; i < k ; i++) 
 	fvec_cpy (centroids + i * d, v + selected[i] * d, d);
