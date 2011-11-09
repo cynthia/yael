@@ -28,6 +28,15 @@ static inline int get_maxincell (const int * boundaries, int nclust)
 
 /*---------- k-NN list handling ----------*/
 
+nnlist_t * nnlist_new_noalloc (int n, int k)
+{
+  nnlist_t * l = (nnlist_t *) malloc (sizeof (nnlist_t));
+  l->n = n;
+  l->k = k;
+  return l;
+}
+
+
 nnlist_t * nnlist_new (int n, int k)
 {
   nnlist_t * l = (nnlist_t *) malloc (sizeof (nnlist_t));

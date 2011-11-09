@@ -33,6 +33,9 @@ typedef struct nnlist_s nnlist_t;
 /* allocate n lists of length k */
 nnlist_t * nnlist_new (int n, int k);
 
+/* same but don't allocate the index/dis lists */
+nnlist_t * nnlist_new_noalloc (int n, int k);
+
 /* free the k-NN list structure */
 void nnlist_delete (nnlist_t * l);
 
