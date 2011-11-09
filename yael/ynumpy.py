@@ -15,7 +15,7 @@ def _check_col_float32(a):
     if not a.flags.f_contiguous:
         raise TypeError('expected Fortran order matrix')
 
-def knn(base, queries, 
+def knn(queries, base, 
         nnn = 1, 
         distance_type = 2,
         nt = 1):
@@ -226,7 +226,23 @@ def fisher(gmm_npy, v,
 
     return fisher_out
 
+def cross_distances(a, b, distance_type = 12):
+    _check_col_float32(a)
+    d, na = a.shape
+    _check_col_float32(b)
+    d2, nb = b.shape
+
+    assert d2 == d
+
+    dis = numpy.zeros((na, nb), dtype = numpy.float32, order = 'FORTRAN')
+
+    yael.compute_cross_distances_alt_nonpacked(distance_type, d, na, nb,
+                                               yael.numpy_to_fvec_ref(a), d,
+                                               yael.numpy_to_fvec_ref(b), d,
+                                               yael.numpy_to_fvec_ref(dis), na)
     
+    return dis                                 
 
 
+    
 

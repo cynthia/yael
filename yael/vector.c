@@ -750,7 +750,13 @@ int bvecs_new_from_siftgeo(const char *fname,
 
     int d2; 
     READANDCHECK(&d2, 1)
-    if(n == 0 && d2 >= 0 && d2 < 100000) d = d2;
+    if(n == 0) {
+      if(!(d2 >= 0 && d2 < 100000)) {
+        fprintf(stderr, "bvecs_new_from_siftgeo: weird descriptor dim %d in %s\n", d2, fname); 
+        goto err;        
+      }        
+      d = d2;
+    }
     else if(d2 != d) {
       fprintf(stderr, "bvecs_new_from_siftgeo: weird dim in %s (expect %d found %d)\n", fname, d, d2); 
       goto err;
@@ -762,7 +768,7 @@ int bvecs_new_from_siftgeo(const char *fname,
       v = realloc(v, d * sizeof(float) * na); 
     }
     
-    if(meta_out) memcpy(meta, buf, sizeof(buf));
+    if(meta_out) memcpy(meta + 9 * n, buf, sizeof(buf));
     
     READANDCHECK(v + d * n, d);
     
