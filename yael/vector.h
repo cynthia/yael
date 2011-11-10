@@ -193,6 +193,11 @@ int fvec_fwrite(FILE *f, const float *v, int d);
 /*!  write a vector without the dimension header */
 int ivec_fwrite_raw (FILE *f, const int *v, long d);
 int fvec_fwrite_raw (FILE *f, const float *v, long d);
+int bvec_fwrite_raw (FILE *f, const unsigned char *v, long d);
+
+int ivec_write_raw (const char * fname, const int *v, long d);
+int fvec_write_raw (const char * fname, const float *v, long d);
+int bvec_write_raw (const char * fname, const unsigned char *v, long d);
 
 /*!  write a set of vectors into an open file */
 int ivecs_fwrite(FILE *f, int d, int n, const int *v);

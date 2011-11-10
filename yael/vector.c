@@ -1347,7 +1347,7 @@ int fvec_fwrite (FILE *fo, const float *v, int d)
 
 
 int fvec_fwrite_raw(FILE *fo, const float *v, long d) {
-  long ret = fwrite (v, sizeof (float), d, fo);
+  long ret = fwrite (v, sizeof (*v), d, fo);
   if (ret != d) {
     perror ("fvec_fwrite_raw: write error 2");
     return -1;
@@ -1356,7 +1356,7 @@ int fvec_fwrite_raw(FILE *fo, const float *v, long d) {
 }
 
 int ivec_fwrite_raw(FILE *fo, const int *v, long d) {
-  long ret = fwrite (v, sizeof (int), d, fo);
+  long ret = fwrite (v, sizeof (*v), d, fo);
   if (ret != d) {
     perror ("ivec_fwrite_raw: write error 2");
     return -1;
@@ -1364,6 +1364,42 @@ int ivec_fwrite_raw(FILE *fo, const int *v, long d) {
   return 0;
 }
 
+int bvec_fwrite_raw(FILE *fo, const unsigned char *v, long d) {
+  long ret = fwrite (v, sizeof (*v), d, fo);
+  if (ret != d) {
+    perror ("ivec_fwrite_raw: write error 2");
+    return -1;
+  }  
+  return 0;
+}
+
+
+int ivec_write_raw (const char *fname, const int *v, long d)
+{
+  FILE * f = fopen (fname, "w");
+  assert (f);
+  int ret = ivec_fwrite_raw (f, v, d);
+  fclose (f);
+  return ret;
+}
+
+int fvec_write_raw (const char *fname, const float *v, long d)
+{
+  FILE * f = fopen (fname, "w");
+  assert (f);
+  int ret = fvec_fwrite_raw (f, v, d);
+  fclose (f);
+  return ret;
+}
+
+int bvec_write_raw (const char *fname, const unsigned char *v, long d)
+{
+  FILE * f = fopen (fname, "w");
+  assert (f);
+  int ret = bvec_fwrite_raw (f, v, d);
+  fclose (f);
+  return ret;
+}
 
 int fvecs_fwrite (FILE *fo, int d, int n, const float *vf)
 {
