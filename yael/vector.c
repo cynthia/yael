@@ -1143,7 +1143,7 @@ int b2fvecs_new_read (const char *fname, int *d_out, float **v_out)
 
 
 
-float * fvec_fread_raw(FILE * f, long d) 
+float * fvec_new_fread_raw(FILE * f, long d) 
 {
   float *v = fvec_new(d);
 
@@ -1157,7 +1157,7 @@ float * fvec_fread_raw(FILE * f, long d)
 }
 
 
-int * ivec_fread_raw(FILE * f, long d) 
+int * ivec_new_fread_raw(FILE * f, long d) 
 {
   int * v = ivec_new(d);
 
@@ -1170,8 +1170,7 @@ int * ivec_fread_raw(FILE * f, long d)
   return v;
 }
 
-
-unsigned char *bvec_fread_raw(FILE * f, long d) 
+unsigned char *bvec_new_fread_raw(FILE * f, long d) 
 {
   unsigned char *v = bvec_new(d);
 
@@ -1183,6 +1182,33 @@ unsigned char *bvec_fread_raw(FILE * f, long d)
   }
   return v;
 }
+
+
+float * fvec_new_read_raw(const char * fname, long d) 
+{
+  FILE * f = fopen (fname, "r");
+  float * v = fvec_new_fread_raw (f, d);
+  fclose (f);
+  return (v);
+}
+
+int * ivec_new_read_raw(const char * fname, long d) 
+{
+  FILE * f = fopen (fname, "r");
+  int * v = ivec_new_fread_raw (f, d);
+  fclose (f);
+  return (v);
+}
+
+
+unsigned char *bvec_new_read_raw(const char * fname, long d) 
+{
+  FILE * f = fopen (fname, "r");
+  unsigned char * v = bvec_new_fread_raw (f, d);
+  fclose (f);
+  return (v);
+}
+
 
 
 long b2fvecs_fread (FILE * f, float * v, long n)
