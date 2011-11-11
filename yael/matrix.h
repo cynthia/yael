@@ -55,6 +55,15 @@ void fmat_mul_full(const float *left, const float *right,
                    const char *transp,
                    float *result);
 
+/*! same as fmat_mul_full, matrices may be non-packed (yes, this is close to sgemm) */
+void fmat_mul_full_nonpacked(const float *left, const float *right,
+                             int m, int n, int k,
+                             const char *transp,
+                             int ld_left, ind ld_right, 
+                             float *result,
+                             int ld_result);
+
+
 
 /*!  same as fmat_mul, allocates result
  */

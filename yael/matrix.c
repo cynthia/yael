@@ -83,16 +83,35 @@ void fmat_mul_full(const float *left, const float *right,
                    const char *transp,
                    float *result) {
 
+
+
+  fmat_mul_full_nonpacked(left, right, m, n, k, transp, 
+                          (transp[0] == 'N' ? m : k), 
+                          (transp[1] == 'N' ? k : n), 
+                          result, m);
+                       
+  
+}
+
+void fmat_mul_full_nonpacked(const float *left, const float *right,
+                             int m, int n, int k,
+                             const char *transp,
+                             int ld_left, ind ld_right, 
+                             float *result,
+                             int ld_result) {
+
   float alpha = 1;
   float beta = 0;
   FINTEGER m=mi,n=ni,k=ki;
-  FINTEGER lda = (transp[0] == 'N' ? m : k);
-  FINTEGER ldb = (transp[1] == 'N' ? k : n);
+  FINTEGER lda = ld_left;
+  FINTEGER ldb = ld_right;
+  FINTEGER ldc = ld_result; 
   
   sgemm_ ((char*)transp, (char*)(transp+1), &m, &n, &k,
-          &alpha, left, &lda, right, &ldb, &beta, result, &m);
+          &alpha, left, &lda, right, &ldb, &beta, result, &ldc);
 
 }
+
 
 float* fmat_new_mul_full(const float *left, const float *right,
                          int m, int n, int k,

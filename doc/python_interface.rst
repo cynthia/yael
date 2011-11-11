@@ -55,6 +55,19 @@ Guidelines for the wrapping process
     Often, when a C function returns a newly allocated pointer ``x``,
     it is advisable to immediately do ``x=ivec.acquirepointer(x)``.
 
+  * ``a.clear(3)`` clears out the 3 first elements of the vector.
+
+  * if ``c`` is another ``int*``, ``a.copyfrom(c, 1, 2)`` will copy 2
+    elements from ``c`` to ``a`` at offset 1 (ie. ``a[1] = c[0]`` and
+    ``a[2] = c[1]``).
+
+  * ``a.tostring(3)`` returns a Python string with the 3 first
+    elements of ``a`` as raw binary data. They can be used eg. in the
+    ``array`` module.
+
+  * similarly, ``a.fromstring(s)`` fills the first elements of ``a``
+    with raw values read from the string.
+
 * all wrapped functions release Python's Global Interpreter Lock (to
   allow multithreaded execution), so Python API functions should not 
   be called in C code.
