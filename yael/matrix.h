@@ -59,7 +59,7 @@ void fmat_mul_full(const float *left, const float *right,
 void fmat_mul_full_nonpacked(const float *left, const float *right,
                              int m, int n, int k,
                              const char *transp,
-                             int ld_left, ind ld_right, 
+                             int ld_left, int ld_right, 
                              float *result,
                              int ld_result);
 

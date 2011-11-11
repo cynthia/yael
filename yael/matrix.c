@@ -79,11 +79,9 @@ float *fmat_new_0 (int nrow, int ncol)
 
 
 void fmat_mul_full(const float *left, const float *right,
-                   int mi, int ni, int ki,
+                   int m, int n, int k,
                    const char *transp,
                    float *result) {
-
-
 
   fmat_mul_full_nonpacked(left, right, m, n, k, transp, 
                           (transp[0] == 'N' ? m : k), 
@@ -94,9 +92,9 @@ void fmat_mul_full(const float *left, const float *right,
 }
 
 void fmat_mul_full_nonpacked(const float *left, const float *right,
-                             int m, int n, int k,
+                             int mi, int ni, int ki,
                              const char *transp,
-                             int ld_left, ind ld_right, 
+                             int ld_left, int ld_right, 
                              float *result,
                              int ld_result) {
 
