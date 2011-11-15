@@ -466,7 +466,7 @@ float *clustering_kmeans_assign_with_score (int n, int di,
 /*    printf("redo: %d iter: %d\n",nredo,nb_iter_max); */
   }   
 
-  float ret=kmeans(di,n,k,nb_iter_max,points,n_thread,0,nredo,centroids,NULL,ca,NULL);
+  float ret=kmeans(di,n,k,nb_iter_max,points,n_thread | KMEANS_INIT_RANDOM,0,nredo,centroids,NULL,ca,NULL);
 
   if(ret>=0) {
     if(clust_assign_out) *clust_assign_out=ca;

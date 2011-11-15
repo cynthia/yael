@@ -66,15 +66,15 @@ void knn_full_thread (int distance_type,
 /* next functions are simplified calls of the previous */
 
 
-/*! single NN */
-void nn (int n, int nb, int d, 
+/*! single NN, returns sum of squared distances */
+double nn (int n, int nb, int d, 
          const float *b, const float *v,
          int *assign,                                              
          void (*peek_fun) (void *arg,double frac),
          void *peek_arg);
 
 /*! single NN, multithread */
-void nn_thread (int n, int nb, int d, 
+double nn_thread (int n, int nb, int d, 
                 const float *b, const float *v,
                 int *assign,    
                 int n_thread,

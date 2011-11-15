@@ -611,7 +611,7 @@ void knn_recompute_exact_dists(int nq, int nb, int d, int k,
  */
 
 
-void nn (int npt, int nclust, int d,
+double nn (int npt, int nclust, int d,
 	 const float *codebook, const float *coords, int *vw,
 	 void (*peek_fun) (void *arg, double frac),
 	 void *peek_arg) {
@@ -620,8 +620,11 @@ void nn (int npt, int nclust, int d,
   float *vwdis = fvec_new(npt);
   
   knn_full (2, npt, nclust, d, 1, codebook, coords, NULL, vw, vwdis, peek_fun, peek_arg);
-
+  
+  double toterr = fvec_sum(vwdis, npt);
   free(vwdis);
+
+  return toterr;
 }
 
 float *knn (int npt, int nclust, int d, int k,
@@ -739,7 +742,7 @@ float *knn_thread (int npt, int nclust, int d, int k,
 
 
 
-void nn_thread (int npt, int nclust, int d,
+double nn_thread (int npt, int nclust, int d,
                                const float *codebook, const float *coords,
                                int *vw, int n_thread,
                                void (*peek_fun) (void *arg, double frac),
@@ -748,8 +751,11 @@ void nn_thread (int npt, int nclust, int d,
   float *vwdis2=fvec_new(npt);
 
   knn_full_thread (2, npt, nclust, d, 1, codebook, coords, NULL, vw, vwdis2, n_thread, peek_fun, peek_arg);
-  
+   
+  double toterr = fvec_sum(vwdis2, npt); 
+
   free(vwdis2);
+  return toterr;
 }
 
 /***************** cross distances */
