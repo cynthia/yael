@@ -225,7 +225,7 @@ void kmeans_cohash_xvec (const kmlsh_t * lsh, int h, const void * v, int n,
   float * vbuf = NULL;
 
   if (vec_type != KMLSH_VECTYPE_FVEC)
-    vbuf = fvec_new (n * d);   /* buffer to store the vectors cast to float */
+    vbuf = fvec_new (KMLSH_BLOCK_SIZE * d);   /* buffer to store the vectors cast to float */
 
 
   /* assign all the vectors using this space partitioning */
