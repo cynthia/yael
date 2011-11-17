@@ -1143,6 +1143,42 @@ int b2fvecs_new_read (const char *fname, int *d_out, float **v_out)
 
 
 
+int fvec_fread_raw (FILE *f, float * v, long n) 
+{
+  long ret = fread (v, sizeof (*v), n, f);
+  if (ret != n) {
+    free(v);
+    perror ("# fvec_fread_raw error");
+    return -1;
+  }
+  return n;
+}
+
+
+int ivec_fread_raw (FILE *f, int * v, long n) 
+{
+  long ret = fread (v, sizeof (*v), n, f);
+  if (ret != n) {
+    free(v);
+    perror ("# ivec_fread_raw error");
+    return -1;
+  }
+  return n;
+}
+
+
+int bvec_fread_raw (FILE *f, unsigned char * v, long n) 
+{
+  long ret = fread (v, sizeof (*v), n, f);
+  if (ret != n) {
+    free(v);
+    perror ("# bvec_fread error");
+    return -1;
+  }
+  return n;
+}
+
+
 float * fvec_new_fread_raw(FILE * f, long d) 
 {
   float *v = fvec_new(d);

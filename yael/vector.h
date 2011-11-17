@@ -279,6 +279,12 @@ int fvec_read (const char *fname, int d, float *a, int o_f);
 int fvec_fread (FILE * f, float * v, int d_alloc);
 
 /* Read raw vectors from disk */
+
+int fvec_fread_raw (FILE *f, float * v, long n);
+int ivec_fread_raw (FILE *f, int * v, long n);
+int bvec_fread_raw (FILE *f, unsigned char * v, long n);
+
+
 float *fvec_new_fread_raw(FILE * f, long n);
 int * ivec_new_fread_raw(FILE * f, long d);
 unsigned char *bvec_new_fread_raw(FILE * f, long n);
