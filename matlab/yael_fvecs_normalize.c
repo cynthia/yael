@@ -18,7 +18,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   int d = mxGetM (prhs[0]);
   int n = mxGetN (prhs[0]);
   int norm = 2; 
-  int i;
+  long i;
 
   if (nrhs >= 2)
     norm = mxGetScalar (prhs[1]);
