@@ -203,7 +203,7 @@ int bvec_write_raw (const char * fname, const unsigned char *v, long d);
 int ivecs_fwrite(FILE *f, int d, int n, const int *v);
 int fvecs_fwrite (FILE *fo, int d, int n, const float *vf);
 
-/*!  several integer vectors of identifcal length into an file */
+/*!  several integer vectors of identical length into an file */
 int ivecs_write (const char *fname, int d, int n, const int *v);
 int ivecs_write_txt (const char * fname, int d, int n, const int *v);
 int fvecs_write (const char *fname, int d, int n, const float *vf);

@@ -1047,6 +1047,7 @@ static long xvecs_fread (long unit_size, FILE * f, void * v, long n, int d_alloc
       break;
 
     ret = xvec_fread (unit_size, f, (char *) v + unit_size * i * d, d_alloc);
+
     if (ret == 0)  /* eof */
       break;
 
