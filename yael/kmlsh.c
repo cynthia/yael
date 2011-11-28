@@ -395,8 +395,8 @@ nnlist_t * kmlsh_match_xvec (const kmlsh_t * lsh,
 
   for (h = 0 ; h < lsh->nhash ; h++) {
     /* Partition the base/query vectors based on cell co-locality */
-    int maxnidx_b = kmlsh_idx_get_maxincell (lshidx_b, h);
-    int maxnidx_q = kmlsh_idx_get_maxincell (lshidx_q, h);
+    long maxnidx_b = kmlsh_idx_get_maxincell (lshidx_b, h);
+    long maxnidx_q = kmlsh_idx_get_maxincell (lshidx_q, h);
 
     /* for each cluster, group the vectors and compute the exact knn-graph
        within the quantization cell. This is used to update the full graph */

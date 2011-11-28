@@ -1,10 +1,10 @@
 # Put various functions in this file that will go in Yael at some point
-import sys, os
-from yael import yael
+import sys, os, types
+import yael
 
 
 # Read a file in siftgeo format
-def siftgeo_read(filename, fmt='bvec'):
+def siftgeo_read(filename, outfmt='bvec'):
     # I/O via double pointers (too lazy to make proper swig interface)
     v_out = yael.BytePtrArray(1)
     meta_out = yael.FloatPtrArray(1)
@@ -26,7 +26,7 @@ def siftgeo_read(filename, fmt='bvec'):
 
     v = yael.bvec.acquirepointer(v_out[0])
 
-    if fmt == 'fvec': 
+    if outfmt == 'fvec': 
         v = yael.bvec2fvec (v_out[0], n * d)
         v = yael.fvec.acquirepointer(v)
 
@@ -107,3 +107,10 @@ def prepare_dir(fname):
       raise
 
 
+def parse_as_type(ty,sval):
+  """ interpret string sval as the same type as vty """
+  if ty==types.BooleanType:
+    if sval.lower() in ("0","false"): return False
+    if sval.lower() in ("1","true"): return True
+    raise ValueError("cannot interpret %s as boolean"%sval)
+  else: return ty(sval)
