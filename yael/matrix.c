@@ -233,10 +233,12 @@ float *fmat_new_get_rows (const float *a, int d, int n,
 			  int nrowout, const int *rows) {
   float *b=fmat_new(nrowout,n);
   int i,j;
-  int ii=0;
-  for(j=0;j<n;j++) 
+  long ii=0;
+  for(j=0;j<n;j++) {
+    const float *aj = a + d*(long)j;
     for(i=0;i<nrowout;i++) 
-      b[ii++]=a[rows[i]+d*j];
+      b[ii++]=aj[rows[i]];
+  }
   
   return b;
 }

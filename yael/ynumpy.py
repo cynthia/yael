@@ -1,6 +1,10 @@
 """
 This is a wrapper for yael's functions, so that all I/O of vectors and
 matrices is done via numpy types. All errors are also raised as exceptions.
+
+Unlike Yael, the matrices are row-major (numpy's support for
+column-major is terrible).
+
 """
 
 import pdb 
@@ -9,24 +13,24 @@ import numpy
 import yael
 
 
-def _check_col_float32(a): 
+def _check_row_float32(a): 
     if a.dtype != numpy.float32: 
         raise TypeError('expected float32 matrix, got %s' % a.dtype)
-    if not a.flags.f_contiguous:
-        raise TypeError('expected Fortran order matrix')
+    if not a.flags.c_contiguous:
+        raise TypeError('expected C order matrix')
 
 def knn(queries, base, 
         nnn = 1, 
         distance_type = 2,
         nt = 1):
-    _check_col_float32(base)
-    _check_col_float32(queries)
-    d, n = base.shape
-    d2, nq = queries.shape
+    _check_row_float32(base)
+    _check_row_float32(queries)
+    n, d = base.shape
+    nq, d2 = queries.shape
     assert d == d2, "base and queries must have same nb of rows (got %d != %d) " % (d, d2)
     
-    idx = numpy.zeros((nnn, nq), dtype = numpy.int32, order = 'FORTRAN')
-    dis = numpy.zeros((nnn, nq), dtype = numpy.float32, order = 'FORTRAN')
+    idx = numpy.zeros((nq, nnn), dtype = numpy.int32)
+    dis = numpy.zeros((nq, nnn), dtype = numpy.float32)
 
     yael.knn_full_thread(distance_type, 
                          nq, n, d, nnn,
@@ -50,10 +54,10 @@ def kmeans(v, k,
            verbose = True,
            init = 'random',
            output = 'centroids'):
-    _check_col_float32(v)
-    d, n = v.shape
+    _check_row_float32(v)
+    n, d = v.shape
     
-    centroids = numpy.zeros((d, k), dtype = numpy.float32, order = 'FORTRAN')
+    centroids = numpy.zeros((k, d), dtype = numpy.float32)
     dis = numpy.zeros(n, dtype = numpy.float32)
     assign = numpy.zeros(n, dtype = numpy.int32)
     nassign = numpy.zeros(k, dtype = numpy.int32)
@@ -90,7 +94,7 @@ def fvecs_fsize(filename):
     if n < 0 and d < 0: 
         return IOError("fvecs_fsize: cannot read " + filename)
     # WARN: if file is empty, (d, n) = (-1, 0)
-    return (d, n)
+    return (n, d)
 
 def fvecs_read(filename):
     (fvecs, n, d) = yael.fvecs_new_read(filename)
@@ -100,12 +104,12 @@ def fvecs_read(filename):
     fvecs = yael.fvec.acquirepointer(fvecs)
     # TODO find a way to avoid copy
     a = yael.fvec_to_numpy(fvecs, n * d)
-    return a.reshape((d, n), order='FORTRAN')
+    return a.reshape((n, d))
 
 
 def fvecs_write(filename, matrix): 
-    _check_col_float32(matrix)
-    d, n = matrix.shape
+    _check_row_float32(matrix)
+    n, d = matrix.shape
     ret = yael.fvecs_write(filename, d, n, yael.numpy_to_fvec_ref(matrix))
     if ret != n:
         raise IOError("write error" + filename)
@@ -126,8 +130,8 @@ def siftgeo_read(filename):
     if n < 0: 
         raise IOError("cannot read " + filename)
     if n == 0: 
-        v = numpy.array([[]], dtype = numpy.uint8, order = 'FORTRAN')
-        meta = numpy.array([[]*9], dtype = numpy.float32, order = 'FORTRAN')
+        v = numpy.array([[]], dtype = numpy.uint8)
+        meta = numpy.array([[]*9], dtype = numpy.float32)
         return v, meta
 
     v_out = yael.bvec.acquirepointer(v_out[0])
@@ -138,10 +142,10 @@ def siftgeo_read(filename):
     assert d_meta == 9
 
     v = yael.bvec_to_numpy(v_out, n * d)
-    v = v.reshape((d, n), order = 'FORTRAN')
+    v = v.reshape((n, d))
     
     meta = yael.fvec_to_numpy(meta_out, n * d_meta)
-    meta = meta.reshape((d_meta, n), order = 'FORTRAN')
+    meta = meta.reshape((n, d_meta))
 
     return v, meta
 
@@ -153,9 +157,9 @@ def _gmm_to_numpy(gmm):
     d, k = gmm.d, gmm.k
     w = yael.fvec_to_numpy(gmm.w, k)
     mu = yael.fvec_to_numpy(gmm.mu, d * k)
-    mu = mu.reshape((d, k), order = 'FORTRAN')
+    mu = mu.reshape((k, d))
     sigma = yael.fvec_to_numpy(gmm.sigma, d * k)
-    sigma = sigma.reshape((d, k), order = 'FORTRAN')
+    sigma = sigma.reshape((k, d))
     return w, mu, sigma
 
 def _gmm_del(gmm): 
@@ -167,10 +171,10 @@ def _gmm_del(gmm):
 def _numpy_to_gmm((w, mu, sigma)):
     # produce a fake gmm from 3 numpy matrices. They should not be
     # deallocated while gmm in use
-    _check_col_float32(mu)
-    _check_col_float32(sigma)
+    _check_row_float32(mu)
+    _check_row_float32(sigma)
     
-    d, k = mu.shape
+    k, d = mu.shape
     assert sigma.shape == mu.shape
     assert w.shape == (k,)
 
@@ -189,8 +193,8 @@ def gmm_learn(v, k,
               seed = 0,
               redo = 1,
               use_weights = True): 
-    _check_col_float32(v)
-    d, n = v.shape
+    _check_row_float32(v)
+    n, d = v.shape
     
     flags = 0
     if use_weights: flags |= yael.GMM_FLAGS_W
@@ -206,8 +210,8 @@ def gmm_learn(v, k,
 def fisher(gmm_npy, v, 
            include = 'mu'): 
 
-    _check_col_float32(v)
-    d, n = v.shape
+    _check_row_float32(v)
+    n, d = v.shape
 
     gmm = _numpy_to_gmm(gmm_npy)
     assert d == gmm.d
@@ -227,14 +231,14 @@ def fisher(gmm_npy, v,
     return fisher_out
 
 def cross_distances(a, b, distance_type = 12):
-    _check_col_float32(a)
-    d, na = a.shape
-    _check_col_float32(b)
-    d2, nb = b.shape
+    _check_row_float32(a)
+    na, d = a.shape
+    _check_row_float32(b)
+    nb, d2 = b.shape
 
     assert d2 == d
 
-    dis = numpy.zeros((na, nb), dtype = numpy.float32, order = 'FORTRAN')
+    dis = numpy.zeros((nb, na), dtype = numpy.float32)
 
     yael.compute_cross_distances_alt_nonpacked(distance_type, d, na, nb,
                                                yael.numpy_to_fvec_ref(a), d,
