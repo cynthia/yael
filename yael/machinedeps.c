@@ -77,8 +77,9 @@ void *memalign (size_t ignored, size_t nbytes)
 int sgemm_bugfix (char *transa, char *transb, integer * pm, integer *
             pn, integer * pk, real * palpha, const real * a, integer * plda,
             const real * b, integer * pldb, real * pbeta, real * c,
-            integer * pldc) {
-  assert(transa[0]=='T' && transb[0]=='N');
+            integer * pldc) 
+{
+  //  assert(transa[0]=='T' && transb[0]=='N');
 
   int na=*pm,nb=*pn,d=*pk;
   int lda=*plda,ldb=*pldb,ldc=*pldc;
