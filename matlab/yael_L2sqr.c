@@ -36,12 +36,6 @@ void mexFunction (int nlhs, mxArray *plhs[],
   float *b = (float*) mxGetPr (prhs[1]); 
   int nt = 1;
 
-  if (nrhs >= 3)
-    nt = (int) mxGetScalar(prhs[2]);
-
-  if (nt == 0)
-    nt = count_cpu();
-
   /* ouptut: centroids, assignment, distances */
   plhs[0] = mxCreateNumericMatrix (na, nb, mxSINGLE_CLASS, mxREAL);
   float *dis = (float*) mxGetPr (plhs[0]);

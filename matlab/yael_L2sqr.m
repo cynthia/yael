@@ -3,13 +3,11 @@
 % Usage: [dis] = dis_L2(q, v)
 %
 % Parameters:
-%   v, q        sets of vectors (1 vector per column)
+%   q, v        sets of vectors (1 vector per column)
 %
 % Returned values
 %   dis         the corresponding *square* distances
 %               vectors of q corresponds to row, and columns for v
-%
-% Both v and q contains vectors stored in rows (columns, so transpose them if needed
 function dis = dis_L2sqr (q, v)
 
   
