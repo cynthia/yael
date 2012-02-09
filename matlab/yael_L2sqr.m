@@ -1,6 +1,6 @@
 % Compute all the distances between two sets of vectors
 %
-% Usage: [dis] = dis_L2(q, v)
+% Usage: [dis] = dis_L2sqr(q, v)
 %
 % Parameters:
 %   q, v        sets of vectors (1 vector per column)

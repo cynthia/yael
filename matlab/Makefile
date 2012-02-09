@@ -42,7 +42,7 @@ else
 endif
 
 
-all: $(YAELAR) yael_kmeans yael_gmm yael_fisher yael_nn yael_kmin yael_kmax yael_fvecs_normalize yael_L2sqr
+all: $(YAELAR) yael_kmeans yael_gmm yael_fisher yael_nn yael_kmin yael_kmax yael_fvecs_normalize yael_L2sqr yael_cross_distances
 
 
 LIBOBJ=vector.o matrix.o eigs.o nn.o kmeans.o gmm.o sorting.o binheap.o machinedeps.o vlad.o
@@ -109,6 +109,9 @@ yael_fvecs_normalize: yael_fvecs_normalize.c $(YAELAR)
 
 yael_L2sqr: yael_L2sqr.c $(YAELAR)
 	$(MEX) yael_L2sqr.c -I.. $(LDFLAGS)
+
+yael_cross_distances: yael_cross_distances.c $(YAELAR)
+	$(MEX) yael_cross_distances.c -I.. $(LDFLAGS)
 
 clean:
 	rm -f  *.a *.mexa64 *.mexmaci64 *.mex *.o *~
