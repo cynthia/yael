@@ -14,6 +14,11 @@
 % Both v and q contains vectors stored in columns, so transpose them if needed
 function [idx, dis] = yael_nn (v, q, k)
 
+
+if narg >= 4
+  error ('yael_nn is defined for arbitrary distances only in the Mex version\nonsider using the Mex-compiled version instead\n');
+end
+  
 fprintf ('* Warning: this is the slow version of nn\nConsider using the Mex-compiled version instead\n');
 
 if nargin < 3, k = 1; end

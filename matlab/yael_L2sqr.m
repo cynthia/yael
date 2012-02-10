@@ -10,7 +10,7 @@
 %               vectors of q corresponds to row, and columns for v
 function dis = dis_L2sqr (q, v)
 
-  
+
 % vector dimension and number of vectors in the dataset
 n = size (v, 2);
 d = size (v, 1);
