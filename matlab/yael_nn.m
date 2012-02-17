@@ -4,7 +4,11 @@
 %   v                the dataset to be searched (one vector per column)
 %   q                the set of queries (one query per column)
 %   k  (default:1)   the number of nearest neigbors we want
-%   distype          distance type: 1=L1, 2=L2, 3=chi-square, 4=signed chis-squre
+%   distype          distance type: 1=L1, 
+%                                   2=L2         -> Warning: return the square L2 distance
+%                                   3=chi-square -> Warning: return the square Chi-square
+%                                   4=signed chis-square
+%                                   16=cosine
 %                    available in Mex-version only
 %
 % Returned values

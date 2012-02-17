@@ -4,7 +4,11 @@
 %
 % Parameters:
 %   q, v        sets of vectors (1 vector per column)
-%   distype     1=L1, 2=L2sqrt, 3=chi-square (default: 2)
+%   distype          distance type: 1=L1, 
+%                                   2=L2         -> Warning: return the square L2 distance
+%                                   3=chi-square -> Warning: return the square Chi-square
+%                                   4=signed chi-square
+%                                   16=cosine
 %   nt          number of threads (not used for L2 distance)
 %
 % Returned values
