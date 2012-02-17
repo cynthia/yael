@@ -54,7 +54,7 @@ yael_wrap.o: EXTRACFLAGS=$(PYTHONCFLAGS) $(NUMPYCFLAGS)
 mmap_and_lock: mmap_and_lock.c
 	$(CC) $(CFLAGS) -o $@ $<
 
-
+machinedeps.o:  EXTRACFLAGS=$(OPENMPFLAG)
 
 #############################
 # Python wrapper 

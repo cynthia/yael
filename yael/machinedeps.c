@@ -307,38 +307,7 @@ double getmillisecs()
  *
  * generic thread stuff */
 
-#include <pthread.h>
-
-typedef struct {
-  pthread_mutex_t mutex;
-  int i, n, tid;
-  void (*task_fun) (void *arg, int tid, int i);
-  void *task_arg;
-} context_t;
-
-
-
-static void *start_routine (void *cp)
-{
-  context_t *context = cp;
-  int tid;
-  pthread_mutex_lock (&context->mutex);
-  tid = context->tid++;
-  pthread_mutex_unlock (&context->mutex);
-
-  for (;;) {
-    int item;
-    pthread_mutex_lock (&context->mutex);
-    item = context->i++;
-    pthread_mutex_unlock (&context->mutex);
-    if (item >= context->n)
-      break;
-    else
-      context->task_fun (context->task_arg, tid, item);
-  }
-
-  return NULL;
-}
+#include <omp.h>
 
 
 void compute_tasks (int n, int nthread,
@@ -346,31 +315,11 @@ void compute_tasks (int n, int nthread,
                     void *task_arg)
 {
   int i;
-  context_t context;
 
-  assert(nthread>0 || !"sombody has to do the job");
+  omp_set_num_threads(nthread); 
 
-  context.i = 0;
-  context.n = n;
-  context.tid = 0;
-  context.task_fun = task_fun;
-  context.task_arg = task_arg;
+#pragma omp parallel for schedule(dynamic) 
+  for(i = 0; i < n; i++) 
+    (*task_fun)(task_arg, omp_get_thread_num(), i);
 
-  pthread_mutex_init (&context.mutex, NULL);
-
-  if(nthread==1) 
-    start_routine(&context);    
-  else {
-    pthread_t *threads = malloc (sizeof (pthread_t) * nthread);
-      
-    for (i = 0; i < nthread; i++) 
-      pthread_create (&threads[i], NULL, &start_routine, &context);
-      
-    /* all computing */
-      
-    for (i = 0; i < nthread; i++)
-      pthread_join (threads[i], NULL);
-    
-    free (threads);
-  }
 }
