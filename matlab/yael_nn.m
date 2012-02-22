@@ -8,7 +8,8 @@
 %                                   2=L2         -> Warning: return the square L2 distance
 %                                   3=chi-square -> Warning: return the square Chi-square
 %                                   4=signed chis-square
-%                                   16=cosine
+%                                   16=cosine    -> Warning: return the *smallest* cosine values
+%                                                   Use -query to obtain the largest
 %                    available in Mex-version only
 %
 % Returned values
