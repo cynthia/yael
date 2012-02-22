@@ -615,7 +615,7 @@ static long xvecs_fsize(long unitsize, const char * fname, int *d_out, int *n_ou
   nbytes = ftell (f);
   fclose (f);
   
-  if(nbytes % (unitsize * d + 4) == 0) {
+  if(nbytes % (unitsize * d + 4) != 0) {
     fprintf(stderr, "xvecs_size %s: weird file size %ld for vectors of dimension %d\n", fname, nbytes, d);
     return -1;
   }
