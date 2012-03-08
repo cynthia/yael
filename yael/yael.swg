@@ -231,7 +231,7 @@ array_class_plus(byte_pointer_t,BytePtrArray)
 
 
 
-// slow functions with peek
+// slow functions 
 PARALLEL_FUNCTION(nn)
 PARALLEL_FUNCTION(knn)
 PARALLEL_FUNCTION(knn_thread)
