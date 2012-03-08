@@ -35,9 +35,6 @@
  * @param    assign(k, n)   on output, the NNs of vector i are assign(:, i) (sorted by increasing distances)
  * @param    b_weights(nb)  multiply squared distances by this for each base vector (may be NULL)
  * @param    dis(k, n)      squared distances of i to its NNs are dis(0, i) to dis(k-1, i)
- * @param    peek_fun, peek_arg  the function calls peek_fun with frac set
- *                          to the fraction of the computation performed so far (for
- *                          progress bars), peek_fun needs not to be reentrant. 
  * 
  */
 
@@ -45,9 +42,7 @@ void knn_full (int distance_type,
                int nq, int nb, int d, int k,
                const float *b, const float *q,
                const float *b_weights,
-               int *assign, float *dis,                                             
-               void (*peek_fun) (void *arg,double frac),
-               void *peek_arg);
+               int *assign, float *dis);
 
 /*! multi-threaded version 
  */
@@ -56,9 +51,7 @@ void knn_full_thread (int distance_type,
                       const float *b, const float *q,
                       const float *b_weights,
                       int *assign, float *dis,
-                      int n_thread,
-                      void (*peek_fun) (void *arg,double frac),
-                      void *peek_arg);
+                      int n_thread);
 
 
 
@@ -69,33 +62,25 @@ void knn_full_thread (int distance_type,
 /*! single NN, returns sum of squared distances */
 double nn (int n, int nb, int d, 
          const float *b, const float *v,
-         int *assign,                                              
-         void (*peek_fun) (void *arg,double frac),
-         void *peek_arg);
+         int *assign);
 
 /*! single NN, multithread */
 double nn_thread (int n, int nb, int d, 
                 const float *b, const float *v,
                 int *assign,    
-                int n_thread,
-                void (*peek_fun) (void *arg,double frac),
-                void *peek_arg);
+                int n_thread);
 
 
 /*! also returns distances to centroids (alloc'ed with malloc) */
 float* knn (int n, int nb, int d, int k,
             const float *b, const float *v,
-            int *assign,                                             
-            void (*peek_fun) (void *arg,double frac),
-            void *peek_arg);
+            int *assign);
 
 
 float* knn_thread (int nq, int nb, int d, int k,
                    const float *b, const float *v,
                    int *assign,    
-                   int n_thread,
-                   void (*peek_fun) (void *arg,double frac),
-                   void *peek_arg);
+                   int n_thread);
 
 
 /*! Re-order a short-list based on exact distances 

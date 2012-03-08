@@ -62,9 +62,9 @@ void mexFunction (int nlhs, mxArray *plhs[],
   /* With Matlab, we have to avoid using threads for the L2 distance, 
      because this one makes a call to MKL, which is no thread-safe */
   if (distype == 2 || distype == 16)
-    knn_full (distype, nq, n, d, k, b, v, NULL, assign, dis, NULL, NULL);
+    knn_full (distype, nq, n, d, k, b, v, NULL, assign, dis);
   else
-    knn_full_thread (distype, nq, n, d, k, b, v, NULL, assign, dis, nt, NULL, NULL);
+    knn_full_thread (distype, nq, n, d, k, b, v, NULL, assign, dis, nt);
 
   /* post-processing: convert to matlab indices, and enforce full sort */
 

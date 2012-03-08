@@ -142,7 +142,7 @@ void hkm_quantize (const hkm_t * hkm, int npt, const float * v, int * idx)
     for (l = 0 ; l < nlevel ; l++) {
       /* at this point, vw contains the parent node */
       nn (1, bf, d, hkm->centroids[l] + vw * d * bf,
-	  v + d * i, &vwtmp, NULL, NULL);
+	  v + d * i, &vwtmp);
       vw = vw * bf + vwtmp;
     }
     idx[i] = vw;

@@ -232,13 +232,13 @@ array_class_plus(byte_pointer_t,BytePtrArray)
 
 
 // slow functions with peek
-PARALLEL_FUNCTION_PEEK(nn)
-PARALLEL_FUNCTION_PEEK(knn)
-PARALLEL_FUNCTION_PEEK(knn_thread)
-PARALLEL_FUNCTION_PEEK(nn_thread)
+PARALLEL_FUNCTION(nn)
+PARALLEL_FUNCTION(knn)
+PARALLEL_FUNCTION(knn_thread)
+PARALLEL_FUNCTION(nn_thread)
 
-PARALLEL_FUNCTION_PEEK(knn_full)
-PARALLEL_FUNCTION_PEEK(knn_full_thread)
+PARALLEL_FUNCTION(knn_full)
+PARALLEL_FUNCTION(knn_full_thread)
 
 
 

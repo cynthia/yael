@@ -240,7 +240,7 @@ void kmeans_cohash_xvec (const kmlsh_t * lsh, int h, const void * v, int n,
     else if (vec_type == KMLSH_VECTYPE_FVEC)
       vbuf = vf + i * d;
     knn_full_thread (2, ninblock, nclust, d, 1, lsh->centroids[h], 
-		     vbuf, NULL, idx + i, dis + i, nt, NULL, NULL);
+		     vbuf, NULL, idx + i, dis + i, nt);
     if (! (flags & KMLSH_QUIET))
       fprintf (stdout, "\rQuantize %d descriptors. %6.2f%%", n, 100.0 * (i + ninblock) / (float) n);
   } 
@@ -403,7 +403,7 @@ nnlist_t * kmlsh_match_xvec (const kmlsh_t * lsh,
     float * vbuf_b = fvec_new (maxnidx_b * d);
     float * vbuf_q = fvec_new (maxnidx_q * d);
 
-    printf ("max in histo: base=%d  query=%d  (nclust=%d, nb=%d, nq=%d)\n", 
+    printf ("max in histo: base=%ld  query=%ld  (nclust=%d, nb=%d, nq=%d)\n", 
 	    maxnidx_b, maxnidx_q, nclust, nb, nq);
 
     /* temporary arrays to store the NN variables for each cell */
@@ -435,7 +435,7 @@ nnlist_t * kmlsh_match_xvec (const kmlsh_t * lsh,
       /* Call the exact kNN-graph function that is applied for each cell */
       int k2 = (k < nvecincell_b ? k : nvecincell_b);
       knn_full_thread (2, nvecincell_q, nvecincell_b, d, k2, vbuf_b, vbuf_q, 
-		       NULL, idxtmp, distmp, nt, NULL, NULL);  
+		       NULL, idxtmp, distmp, nt);  
 
 
       /* translate output of knn-graph to absolute vector indexes */
@@ -455,21 +455,26 @@ nnlist_t * kmlsh_match_xvec (const kmlsh_t * lsh,
   return nnlist;
 }
 
+
 nnlist_t * kmlsh_match_bvec (const kmlsh_t * lsh,
             const kmlsh_idx_t * lshidx_b, const unsigned char * vb, int nb,
             const kmlsh_idx_t * lshidx_q, const unsigned char * vq, int nq,
             int k, int nt)
 {
-  return kmlsh_match_xvec (lsh, lshidx_b, (void *) vb, nb, lshidx_q, (void *) vq, nq, k, nt, KMLSH_VECTYPE_BVEC);
+  return kmlsh_match_xvec (lsh, lshidx_b, (void *) vb, nb, lshidx_q, 
+			   (void *) vq, nq, k, nt, KMLSH_VECTYPE_BVEC);
 }
+
 
 nnlist_t * kmlsh_match_fvec (const kmlsh_t * lsh,
             const kmlsh_idx_t * lshidx_b, const float * vb, int nb,
             const kmlsh_idx_t * lshidx_q, const float * vq, int nq,
             int k, int nt)
 {
-  return kmlsh_match_xvec (lsh, lshidx_b, (void *) vb, nb, lshidx_q, (void *) vq, nq, k, nt, KMLSH_VECTYPE_FVEC);
+  return kmlsh_match_xvec (lsh, lshidx_b, (void *) vb, nb, lshidx_q, 
+			   (void *) vq, nq, k, nt, KMLSH_VECTYPE_FVEC);
 }
+
 
 nnlist_t * kmlsh_ann_xvec (const void * vb, int nb,
 		      const void * vq, int nq,
@@ -499,12 +504,14 @@ nnlist_t * kmlsh_ann_xvec (const void * vb, int nb,
   return nnlist;
 }
 
+
 nnlist_t * kmlsh_ann_bvec (const unsigned char * vb, int nb,
               const unsigned char * vq, int nq,
               int d, int k, int nhash, int nt)
 {
   return kmlsh_ann_xvec ( (void *) vb, nb, (void *) vq, nq, d, k, nhash, nt, KMLSH_VECTYPE_BVEC);
 }
+
 
 nnlist_t * kmlsh_ann_fvec (const float * vb, int nb,
               const float * vq, int nq,

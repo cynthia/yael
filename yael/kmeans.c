@@ -82,7 +82,6 @@ static void kmeanspp_init (long d, int n, int k, const float * v,
 }
 
 /* Minimize 
-
      sum( (x - a[i])^2 / (x + a[i]), i = 0..n-1) 
 
 in x. Return minimal x st. x > 0. 
@@ -242,7 +241,7 @@ static int kmeans_core (int d, int n, int k, int niter, int nt, int flags, int v
 
     knn_full_thread (flags & KMEANS_L1 ? 1 : 
                      flags & KMEANS_CHI2 ? 3 : 2, 
-                     n, k, d, 1, centroids, v, NULL, assign, dis, nt, NULL, NULL);
+                     n, k, d, 1, centroids, v, NULL, assign, dis, nt);
 
     
     /* compute the number of points assigned to each cluster and a 
@@ -285,7 +284,6 @@ static int kmeans_core (int d, int n, int k, int niter, int nt, int flags, int v
       for (i = 0 ; i < k ; i++) {          
         fvec_mul_by (centroids + i * d, d, 1.0 / nassign[i]);
       }
-    
     } 
 
     if(flags & KMEANS_NORMALIZE_CENTS) 

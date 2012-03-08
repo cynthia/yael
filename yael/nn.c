@@ -66,6 +66,7 @@ static void add_matmul (FINTEGER d, FINTEGER na, FINTEGER nb,
 
 }
 
+
 static void add_matvecmul (FINTEGER d, FINTEGER nb,
                            const float *a, 
                            const float *b, FINTEGER ldb,
@@ -94,6 +95,7 @@ void compute_cross_distances (int d, int na, int nb,
 {
   compute_cross_distances_nonpacked (d, na, nb, a, d, b, d, dist2, na);
 }
+
 
 void compute_cross_distances_nonpacked (int d, int na, int nb,
                                         const float *a, int lda,
@@ -128,9 +130,9 @@ void compute_cross_distances_nonpacked (int d, int na, int nb,
 
 
 void compute_distances_1_nonpacked (int d, int nb,
-                                           const float *a, 
-                                           const float *b, int ldb, 
-                                           float *dist2)
+				    const float *a, 
+				    const float *b, int ldb, 
+				    float *dist2)
 {
   long i, j;
   double sum_c2;
@@ -154,7 +156,8 @@ void compute_distances_1_nonpacked (int d, int nb,
 void compute_distances_1 (int d, int nb,
                           const float *a, 
                           const float *b,                         
-                          float *dist2) {
+                          float *dist2) 
+{
   compute_distances_1_nonpacked(d,nb,a,b,d,dist2);  
 }
 
@@ -170,27 +173,30 @@ void compute_distances_1 (int d, int nb,
 #warning "SSE optimized distance computations"
 
 /* compute chi2 distance between two vectors */
-static float vec_chi2(const float *a,const float *b,int n) {
+static float vec_chi2 (const float *a, const float *b, int n) 
+{
   int i=0;
   __v4sf accu={0,0,0,0};
   __v4sf *av=(void*)a,*bv=(void*)b;
   n/=4;
 
-  for(i=0;i<n;i++) {
-    __v4sf ai=av[i],bi=bv[i];
-    __v4sf sum=ai+bi,diff=ai-bi;
-    __v4sf mask=_mm_cmpneq_ps(ai,bi);
-    accu+=_mm_and_ps(_mm_div_ps(_mm_mul_ps(diff,diff),sum),mask);
+  for (i = 0 ; i < n ; i++) {
+    __v4sf ai = av[i],bi=bv[i];
+    __v4sf sum = ai+bi,diff=ai-bi;
+    __v4sf mask = _mm_cmpneq_ps(ai,bi);
+    accu+=_mm_and_ps (_mm_div_ps(_mm_mul_ps(diff,diff),sum),mask);
   }
 
   float *af=(void*)&accu;
       
-  return af[0]+af[1]+af[2]+af[3];
+  return af[0] + af[1] + af[2] + af[3];
 }
 
-static float vec_L1(const float *a,const float *b,int n) {
+
+static float vec_L1 (const float *a, const float *b, int n) 
+{
   int i=0;
-  __v4sf accu={0,0,0,0};
+  __v4sf accu = {0,0,0,0};
   __v4si signbit = {0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff};  /* to clear out sign bit */
   __v4sf *av=(void*)a,*bv=(void*)b;
   n/=4;
@@ -209,12 +215,13 @@ static float vec_L1(const float *a,const float *b,int n) {
 
 
 /* TODO optimize a bit more with blocks */
-static void cross_distances_chi2_vec(int d,int na,int nb,
-                              const float *a,int lda,
-                              const float *b,int ldb,
-                              float *c,int ldc) {  
-  int i,j;
-  const float *bl=b;
+static void cross_distances_chi2_vec (int d, int na, int nb,
+				      const float *a, int lda,
+				      const float *b, int ldb,
+				      float *c, int ldc) 
+{  
+  int i, j;
+  const float *bl = b;
   float *cl=c;    
 
   for(j=0;j<nb;j++) {
@@ -375,9 +382,7 @@ static void nn_single_full (int distance_type,
 			    int n1, int n2, int d,
 			    const float *mat2, const float *mat1, 
 			    const float *vw_weights,                             
-			    int *vw, float *vwdis,
-			    void (*peek_fun) (void *arg, double frac),
-			    void *peek_arg)
+			    int *vw, float *vwdis)
 {
   int step1 = MIN (n1, BLOCK_N1), step2 = MIN (n2, BLOCK_N2);
 
@@ -385,7 +390,6 @@ static void nn_single_full (int distance_type,
 
   /* divide the dataset into sub-blocks to:
    * - not make a too big dists2 output array 
-   * - call peek_fun from time to time
    */
   
   long i1,i2,j1,j2;
@@ -434,16 +438,9 @@ static void nn_single_full (int distance_type,
       }      
 
     }  
-
-    if (peek_fun)
-      (*peek_fun) (peek_arg, i1 / (double) n1);
-
   }
 
   free (dists);
-
-  if (peek_fun)
-    (*peek_fun) (peek_arg, 1);
 }
 
 
@@ -452,16 +449,12 @@ static void nn_single_full (int distance_type,
 void knn_full (int distance_type,int n1, int n2, int d, int k,
 	       const float *mat2, const float *mat1,
 	       const float *vw_weights,
-	       int *vw, float *vwdis,                                             
-	       void (*peek_fun) (void *arg,double frac),
-	       void *peek_arg)
+	       int *vw, float *vwdis)
 {
   assert (k <= n2);
 
   if(k==1) {
-    nn_single_full(distance_type,
-                                  n1, n2, d, mat2, mat1, vw_weights, vw, vwdis, 
-                                  peek_fun, peek_arg);
+    nn_single_full(distance_type, n1, n2, d, mat2, mat1, vw_weights, vw, vwdis);
     return;
   }
 
@@ -517,26 +510,19 @@ void knn_full (int distance_type,int n1, int n2, int d, int k,
       assert (mh->k == k);
       fbinheap_sort(mh, vw + (i1+j1) * k, vwdis + (i1+j1) * k);
     }
-
-    if (peek_fun)
-      (*peek_fun) (peek_arg, i1 / (double) n1);
-
   }
 
 #undef MINS
   free (minbuf);
   free(dists);
-
-  if (peek_fun)
-    (*peek_fun) (peek_arg, 1);
-
 }
 
 
 void knn_reorder_shortlist(int n, int nb, int d, int k,
                            const float *b, const float *v,
                            int *assign,
-                           float *dists) {
+                           float *dists) 
+{
   float *subb=fvec_new(k*d);
   float *diststmp=fvec_new(k);
   int *perm=ivec_new(k);
@@ -586,10 +572,12 @@ void knn_reorder_shortlist(int n, int nb, int d, int k,
   free(perm);
 }
 
+
 void knn_recompute_exact_dists(int nq, int nb, int d, int k,
 			       const float *b, const float *v,
 			       int label0, int *kp,
-			       const int *idx, float *dis) {
+			       const int *idx, float *dis) 
+{
   long q, i;
 
   for(q = 0; q < nq; q++) {
@@ -602,7 +590,6 @@ void knn_recompute_exact_dists(int nq, int nb, int d, int k,
     }
     kp[q] = i;
   }
-
 }
 
 
@@ -612,14 +599,13 @@ void knn_recompute_exact_dists(int nq, int nb, int d, int k,
 
 
 double nn (int npt, int nclust, int d,
-	 const float *codebook, const float *coords, int *vw,
-	 void (*peek_fun) (void *arg, double frac),
-	 void *peek_arg) {
+	 const float *codebook, const float *coords, int *vw) 
+{
   
   /* The distances to centroids that will be returned */
   float *vwdis = fvec_new(npt);
   
-  knn_full (2, npt, nclust, d, 1, codebook, coords, NULL, vw, vwdis, peek_fun, peek_arg);
+  knn_full (2, npt, nclust, d, 1, codebook, coords, NULL, vw, vwdis);
   
   double toterr = fvec_sum(vwdis, npt);
   free(vwdis);
@@ -627,15 +613,14 @@ double nn (int npt, int nclust, int d,
   return toterr;
 }
 
+
 float *knn (int npt, int nclust, int d, int k,
-	    const float *codebook, const float *coords,
-	    int *vw, void (*peek_fun) (void *arg, double frac),  void *peek_arg)
+	    const float *codebook, const float *coords, int *vw)
 {
   /* The distances to centroids that will be returned */
   float *vwdis = fvec_new(npt * k);
 
-  knn_full (2, npt, nclust, d, k, codebook, coords, NULL, vw, vwdis, peek_fun, peek_arg);
-  
+  knn_full (2, npt, nclust, d, k, codebook, coords, NULL, vw, vwdis);
   return vwdis;
 }
 
@@ -667,19 +652,9 @@ typedef struct {
 
   /* bookkeeping */
   int n_thread;
-  void (*peek_fun) (void *arg, double frac);
-  void *peek_arg;
   pthread_mutex_t peek_mutex;
 } nn_input_t;
 
-static void nn_peek (void *arg, double frac)
-{
-  nn_input_t *t = arg;
-  if (pthread_mutex_trylock (&t->peek_mutex) != 0)      /* don't insist if another thread is peeking */
-    return;
-  (*t->peek_fun) (t->peek_arg, frac);
-  pthread_mutex_unlock (&t->peek_mutex);
-}
 
 
 static void nn_task (void *arg, int tid, int i)
@@ -689,13 +664,9 @@ static void nn_task (void *arg, int tid, int i)
   long n0 = t->npt * (long)i / t->n_thread;
   long n1 = t->npt * (long)(i + 1) / t->n_thread;
 
-  void (*peek_fun) (void *arg, double frac) =
-      t->peek_fun ? &nn_peek : NULL;
-
   knn_full (t->distance_type, n1 - n0, t->nclust, t->d, t->k, t->codebook,
 			  t->points + n0 * t->d, t->vw_weights,
-			  t->vw + n0 * t->k, t->vwdis + n0 * t->k,
-			  peek_fun, t);
+			  t->vw + n0 * t->k, t->vwdis + n0 * t->k);
 }
 
 /********** frontends */
@@ -704,19 +675,18 @@ void knn_full_thread (int distance_type, int npt, int nclust, int d, int k,
                                     const float *codebook, const float *coords,
                                     const float *vw_weights,
                                     int *vw, float *vwdis2,
-                                    int n_thread,
-                                    void (*peek_fun) (void *arg,double frac),
-                                    void *peek_arg) {
+                                    int n_thread) 
+{
   if (npt < n_thread || n_thread == 1) {        /* too few pts */
     return knn_full (distance_type, npt, nclust, d, k, codebook, coords, vw_weights, 
-                     vw, vwdis2, peek_fun, peek_arg);
+                     vw, vwdis2);
   }
 
   nn_input_t task = { 
     distance_type,
     nclust, d, k, codebook, 
     npt, coords, vw_weights, vw, vwdis2,
-    n_thread, peek_fun, peek_arg, PTHREAD_MUTEX_INITIALIZER
+    n_thread, PTHREAD_MUTEX_INITIALIZER
   };
 
   compute_tasks (n_thread, n_thread, &nn_task, &task);
@@ -728,35 +698,28 @@ void knn_full_thread (int distance_type, int npt, int nclust, int d, int k,
 
 float *knn_thread (int npt, int nclust, int d, int k,
 		   const float *codebook, const float *coords,
-		   int *vw, 
-		   int n_thread,
-		   void (*peek_fun) (void *arg, double frac),
-		   void *peek_arg) 
+		   int *vw, int n_thread) 
 {
   float *vwdis2=fvec_new(k*npt);
-    
-  knn_full_thread (2, npt, nclust, d, k, codebook, coords, NULL, vw, vwdis2, n_thread, peek_fun, peek_arg);
-  
+  knn_full_thread (2, npt, nclust, d, k, codebook, coords, NULL, vw, vwdis2, n_thread);
   return vwdis2;
 }
 
 
 
 double nn_thread (int npt, int nclust, int d,
-                               const float *codebook, const float *coords,
-                               int *vw, int n_thread,
-                               void (*peek_fun) (void *arg, double frac),
-                               void *peek_arg)
+		  const float *codebook, const float *coords,
+		  int *vw, int n_thread)
 {
   float *vwdis2=fvec_new(npt);
-
-  knn_full_thread (2, npt, nclust, d, 1, codebook, coords, NULL, vw, vwdis2, n_thread, peek_fun, peek_arg);
+  knn_full_thread (2, npt, nclust, d, 1, codebook, coords, NULL, vw, vwdis2, n_thread);
    
   double toterr = fvec_sum(vwdis2, npt); 
 
   free(vwdis2);
   return toterr;
 }
+
 
 /***************** cross distances */
 
@@ -769,39 +732,39 @@ typedef struct {
   int split_a;  
 } cross_distances_params_t;
 
-/*Core funcs*/
 
-void compute_cross_distances_task(void *arg, int tid, int i) {
+/*Core funcs*/
+void compute_cross_distances_task (void *arg, int tid, int i) 
+{
   cross_distances_params_t *t=arg;
   if(t->split_a) {
-    long i0=t->na*(long)i/t->nt;
-    long i1=t->na*(long)(i+1)/t->nt;
+    long i0 = t->na*(long)i/t->nt;
+    long i1 = t->na*(long)(i+1)/t->nt;
     if(t->distance_type<0) 
-      compute_cross_distances_nonpacked(t->d,i1-i0,t->nb,
-                                        t->a+i0*t->d,t->d,
-                                        t->b,t->d,
-                                        t->dist2+i0,t->na);
+      compute_cross_distances_nonpacked (t->d,i1-i0,t->nb,
+                                         t->a+i0*t->d,t->d,
+                                         t->b,t->d,
+                                         t->dist2+i0,t->na);
     else 
-      compute_cross_distances_alt_nonpacked(t->distance_type,t->d,i1-i0,t->nb,
-                                            t->a+i0*t->d,t->d,
-                                            t->b,t->d,
-                                            t->dist2+i0,t->na);
+      compute_cross_distances_alt_nonpacked (t->distance_type,t->d,i1-i0,t->nb,
+                                             t->a+i0*t->d,t->d,
+                                             t->b,t->d,
+                                             t->dist2+i0,t->na);
   } else {
-    long i0=t->nb*(long)i/t->nt;
-    long i1=t->nb*(long)(i+1)/t->nt;
+    long i0 = t->nb*(long)i/t->nt;
+    long i1 = t->nb*(long)(i+1)/t->nt;
     if(t->distance_type<0) 
-      compute_cross_distances_nonpacked(t->d,t->na,i1-i0,
-                                        t->a,t->d,
-                                        t->b+i0*t->d,t->d,
-                                        t->dist2+i0*t->na,t->na);   
+      compute_cross_distances_nonpacked (t->d,t->na,i1-i0,
+                                         t->a,t->d,
+                                         t->b+i0*t->d,t->d,
+                                         t->dist2+i0*t->na,t->na);   
     else 
-      compute_cross_distances_alt_nonpacked(t->distance_type,
-                                            t->d,t->na,i1-i0,
-                                            t->a,t->d,
-                                            t->b+i0*t->d,t->d,
-                                            t->dist2+i0*t->na,t->na);         
+      compute_cross_distances_alt_nonpacked (t->distance_type,
+                                             t->d,t->na,i1-i0,
+                                             t->a,t->d,
+                                             t->b+i0*t->d,t->d,
+                                             t->dist2+i0*t->na,t->na);         
   }  
-  
 }
 
 /*main funcs*/
@@ -809,7 +772,8 @@ void compute_cross_distances_task(void *arg, int tid, int i) {
 void compute_cross_distances_thread (int d, int na, int nb,
                                      const float *a,
                                      const float *b, float *dist2,
-                                     int nt) {
+                                     int nt) 
+{
   cross_distances_params_t t={-1,d,na,nb,a,b,dist2,nt};
   
   int n=MAX(na,nb);
@@ -826,13 +790,14 @@ void compute_cross_distances_thread (int d, int na, int nb,
 void compute_cross_distances_alt_thread (int distance_type,int d, int na, int nb,
                                          const float *a,
                                          const float *b, float *dist2,
-                                         int nt) {
-  cross_distances_params_t t={distance_type,d,na,nb,a,b,dist2,nt};
+                                         int nt) 
+{
+  cross_distances_params_t t = {distance_type,d,na,nb,a,b,dist2,nt};
   
   int n=MAX(na,nb);
   
   if(n<nt) /* too small, no threads */
-    compute_cross_distances_alt(distance_type,d,na,nb,a,b,dist2);
+    compute_cross_distances_alt (distance_type,d,na,nb,a,b,dist2);
   else { 
     t.split_a=na>nb;    
     compute_tasks(nt,nt,&compute_cross_distances_task,&t);

@@ -222,7 +222,7 @@ int main (int argc, char ** argv)
   int * idx = ivec_new (k * nq);
   float * dis = fvec_new (k * nq);
 
-  knn_full_thread (2, nq, nb, d, k, vb, vq, NULL, idx, dis, nt, NULL, NULL);
+  knn_full_thread (2, nq, nb, d, k, vb, vq, NULL, idx, dis, nt);
   knn_reorder_shortlist (nq, nb, d, k, vb, vq, idx, dis);
 
   /* write the distance output file */
