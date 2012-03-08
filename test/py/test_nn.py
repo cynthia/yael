@@ -15,7 +15,7 @@ dis = yael.fvec_new (nq * k)
 
 
 t1 = time.time()
-yael.knn_thread (nq, n, d, k, v, q, idx, nt, None)
+yael.knn_thread (nq, n, d, k, v, q, idx, nt)
 t2 = time.time()
 
 idx = yael.IntArray.acquirepointer (idx)
