@@ -630,7 +630,6 @@ float *knn (int npt, int nclust, int d, int k,
  * Threaded versions
  */
 
-#include <pthread.h>
 
 /* a common function dispatches the calls */
 typedef struct {
@@ -652,7 +651,6 @@ typedef struct {
 
   /* bookkeeping */
   int n_thread;
-  pthread_mutex_t peek_mutex;
 } nn_input_t;
 
 
@@ -686,7 +684,7 @@ void knn_full_thread (int distance_type, int npt, int nclust, int d, int k,
     distance_type,
     nclust, d, k, codebook, 
     npt, coords, vw_weights, vw, vwdis2,
-    n_thread, PTHREAD_MUTEX_INITIALIZER
+    n_thread
   };
 
   compute_tasks (n_thread, n_thread, &nn_task, &task);

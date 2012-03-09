@@ -78,7 +78,7 @@ usage: $0
   [--enable-arpack]
   [--arpack=ld_flags_for_arpack]
   [--python-cflags=flags_to_compile_with_python_c_api]
-  [--enable-openmp]
+  [--disable-openmp]
   [--enable-numpy]
   [--numpy-cflags=includes-for-numpy]
   [--mac32]
@@ -149,8 +149,8 @@ while [ $# -gt 0 ] ; do
             numpycflags=-I${a#*=}
             ;;
 
-        --enable-openmp) 
-            useopenmp=yes
+        --disable-openmp) 
+            useopenmp=''
             ;;
 	*)  echo "unknown option $a" 1>&2; exit 1;;
     esac
@@ -200,7 +200,6 @@ ARPACKLDFLAGS=$arpackldflags
 
 USETHREADS=yes
 THREADCFLAGS=-DHAVE_THREADS
-THREADLDFLAGS=-lpthread
 
 SHAREDEXT=$sharedext
 SHAREDFLAGS=$sharedflags
