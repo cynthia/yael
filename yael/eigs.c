@@ -50,7 +50,7 @@ int eigs_sym (int di, const float * m, float * eigval, float * eigvec)
   dsyev_( "V", "L", &d, md, &d, lambda, work, &lwork, &info );
   
   if (info > 0) {
-    fprintf (stderr, "# eigs_sym: problem while computing eigen-vectors/values info=%d\n",info);
+    fprintf (stderr, "# eigs_sym: problem while computing eigen-vectors/values info=%ld\n",(long) info);
     goto error;
   }
   /* normalize the eigenvectors, copy and free */
@@ -96,7 +96,7 @@ int geigs_sym (int di, const float * a, const float * b, float * eigval, float *
   dsygv_ (&itype, "V", "L", &d, ad, &d, bd, &d, lambda, work, &lwork, &info );
   
   if (info != 0) {
-    fprintf (stderr, "# eigs_sym: problem while computing eigen-vectors/values info=%d\n",info);
+    fprintf (stderr, "# eigs_sym: problem while computing eigen-vectors/values info=%ld\n",(long) info);
     goto error;
   }
 
