@@ -131,7 +131,7 @@ void bof_compute_ma (int k, int d, const float *centroids,
   knn_thread (n, k, d, ma, centroids, v, assign, nt);
   ivec_0(desc,k);
 
-  for(i=0;i<n;i++)
+  for(i=0;i<n*ma;i++)
     desc[assign[i]]++;
 
   free(assign);
