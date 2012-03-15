@@ -58,6 +58,12 @@ void bof_compute (int k, int d, const float *centroids,
 		  int n, const float *v, int *desc);
 
 
+/*! Same as bof_compute, but with multiple assignment, and might be multi-threaded */
+void bof_compute_ma (int k, int d, const float *centroids, 
+		     int n, const float *v, int *desc, 
+		     int ma, float alpha, int nt);
+
+
 /*! like vlad_compute_subsets, but compute BOFs on subsets of the n descriptors 
  * instead of VLADs (intended for bag-of-colors computation)
  *

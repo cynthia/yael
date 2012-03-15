@@ -121,3 +121,19 @@ void bof_compute (int k, int d, const float *centroids,
   free(assign);
 }
 
+
+void bof_compute_ma (int k, int d, const float *centroids, 
+		     int n, const float *v, int *desc, 
+		     int ma, float alpha, int nt)
+{
+  int i;
+  int *assign = ivec_new(n*ma);
+  knn_thread (n, k, d, ma, centroids, v, assign, nt);
+  ivec_0(desc,k);
+
+  for(i=0;i<n;i++)
+    desc[assign[i]]++;
+
+  free(assign);
+}
+
