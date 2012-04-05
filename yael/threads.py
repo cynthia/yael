@@ -251,26 +251,6 @@ class RunOnSet:
         self.lock2.release() # avoid deadlock
         self.lock.release()
 
-class RunOnSetWithPeek(RunOnSet):
-  """ same as RunOnSet, with a peek function (l must have a length)"""
-
-  def __init__(self,n,l,f,peek_fun=None):
-    self.tot_l=len(l)
-    self.l_no=0
-    self.peek_fun=peek_fun
-    self.orig_f=f
-    self.lock3=thread.allocate_lock()
-    RunOnSet.__init__(self,n,l,self.fx)
-    del self.f # avoid circular ref
-
-  def fx(self,i):
-    self.orig_f(i)
-    if self.peek_fun:
-      self.lock3.acquire()
-      self.l_no+=1
-      self.peek_fun(float(self.l_no)/self.tot_l)        
-      self.lock3.release()
-
 class ParallelMap:
 
    def __init__(self,n,l,f):
@@ -290,17 +270,6 @@ class ParallelMap:
 def parallel_map(n,l,f):
   return ParallelMap(n,l,f).result
 
-
-class ParallelMapWithPeek:
-
-   def __init__(self,n,l,f,peek_fun):
-     self.orig_f2=f
-     self.l2=l
-     self.result=[None]*len(l)
-     RunOnSetWithPeek(n,range(len(l)),self.f2,peek_fun)
-
-   def f2(self,i):
-     self.result[i]=self.orig_f2(self.l2[i])
 
   
 

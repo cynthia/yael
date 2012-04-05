@@ -45,7 +45,7 @@ int eigs_sym_part (int d, const float * m, int nev, float * eigval, float * eigv
 typedef struct arpack_eigs_t arpack_eigs_t; 
 
 
-/*! begin partial eigenvalue computation -- user should provide a matrix multiplication function
+/*! begin partial eigenvalue computation -- user should have a matrix multiplication function at hand
  *
  * @param n           dimension of the square matrix
  * @param nev         nb of eigenvectors/values to return

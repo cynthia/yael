@@ -164,7 +164,7 @@ int eigs_sym_part (int ni, const float * a, int nev, float * sout, float * vout)
   for(;;) {
     float *x,*y;
     ret=arpack_eigs_step(ae,&x,&y); 
-
+    
     if(ret<0) break; /* error */
 
     if(ret==0) break; /* stop iteration */
@@ -225,8 +225,11 @@ arpack_eigs_t *arpack_eigs_begin(int n,int nev) {
 
   ae->n=n;
   ae->nev=nev;
+  
 
-  int ncv=ae->ncv=2*nev;  /* should be enough (see remark 4 of ssaupd doc) */
+  int ncv = n;  /* should be enough (see remark 4 of ssaupd doc) */
+  ae->ncv = ncv;
+  /*  printf("nev = %d ncv = %d\n", (int)nev, (int)ncv);  */
 
   ae->lworkl = ncv*(long)(ncv+8);
   ae->resid=NEWA(float,n);
@@ -259,8 +262,10 @@ int arpack_eigs_step(arpack_eigs_t *ae,
           &tol, ae->resid, &ae->ncv, ae->v, &ae->n, 
           ae->iparam, ae->ipntr, ae->workd, ae->workl, &ae->lworkl,
           &ae->info);
-  
-
+/*  
+  printf("arpack_eigs_step: ido = %d info = %d\n", 
+         (int)ae->ido, (int)ae->info);
+*/
   if(ae->ido==-1 || ae->ido==1) {
     *x=ae->workd+ae->ipntr[0]-1;
     *y=ae->workd+ae->ipntr[1]-1;
@@ -269,12 +274,19 @@ int arpack_eigs_step(arpack_eigs_t *ae,
   
   *x=*y=NULL;
   if(ae->info<0) {
-    printf("arpack_eigs_step: ssaupd_ error info=%d\n",ae->info);
+    fprintf(stderr, "arpack_eigs_step: ssaupd_ error info=%d\n",ae->info);
     
     return ae->info;
   } 
 
   return 0; 
+#if 0
+    ae->ido == 99 ? 0 :  /* done */
+    ae->info == 0 ? 0 :  /* normal exit */
+    ae->info == 1 ? 0 :  /* max nb of iterations */ 
+    ae->info == 3 ? 0 :  /* ~ did not converge */
+    0;       
+#endif 
 }
 
 
@@ -307,13 +319,12 @@ int arpack_eigs_end(arpack_eigs_t *ae,
             &ierr);
 
     if(ierr!=0) {
-      printf("arpack_eigs_end: sseupd_ error: %d\n",ierr);
+      fprintf(stderr, "arpack_eigs_end: sseupd_ error: %d\n",ierr);
       ret=ierr;
       goto error;
     }
     ret=nconv=ae->iparam[4];
     assert(nconv<=nev);
-
   }
 
   /* order v by s */
