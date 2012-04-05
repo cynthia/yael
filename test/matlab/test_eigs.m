@@ -1,7 +1,7 @@
 addpath('../../matlab')
 
-d = 100 
-nev = 8
+d = 2000
+nev = 20
 
 a=rand(d, d);
 

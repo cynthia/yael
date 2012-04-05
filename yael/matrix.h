@@ -263,10 +263,18 @@ float *fmat_new_pca_part(int d,int n,int nev,
                          const float *v,float *singvals); 
 
 
-/*! Compute SVD decomposition of a matrix: a = u * s * v'
+/*! Compute SVD decomposition of a matrix: a = u * diag(singvals) * v'
+ *
+ * @param d            nb of rows of matrix a
+ * @param n            nb of columns of matrix a
+ * @param ns           nb of singular values to compute 
+ * @param a(d,n)       matrix to compute singular vals for
+ * @param singvals(ns) output singular values (may be NULL)
+ * @param u(d,ns)      left orthogonal matrix (may be NULL)
+ * @param v(n,ns)      right orthogonal matrix (may be NULL)
  */
-int fmat_svd_partial(int d,int n,int ns,const float *a,
-                      float *singvals,float *u,float *v); 
+int fmat_svd_partial(int d, int n, int ns, const float *a,
+                     float *singvals, float *u, float *v); 
 
 /*! with additionnal options
  */

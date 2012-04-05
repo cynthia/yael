@@ -17,10 +17,10 @@
 
 
 # set octave install directory (/usr if you are lucky)
-octavedir=/home/lear/douze/scratch2/installed_fc10_64
+octavedir=/usr
 
 # version number
-octavevers=3.2.3
+octavevers=3.2.4
 
 
 
@@ -29,10 +29,10 @@ n=${n%.c}
 shift
 os="$@"
     
-cmd="gcc -c -fPIC -I$octavedir/include/octave-$octavevers -I$octavedir/include/octave-$octavevers/octave -g -O2  $n.c $os"
+cmd="gcc -c -fPIC -I$octavedir/include/octave-$octavevers -I$octavedir/include/octave-$octavevers/octave -g -O2  $n.c $os -fopenmp"
 echo $cmd
 $cmd
     
-cmd="g++ -shared -Wl,-Bsymbolic -o $n.mex $n.o $os"
+cmd="g++ -shared -Wl,-Bsymbolic -o $n.mex $n.o $os -fopenmp"
 echo $cmd
 $cmd

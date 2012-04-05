@@ -32,7 +32,7 @@ ifeq "$(TARGET)" "matlab"
     YAELAR=yael4matlab.a
 
     LDFLAGS=-g $(YAELAR) LDFLAGS="\$$LDFLAGS -lmwblas -lmwlapack -lmwarpack -fopenmp"
-    MEX=mex
+    MEX=mex -g
 
 else
 
@@ -43,7 +43,7 @@ else
 endif
 
 
-all: $(YAELAR) yael_kmeans yael_gmm yael_fisher yael_nn yael_kmin yael_kmax yael_fvecs_normalize yael_L2sqr yael_cross_distances yael_eigs
+all: $(YAELAR) yael_kmeans yael_gmm yael_fisher yael_nn yael_kmin yael_kmax yael_fvecs_normalize yael_L2sqr yael_cross_distances yael_eigs yael_svds
 
 
 LIBOBJ=vector.o matrix.o eigs.o nn.o kmeans.o gmm.o sorting.o binheap.o machinedeps.o vlad.o
@@ -140,6 +140,9 @@ yael_cross_distances: yael_cross_distances.c $(YAELAR)
 
 yael_eigs: yael_eigs.c $(YAELAR)
 	$(MEX) yael_eigs.c -I.. $(LDFLAGS)
+
+yael_svds: yael_svds.c $(YAELAR)
+	$(MEX) yael_svds.c -I.. $(LDFLAGS)
 
 clean:
 	rm -f  *.a *.mexa64 *.mexmaci64 *.mex *.o *~
