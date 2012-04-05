@@ -174,7 +174,19 @@ int eigs_sym_part (int ni, const float * a, int nev, float * sout, float * vout)
     float zero=0,one=1;
     FINTEGER ione=1;
     
+#ifndef _OPENMP
     sgemv_("Trans",&n,&n,&one,a,&n,x,&ione,&zero,y,&ione);    
+#else 
+
+    int c, nt = count_cpu();
+#pragma omp parallel for 
+    for(c = 0; c < nt; c++) {
+      int i0 = n * c / nt; 
+      int i1 = n * (c + 1) / nt; 
+      FINTEGER id = i1 - i0;
+      sgemv_("Trans", &n, &id, &one, a + i0 * n, &n, x, &ione, &zero, y + i0, &ione);    
+    }
+#endif
   } 
   ret=arpack_eigs_end(ae,sout,vout);
  
@@ -227,7 +239,7 @@ arpack_eigs_t *arpack_eigs_begin(int n,int nev) {
   ae->nev=nev;
   
 
-  int ncv = n;  /* should be enough (see remark 4 of ssaupd doc) */
+  int ncv = nev * 2;  /* should be enough (see remark 4 of ssaupd doc) */
   ae->ncv = ncv;
   /*  printf("nev = %d ncv = %d\n", (int)nev, (int)ncv);  */
 
@@ -280,13 +292,6 @@ int arpack_eigs_step(arpack_eigs_t *ae,
   } 
 
   return 0; 
-#if 0
-    ae->ido == 99 ? 0 :  /* done */
-    ae->info == 0 ? 0 :  /* normal exit */
-    ae->info == 1 ? 0 :  /* max nb of iterations */ 
-    ae->info == 3 ? 0 :  /* ~ did not converge */
-    0;       
-#endif 
 }
 
 

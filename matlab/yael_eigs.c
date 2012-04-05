@@ -31,8 +31,8 @@ void mexFunction (int nlhs, mxArray *plhs[],
 
   int nev = (int) mxGetScalar (prhs[1]);
 
-  if(nev > d) {
-    mexErrMsgTxt("more eigenvalues requested than dimensions...");    
+  if(nev * 2 > d) {
+    mexErrMsgTxt("If so many eigenvals are needed, it is better to use the full version...");    
   }
 
 

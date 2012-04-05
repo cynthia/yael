@@ -8,7 +8,7 @@ include ../makefile.inc
 
 # Here you can chose between Matlab and Octave
 TARGET=matlab
-#TARGET=octave
+# TARGET=octave
 
 
 CFLAGS=-O3 -fPIC -m64 -g -I.. -fopenmp -DHAVE_ARPACK

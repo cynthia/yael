@@ -1,11 +1,28 @@
 addpath('../../matlab')
 
+d = 100 
+nev = 8
 
-a=rand(100,100);
+a=rand(d, d);
 
-a=a+a'; % hope it's definite positive
+a=a+a'; 
 
-[vecs_ref, vals_ref ] = eigs(a,8)
-[vecs_new, vals_new ] = yael_eigs(single(a),8)
+fprintf('ref\n'); 
+tic
+[vecs_ref, vals_ref ] = eigs(a, nev); 
+toc
+vals_ref = diag(vals_ref);
 
+fprintf('new\n'); 
+tic
+[vecs_new, vals_new ] = yael_eigs(single(a), nev); 
+toc
+
+value_error = (vals_ref - vals_new) ./ abs(vals_ref)
+
+% sign ambiguity
+errs1 = sum(abs(vecs_ref - vecs_new)); 
+errs2 = sum(abs(vecs_ref + vecs_new)); 
+
+vector_error = min(errs1, errs2)
 
