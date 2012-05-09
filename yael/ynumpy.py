@@ -39,7 +39,7 @@ def knn(queries, base,
                          None, 
                          yael.numpy_to_ivec_ref(idx), 
                          yael.numpy_to_fvec_ref(dis), 
-                         nt, None)
+                         nt)
     return idx, dis
     
 

@@ -87,7 +87,9 @@ self-explanatory names::
   numpy_to_fvec 
   numpy_to_ivec 
 
-Arrays corresponding to Yael's ``fvec``are of Numpy's ``dtype='float32'``.  
+Arrays corresponding to Yael's ``fvec``are of Numpy's
+``dtype='float32'``. Moving from yael to numpy produces line vectors,
+that can be reshaped to matrices if needed.
 
 These functions copy their arguments. To share the same data buffer
 between Yael and Numpy, suffix the function with ``_ref``.
@@ -105,10 +107,10 @@ include::
   kmeans
   fvecs_read ivecs_read siftgeo_read
 
-All matrix arguments should be in Fortran indexing (defined in the
-``flags`` field). This sometimes requires counter-intuitive
-transpositions, as Numpy has a bias towards C-ordering. See
-``test_ynumpy.py`` for an example.
+All matrix arguments should be in C indexing, because numpy's support
+for Fortran-style indexing is close to unusable. Therefore, in the
+function documentation, all references to "columns" should become
+"lines". See ``test_ynumpy.py`` for an example.
 
 
 

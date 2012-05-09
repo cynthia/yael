@@ -11,7 +11,7 @@
 %   w, mu and sigma are the parameters of the mixture (learned by, e.g., yael_gmm)
 %
 % 
-% By default, only the components associated with variance mu are compuetd
+% By default, only the derivatives associated with the mu component are computed
 %
 % Options:
 %   'weights'   includes the mixture weights in the representation
