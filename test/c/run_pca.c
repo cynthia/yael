@@ -7,6 +7,27 @@
 #include <yael/matrix.h>
 
 
+/* sample test:
+   ./run_pca cov -fi test.dat -favg test.avg -fcov test.cov -n 10 -d 4 
+   ./run_pca eig -fi test.dat -favg test.avg -fcov test.cov -n 10 -d 4
+   ./run_pca apply -favg test.avg -n 10 -d 4 -fevec test.evec -feval test.eval -fi test.dat -fo test.out
+
+To check in Matlab that this gives the same results:
+
+  f=fopen('test','r');
+  a=fread(f,'single');
+  n=10;a=reshape(a,4,n);
+  fclose(f);
+  mu=mean(a,2);
+  ac=a-repmat(mu,1,n);
+  cv=ac*ac'/(n-1);     % Covariance matrix
+
+  [cov_eigenvectors,cov_eigenvalues]=eig(cv);
+  cov_eigenvalues=diag(cov_eigenvalues);
+  [sorted,perm]=sort(cov_eigenvalues, 'descend')
+  cov_eigenvectors(:,perm)
+*/   
+
 void usage (const char * cmd)
 {
   printf ("Usage: %s cov|eig|apply [-v] -n # -d # -fi fi [-fcov fcov] [-favg favg] [-fevec fevec] [-feval feval] [-fo fvout]\n", cmd);
@@ -429,19 +450,5 @@ int main (int argc, char **argv)
 }
 
 /*
-To check in Matlab that this gives the same results:
-
-f=fopen('test','r');
-a=fread(f,'single');
-n=10;a=reshape(a,4,n);
-fclose(f);
-mu=mean(a,2);
-ac=a-repmat(mu,1,n);
-cv=ac*ac'/(n-1);     % Covariance matrix
-
-[cov_eigenvectors,cov_eigenvalues]=eig(cv);
-cov_eigenvalues=diag(cov_eigenvalues);
-[sorted,perm]=sort(cov_eigenvalues, 'descend')
-cov_eigenvectors(:,perm)
 */
 
