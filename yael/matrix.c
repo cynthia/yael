@@ -645,10 +645,8 @@ void fmat_inplace_transp(float *a, int ncol, int nrow)
 
 
 
-float *fmat_new_pca_from_covariance(int d,const float *cov, float *singvals) 
+void fmat_pca_from_covariance(int d,const float *cov, float *singvals, float * pcamat) 
 {
-
-  float *pcamat=fvec_new(d*d);
   float *evals=singvals;
 
   if(!singvals) evals=fvec_new(d);
@@ -662,7 +660,14 @@ float *fmat_new_pca_from_covariance(int d,const float *cov, float *singvals)
 
  error:
   if(!singvals) free(evals);
+}
 
+
+
+float *fmat_new_pca_from_covariance(int d,const float *cov, float *singvals) 
+{
+  float *pcamat=fvec_new(d*d);
+  fmat_pca_from_covariance (d, cov, singvals, pcamat);
   return pcamat;
 }
 
@@ -949,7 +954,7 @@ pca_online_t * pca_online_new (int d)
   pca->n = 0;
   pca->mu = fvec_new_0 (d);
   pca->cov = fvec_new_0 (d*d);
-  pca->eigvec = NULL;
+  pca->eigvec = fvec_new (d*d);
   pca->eigval = fvec_new (d);
   return pca;
 }
@@ -985,9 +990,8 @@ void pca_online_accu (struct pca_online_s * pca, const float * v, long n)
 }
 
 
-/* compute the mean, the covariance matrix, and the eigenvectors.
-   They are stored in the structure itself  */
-void pca_online_complete (struct pca_online_s * pca)
+/* compute the mean and covariance matrix */
+void pca_online_cov (struct pca_online_s * pca)
 {
   int d = pca->d;
   int n = pca->n;
@@ -999,9 +1003,20 @@ void pca_online_complete (struct pca_online_s * pca)
   fmat_mul_tr (pca->mu, pca->mu, d, d, 1, mumut);
   fvec_sub (pca->cov, mumut, d*d);
   free (mumut);
-
+  
+  fvec_mul_by (pca->cov, d * d, n / (double) (n-1));
   assert(fvec_all_finite(pca->cov,d*d));
-  pca->eigvec = fmat_new_pca_from_covariance (d, pca->cov, pca->eigval);
+  pca->n = -pca->n;
+}
+
+
+/* compute the mean, the covariance matrix, and the eigenvectors.
+   They are stored in the structure itself  */
+void pca_online_complete (struct pca_online_s * pca)
+{
+  if (pca->n > 0)
+    pca_online_cov (pca);
+  fmat_pca_from_covariance (pca->d, pca->cov, pca->eigval, pca->eigvec);
 }
 
 

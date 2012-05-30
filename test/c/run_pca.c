@@ -9,31 +9,40 @@
 
 void usage (const char * cmd)
 {
-  printf ("Usage: %s [-v] -n # -d # -fi fvin [-favg favg] [-fevec fevec] [-feval feval] [-fo fvout]\n", cmd);
+  printf ("Usage: %s cov|eig|apply [-v] -n # -d # -fi fi [-fcov fcov] [-favg favg] [-fevec fevec] [-feval feval] [-fo fvout]\n", cmd);
   
   printf ("Output: all output file are optional (produced only if option is specified)\n"
-	  "  Input\n"
+	  "  Parameters (in brackets: corresponding action)\n"
+	  "    cov|eig|apply     first argument is the action to be performed\n"
+          "                      cov     compute the covariance matrix\n"
+          "                      eig     compute the eigendecomposition of the covariance matrix\n"
+          "                      apply   apply the PCA rotation to the input file\n"
 	  "    -v                verbose output\n"
 	  "    -n #              number of vectors\n"
           "    -d #              dimension of the vectors\n"
           "    -dout #           dimension of the output vectors\n"
-          "    -plaw #           pre-process vector using sqrt component-wise normalization\n"
-          "    -norm #           pre-normalization of input vector (may be after powerlaw)\n\n"
-	  "    -fi filename      file of input vectors (raw format)\n"
-	  "    -fo filename      file of PCA-transformed output vectors (raw format)\n"
+	  "    -fi filename      file of input vectors (raw format)\n\n"
+	  "   Following parameters are output with 'cov' action, input with 'apply' action\n"
 	  "    -favg filename    raw file containing the mean values\n"
 	  "    -fevec filename   raw file containing the eigenvectors\n"
-	  "    -feval filename   raw file containing the eigenvalues\n"
+	  "    -feval filename   raw file containing the eigenvalues\n\n"
+          "                      -> output with 'cov' action, input with 'apply' action\n\n"
+          "   Parameters for 'apply' action\n"
+          "    -plaw #           [apply] pre-process vector using sqrt component-wise normalization\n"
+          "    -norm #           [apply] pre-normalization of input vector (may be after powerlaw)\n\n"
+	  "    -fo filename      file of PCA-transformed output vectors (raw format)\n"
 	  );
   exit (0);
 }
 
+/*---------------------------------*/
+/* I/O                             */
+/*---------------------------------*/
 
 /* write output file in raw file format */
 void write_raw_floats (const char * fname, const float * v, long n)
 {
   int ret;
-
   FILE * f = fopen (fname, "w");
   if (!f) { 
     fprintf (stderr, "Unable to open file %s for writing\n", fname);
@@ -47,6 +56,76 @@ void write_raw_floats (const char * fname, const float * v, long n)
   }
   fclose (f);
 }
+
+/* read input file in raw file format */
+void write_read_floats (const char * fname, float * v, long n)
+{
+  int ret;
+  FILE * f = fopen (fname, "r");
+  if (!f) { 
+    fprintf (stderr, "Unable to open file %s\n", fname);
+    exit (1);
+  }
+
+  ret = fread (v, sizeof (*v), n, f);
+  if (ret != n) {
+    fprintf (stderr, "Unable to read %ld floats in file %s\n", n, fname);
+    exit (2);
+  }
+  fclose (f);
+}
+
+/* To write the covariance matrix in a compact form */
+void read_sym_matrix (const char * fname, float * v, long d)
+{
+  int ret;
+  long i, j;
+  FILE * f = fopen (fname, "r");
+  if (!f) { 
+    fprintf (stderr, "Unable to open file %s\n", fname);
+    exit (1);
+  }
+
+  for (i = 0 ; i < d ; i++) {
+    ret = fread (v + i * d, sizeof (*v), i+1, f);
+    if (ret != i+1) {
+      fprintf (stderr, "Error read_sym_matrix: Unable to read %ld floats in file %s\n", i+1, fname);
+      exit (2);
+    }
+  }
+
+  for (i = 0 ; i < d ; i++)
+    for (j = 0 ; j < i ; j++)
+      v[j * d + i] = v[i * d + j];
+  fclose (f);
+}
+
+
+/* To read the compacted covariance matrix */
+void write_sym_matrix (const char * fname, const float * v, long d)
+{
+  int ret;
+  long i;
+  FILE * f = fopen (fname, "w");
+  if (!f) { 
+    fprintf (stderr, "Unable to open file %s\n", fname);
+    exit (1);
+  }
+
+  for (i = 0 ; i < d ; i++) {
+    ret = fwrite (v + i * d, sizeof (*v), i+1, f);
+    if (ret != i+1) {
+      fprintf (stderr, "Error read_sym_matrix: Unable to read %ld floats in file %s\n", i+1, fname);
+      exit (2);
+    }
+  }
+  fclose (f);
+}
+
+
+/*---------------------------------*/
+/* Various processing              */
+/*---------------------------------*/
 
 
 /* Pre-processing */
@@ -65,10 +144,15 @@ void preprocess (float * v, int d, long n, float plaw, float norm)
 }
 
 
+/*---------------------------------*/
+/* Online PCA                      */
+/*---------------------------------*/
+
+
 /* Online PCA -> accumulating covariance matrice on-the-fly, using blocks of data */
 #define PCA_BLOCK_SIZE 256
 
-pca_online_t * pca_online (long n, int d, const char * fname, float plaw, float norm)
+pca_online_t * pca_cov (long n, int d, const char * fname, float plaw, float norm)
 {
   long i;
 
@@ -94,19 +178,24 @@ pca_online_t * pca_online (long n, int d, const char * fname, float plaw, float 
       exit (2);
     }
     preprocess (vbuf, d, ntmp, plaw, norm);
-
     pca_online_accu (pca, vbuf, ntmp);
   }
 
-  printf ("* PCA: perform the eigen-decomposition\n");
-  pca_online_complete (pca);
+  pca_online_cov (pca);
 
   free (vbuf);
   fclose (f);
   return pca;
 }
 
-
+pca_online_t * pca_eigen (int d, const char * cov_fname)
+{
+  pca_online_t * pca = pca_online_new (d);
+  read_sym_matrix (cov_fname, pca->cov, d);
+  printf ("* PCA: perform the eigen-decomposition\n");
+  pca_online_complete (pca);
+  return pca;
+}
 
 /* Apply the matrix multiplication by block */
 void apply_pca (const struct pca_online_s * pca, 
@@ -137,6 +226,7 @@ void apply_pca (const struct pca_online_s * pca,
     ntmp = iend - i;
     
     ret = fread (vibuf, sizeof (*vibuf), ntmp * d, fi);
+
     if (ret != d * ntmp) {
       fprintf (stderr, "Unable to read %ld floats in file %s\n", n, finame);
       exit (2);
@@ -163,29 +253,55 @@ void apply_pca (const struct pca_online_s * pca,
 
 
 
+/*---------------------------------*/
+/* Main                            */
+/*---------------------------------*/
+
 int main (int argc, char **argv)
 {
   int i, ret;
   int verbose = 0;
-  int d = -1;
-  int dout = -1;
+  int d = -1;                        /* input dimensionality */
+  int dout = -1;                     /* maximum output dimensionality */
   long n = -1;
   
   float plaw = -1;
   float norm = -1;
 
-  const char * vec_fname = NULL;     /* input vector file */
+  const char * ivec_fname = NULL;    /* input vector file */
   const char * ovec_fname = NULL;    /* output vector file */
-  const char * avg_fname = NULL;   
-  const char * evec_fname = NULL; 
-  const char * eval_fname = NULL; 
+  const char * cov_fname = NULL;     /* file associated with covariance matrix */
+  const char * avg_fname = NULL;     /* vector containing means */
+  const char * evec_fname = NULL;    /* for Eigenvectors */
+  const char * eval_fname = NULL;    /* for Eigenvalues */
 
-  for (i = 1 ; i < argc ; i++) {
-    char *a = argv[i];
+  int action_cov = 0;                /* compute the covariance matrix */
+  int action_eig = 0;                /* compute the PCA */
+  int action_apply = 0;              /* apply the PCA to input file */
 
-    if (!strcmp (a, "-h") || !strcmp (a, "--help"))
-      usage (argv[0]);
-    else if (!strcmp (a, "-verbose") || !strcmp (a, "-v")) {
+  /* First argument is the action to be performed */
+  char *a = argv[1];
+
+  if (argc < 2)
+    usage (argv[0]);
+
+  if (!strcmp (a, "cov"))
+    action_cov = 1;
+  else if (!strcmp (a, "eig"))
+    action_eig = 1;
+  else if (!strcmp (a, "apply"))
+    action_apply = 1;
+  else if (!strcmp (a, "-h") || !strcmp (a, "--help"))
+    usage (argv[0]);
+  else {
+    fprintf (stderr, "Unknown action: %s\n\n", a);
+    usage (argv[0]);
+  }
+  
+  /* Other arguments */
+  for (i = 2 ; i < argc ; i++) {
+    a = argv[i];
+    if (!strcmp (a, "-verbose") || !strcmp (a, "-v")) {
       verbose = 2;
     }
     else if (!strcmp (a, "-n") && i+1 < argc) {
@@ -208,65 +324,124 @@ int main (int argc, char **argv)
       ret = sscanf (argv[++i], "%f", &norm);
       assert (ret);
     }
-    else if (!strcmp (a, "-fi") && i+1 < argc) {
-      vec_fname = argv[++i];
-    }
-    else if (!strcmp (a, "-fo") && i+1 < argc) {
+    //    else if (!strcmp (a, "-fb") && i+1 < argc)
+    //***
+    else if (!strcmp (a, "-fi") && i+1 < argc)
+      ivec_fname = argv[++i];
+    else if (!strcmp (a, "-fo") && i+1 < argc)
       ovec_fname = argv[++i];
-    }
-    else if (!strcmp (a, "-favg") && i+1 < argc) {
+    else if (!strcmp (a, "-fcov") && i+1 < argc)
+      cov_fname = argv[++i];
+    else if (!strcmp (a, "-favg") && i+1 < argc)
       avg_fname = argv[++i];
-    }
-    else if (!strcmp (a, "-fevec") && i+1 < argc) {
+    else if (!strcmp (a, "-fevec") && i+1 < argc)
       evec_fname = argv[++i];
-    }
-    else if (!strcmp (a, "-feval") && i+1 < argc) {
+    else if (!strcmp (a, "-feval") && i+1 < argc)
       eval_fname = argv[++i];
-    }
     else {
       fprintf (stderr, "Unknown argument: %s\nAborting...\n", a);
       exit (4);
     }
   }
 
-  if (verbose) {
-    printf ("d=%d\nn=%ld\nvec=%s\navg=%s\nevec=%s\neval=%s\novec=%s\n",
-	    d, n, vec_fname, avg_fname, evec_fname, eval_fname, ovec_fname);
-  }
-
-  if (d == -1 || n == -1 || !vec_fname)
+  if (d == -1 || n == -1)
     usage (argv[0]);
 
   /* By default, keep all dimensions */
   if (dout == -1)
     dout = d;
 
-
-  /* Online PCA learning */
-  pca_online_t * pca = pca_online (n, d, vec_fname, plaw, norm);
-
-
   if (verbose) {
-    printf ("eigenval = ");
-    fvec_print (pca->eigval, d);
+    printf ("d=%d\nn=%ld\nvec=%s\ncov=%s\navg=%s\nevec=%s\neval=%s\novec=%s\n",
+	    d, n, ivec_fname, cov_fname, avg_fname, evec_fname, eval_fname, ovec_fname);
   }
-  
-  if (avg_fname) 
+
+  /*--- Action: compute the covariance matrix ---*/
+  if (action_cov) {
+    if (!ivec_fname) usage(argv[0]);
+    if (!cov_fname) usage(argv[0]);
+    if (!avg_fname) usage(argv[0]);
+    printf ("Covariance matrix stored in %s\n", cov_fname);
+
+    /* Learning the covariance matrix */
+    pca_online_t * pca = pca_cov (n, d, ivec_fname, plaw, norm);
+
+    if (verbose) {
+      printf ("mu=");    fvec_print (pca->mu,d);
+      printf ("cov=\n"); fmat_print (pca->cov,d,d);
+    }
+
+    /* write means and covariance matrix */
+    write_sym_matrix (cov_fname, pca->cov, d);
     write_raw_floats (avg_fname, pca->mu, d);
 
-  if (eval_fname)
-    write_raw_floats (eval_fname, pca->eigval, d);
-
-  if (evec_fname) 
-    write_raw_floats (evec_fname, pca->eigvec, d*d);
-
-
-  /* Optionnally, apply the PCA */
-  if (ovec_fname) {
-    apply_pca (pca, vec_fname, ovec_fname, d, n, dout, plaw, norm);    
+    pca_online_delete (pca);
   }
 
-  pca_online_delete (pca);
+
+  /*--- Action: Eigen-decomposition ---*/
+  if (action_eig) {
+    if (!cov_fname) usage(argv[0]);
+
+    /* perform the eigen-decomposition: for the moment, slow method */	
+    pca_online_t * pca = pca_eigen (d, cov_fname);
+
+    if (verbose) {
+      printf ("eigenval = ");
+      fvec_print (pca->eigval, d);
+      fmat_print (pca->eigvec, d, d);
+    }
+
+    /* write down the entities associated with eigen-decomposition */  
+    if (eval_fname)
+      write_raw_floats (eval_fname, pca->eigval, d);
+    if (evec_fname) 
+      write_raw_floats (evec_fname, pca->eigvec, d*d);
+
+    pca_online_delete (pca);
+  }
+
+  /*--- Action: apply the PCA ---*/
+  if (action_apply) {
+    pca_online_t * pca = pca_online_new (d);
+
+    if (!ivec_fname) usage(argv[0]);
+    if (!avg_fname) usage(argv[0]);
+    if (!eval_fname) usage(argv[0]);
+    if (!evec_fname) usage(argv[0]);
+
+    FILE * favg = fopen (avg_fname, "r");    assert (favg);
+    FILE * feval = fopen (eval_fname, "r");  assert (feval);
+    FILE * fevec = fopen (evec_fname, "r");  assert (fevec);
+
+    fvec_fread_raw (favg, pca->mu, d);
+    fvec_fread_raw (feval, pca->eigval, d);
+    fvec_fread_raw (fevec, pca->eigvec, d*d);
+    fclose (favg);
+    fclose (feval);
+    fclose (fevec);
+
+    apply_pca (pca, ivec_fname, ovec_fname, d, n, dout, plaw, norm);    
+    pca_online_delete (pca);
+  }
+
   return 0;
 }
+
+/*
+To check in Matlab that this gives the same results:
+
+f=fopen('test','r');
+a=fread(f,'single');
+n=10;a=reshape(a,4,n);
+fclose(f);
+mu=mean(a,2);
+ac=a-repmat(mu,1,n);
+cv=ac*ac'/(n-1);     % Covariance matrix
+
+[cov_eigenvectors,cov_eigenvalues]=eig(cv);
+cov_eigenvalues=diag(cov_eigenvalues);
+[sorted,perm]=sort(cov_eigenvalues, 'descend')
+cov_eigenvectors(:,perm)
+*/
 
