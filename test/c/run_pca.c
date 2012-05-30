@@ -30,8 +30,8 @@ To check in Matlab that this gives the same results:
 
 void usage (const char * cmd)
 {
-  printf ("Usage: %s cov|eig|apply [-v] -n # -d # -fi fi [-fcov fcov] [-favg favg] [-fevec fevec] [-feval feval] [-fo fvout]\n", cmd);
-  
+  printf ("Usage: %s cov|eig|apply [-v] -n # -d # -fi fi [-fcov fcov] [-favg favg]\n"
+	  "          [-fevec fevec] [-feval feval] [-fo fvout]\n\n", cmd);
   printf ("Output: all output file are optional (produced only if option is specified)\n"
 	  "  Parameters (in brackets: corresponding action)\n"
 	  "    cov|eig|apply     first argument is the action to be performed\n"
@@ -42,16 +42,16 @@ void usage (const char * cmd)
 	  "    -n #              number of vectors\n"
           "    -d #              dimension of the vectors\n"
           "    -dout #           dimension of the output vectors\n"
-	  "    -fi filename      file of input vectors (raw format)\n\n"
-	  "   Following parameters are output with 'cov' action, input with 'apply' action\n"
-	  "    -favg filename    raw file containing the mean values\n"
-	  "    -fevec filename   raw file containing the eigenvectors\n"
-	  "    -feval filename   raw file containing the eigenvalues\n\n"
-          "                      -> output with 'cov' action, input with 'apply' action\n\n"
-          "   Parameters for 'apply' action\n"
           "    -plaw #           [apply] pre-process vector using sqrt component-wise normalization\n"
           "    -norm #           [apply] pre-normalization of input vector (may be after powerlaw)\n\n"
-	  "    -fo filename      file of PCA-transformed output vectors (raw format)\n"
+	  "   Following files are input or output, depending the step (cov|eig|apply)\n"
+          "   All these files are in raw format (float32)               |output|input\n"              
+	  "    -fi filename      file of input vectors (raw format)     |      |cov,apply\n"
+	  "    -favg filename    raw file: mean values                  |  cov |eig,apply\n"
+	  "    -fcov filename    raw file: covariance matrix (sym)      |  cov |eig\n"
+	  "    -fevec filename   raw file: eigenvectors                 |  eig |apply\n"
+	  "    -feval filename   raw file: eigenvalues                  |  eig |apply\n"
+	  "    -fo filename      file of PCA-transformed output vectors | apply|\n"
 	  );
   exit (0);
 }
