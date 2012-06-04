@@ -9,7 +9,7 @@
 
 /* sample test:
    ./run_pca cov -fi test.dat -favg test.avg -fcov test.cov -n 10 -d 4 
-   ./run_pca eig -fi test.dat -favg test.avg -fcov test.cov -n 10 -d 4
+   ./run_pca eig -fcov test.cov -fevec test.evec -feval test.eval -n 10 -d 4
    ./run_pca apply -favg test.avg -n 10 -d 4 -fevec test.evec -feval test.eval -fi test.dat -fo test.out
 
 To check in Matlab that this gives the same results:
@@ -47,7 +47,7 @@ void usage (const char * cmd)
 	  "   Following files are input or output, depending the step (cov|eig|apply)\n"
           "   All these files are in raw format (float32)               |output|input\n"              
 	  "    -fi filename      file of input vectors (raw format)     |      |cov,apply\n"
-	  "    -favg filename    raw file: mean values                  |  cov |eig,apply\n"
+	  "    -favg filename    raw file: mean values                  |  cov |apply\n"
 	  "    -fcov filename    raw file: covariance matrix (sym)      |  cov |eig\n"
 	  "    -fevec filename   raw file: eigenvectors                 |  eig |apply\n"
 	  "    -feval filename   raw file: eigenvalues                  |  eig |apply\n"
@@ -402,7 +402,7 @@ int main (int argc, char **argv)
 
   /*--- Action: Eigen-decomposition ---*/
   if (action_eig) {
-    if (!cov_fname) usage(argv[0]);
+    if (!cov_fname || !eval_fname || !evec_fname) usage(argv[0]);
 
     /* perform the eigen-decomposition: for the moment, slow method */	
     pca_online_t * pca = pca_eigen (d, cov_fname);
@@ -414,10 +414,8 @@ int main (int argc, char **argv)
     }
 
     /* write down the entities associated with eigen-decomposition */  
-    if (eval_fname)
-      write_raw_floats (eval_fname, pca->eigval, d);
-    if (evec_fname) 
-      write_raw_floats (evec_fname, pca->eigvec, d*d);
+    write_raw_floats (eval_fname, pca->eigval, d);
+    write_raw_floats (evec_fname, pca->eigvec, d*d);
 
     pca_online_delete (pca);
   }
@@ -448,7 +446,3 @@ int main (int argc, char **argv)
 
   return 0;
 }
-
-/*
-*/
-
