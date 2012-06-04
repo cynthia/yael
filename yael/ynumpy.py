@@ -106,6 +106,17 @@ def fvecs_read(filename):
     a = yael.fvec_to_numpy(fvecs, n * d)
     return a.reshape((n, d))
 
+def ivecs_read(filename):
+    (fvecs, n, d) = yael.ivecs_new_read(filename)
+    if n == -1: 
+        raise IOError("could not read " + filename)
+    elif n == 0: d = 0    
+    ivecs = yael.ivec.acquirepointer(fvecs)
+    # TODO find a way to avoid copy
+    a = yael.ivec_to_numpy(fvecs, n * d)
+    return a.reshape((n, d))
+
+
 
 def fvecs_write(filename, matrix): 
     _check_row_float32(matrix)

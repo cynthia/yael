@@ -4,7 +4,7 @@ include ../makefile.inc
 
 CC=gcc 
 
-all: libyael.a libyael.$(SHAREDEXT) _yael.so
+all: libyael.a libyael.$(SHAREDEXT) _yael.so __init__.py
 
 
 ifeq "$(USEARPACK)" "yes"
@@ -66,6 +66,9 @@ yael_wrap.c : yael.swg common.swg nn.h kmeans.h gmm.h eigs.h hkm.h \
 
 _yael.so: yael_wrap.o libyael.$(SHAREDEXT)
 	$(CC) $(LDFLAGS) -o $@ $(WRAPLDFLAGS) $^ $(PYTHONLDFLAGS) $(LAPACKLDFLAGS) $(THREADLDFLAGS) $(YAELLDFLAGS)
+
+__init__.py: 
+	touch $@
 
 #############################
 # Dependencies  
