@@ -96,8 +96,11 @@ def fvecs_fsize(filename):
     # WARN: if file is empty, (d, n) = (-1, 0)
     return (n, d)
 
-def fvecs_read(filename):
-    (fvecs, n, d) = yael.fvecs_new_read(filename)
+def fvecs_read(filename, nmax = -1):
+    if nmax < 0: 
+        (fvecs, n, d) = yael.fvecs_new_read(filename)
+    else: 
+        (fvecs, n, d) = yael.fvecs_new_fread_max(open(filename, "r"), nmax)
     if n == -1: 
         raise IOError("could not read " + filename)
     elif n == 0: d = 0    
