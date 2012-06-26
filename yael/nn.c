@@ -549,7 +549,7 @@ void knn_reorder_shortlist(int n, int nb, int d, int k,
       ki=j;
       ivec_sort(assigni,ki); /* to improve access locality */
       for(j=0;j<ki;j++) {
-        memcpy(subb+j*d,b+assigni[j]*d,sizeof(*subb)*d);
+        memcpy(subb+j*d,b+assigni[j]*(long) d,sizeof(*subb)*d);
       } 
     }
 
