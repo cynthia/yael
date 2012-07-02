@@ -1027,8 +1027,15 @@ void pca_online_complete_part (struct pca_online_s * pca, int nev)
   if (pca->n > 0)
     pca_online_cov (pca);
 
-  int ret = eigs_sym_part(pca->d,pca->cov,nev,pca->eigval,pca->eigvec);
-  assert (ret == 0);
+  if (nev * 2 >= pca->d)
+    pca_online_complete (pca);
+  else {
+    int ret = eigs_sym_part(pca->d,pca->cov,nev,pca->eigval,pca->eigvec);
+    assert (ret > 0);
+    if(ret<nev) 
+      printf("!!! only %d / %d eigenvalues converged\n",ret,nev);
+    
+  }
 }
 
 

@@ -71,7 +71,7 @@ pca_online_t * pca_online (long n, int d, const float *v)
 
 
 /* Apply the matrix multiplication by block */
-void apply_pca (const struct pca_online_s * pca, const float * v, float * vo, int d, int n, int dout)
+void apply_pca (const struct pca_online_s * pca, float * v, float * vo, int d, int n, int dout)
 {
   long i;
 

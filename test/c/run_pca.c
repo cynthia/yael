@@ -136,7 +136,7 @@ void write_sym_matrix (const char * fname, const float * v, long d)
   for (i = 0 ; i < d ; i++) {
     ret = fwrite (v + i * d, sizeof (*v), i+1, f);
     if (ret != i+1) {
-      fprintf (stderr, "Error read_sym_matrix: Unable to read %ld floats in file %s\n", i+1, fname);
+      fprintf (stderr, "Error write_sym_matrix: Unable to read %ld floats in file %s\n", i+1, fname);
       exit (2);
     }
   }
@@ -209,12 +209,15 @@ pca_online_t * pca_cov (long n, int d, const char * fname, float plaw, float nor
   return pca;
 }
 
-pca_online_t * pca_eigen (int d, const char * cov_fname)
+pca_online_t * pca_eigen (const char * cov_fname, int d, int dout)
 {
   pca_online_t * pca = pca_online_new (d);
   read_sym_matrix (cov_fname, pca->cov, d);
   printf ("* PCA: perform the eigen-decomposition\n");
-  pca_online_complete (pca);
+
+  fmat_print (pca->cov, d, d);
+
+  pca_online_complete_part (pca, dout);
   return pca;
 }
 
@@ -389,7 +392,7 @@ int main (int argc, char **argv)
 
     if (verbose) {
       printf ("mu=");    fvec_print (pca->mu,d);
-      printf ("cov=\n"); fmat_print (pca->cov,d,d);
+      printf ("\ncov=\n"); fmat_print (pca->cov,d,dout);
     }
 
     /* write means and covariance matrix */
@@ -405,17 +408,17 @@ int main (int argc, char **argv)
     if (!cov_fname || !eval_fname || !evec_fname) usage(argv[0]);
 
     /* perform the eigen-decomposition: for the moment, slow method */	
-    pca_online_t * pca = pca_eigen (d, cov_fname);
+    pca_online_t * pca = pca_eigen (cov_fname, d, dout);
 
     if (verbose) {
       printf ("eigenval = ");
       fvec_print (pca->eigval, d);
-      fmat_print (pca->eigvec, d, d);
+      fmat_print (pca->eigvec, d, dout);
     }
 
     /* write down the entities associated with eigen-decomposition */  
-    write_raw_floats (eval_fname, pca->eigval, d);
-    write_raw_floats (evec_fname, pca->eigvec, d*d);
+    write_raw_floats (eval_fname, pca->eigval, dout);
+    write_raw_floats (evec_fname, pca->eigvec, d*dout);
 
     pca_online_delete (pca);
   }
@@ -434,8 +437,8 @@ int main (int argc, char **argv)
     FILE * fevec = fopen (evec_fname, "r");  assert (fevec);
 
     fvec_fread_raw (favg, pca->mu, d);
-    fvec_fread_raw (feval, pca->eigval, d);
-    fvec_fread_raw (fevec, pca->eigvec, d*d);
+    fvec_fread_raw (feval, pca->eigval, dout);
+    fvec_fread_raw (fevec, pca->eigvec, d*dout);
     fclose (favg);
     fclose (feval);
     fclose (fevec);

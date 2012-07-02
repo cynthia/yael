@@ -208,7 +208,7 @@ float * hadamard (int d);
 /*---------------------------------------------------------------------------*/
 
 /* compute average of v matrix columns, subtract it to v and return average */
-float *fmat_center_columns(int d,int n,float *v);
+float *fmat_center_columns(int d,int n,float *v); 
 
 /* subtract a vector from all columns of a matrix, m_i := m_i - avg*/
 void fmat_subtract_from_columns(int d,int n,float *m,const float *avg);

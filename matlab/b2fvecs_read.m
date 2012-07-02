@@ -48,7 +48,12 @@ end
 
 % compute the number of vectors that are really read and go in starting positions
 n = b - a + 1;
+a
+(a-1)*vecsizeof
+
 fseek (fid, (a - 1) * vecsizeof, -1);
+
+fprintf ('b2fvecs_read -> pos=%d\n', ftell (fid));
 
 % read n vectors
 v = fread (fid, (d + 4) * n, 'uint8=>single');
