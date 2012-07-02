@@ -9,7 +9,7 @@
 
 /* sample test:
    ./run_pca cov -fi test.dat -favg test.avg -fcov test.cov -n 10 -d 4 
-   ./run_pca eig -fcov test.cov -fevec test.evec -feval test.eval -n 10 -d 4 -dout 2
+   ./run_pca eig -fcov test.cov -fevec test.evec -feval test.eval -d 4 -dout 2
    ./run_pca apply -favg test.avg -n 10 -d 4 -dout 2 -fevec test.evec -feval test.eval -fi test.dat -fo test.out
 
 To check in Matlab that this gives the same results:
@@ -366,7 +366,7 @@ int main (int argc, char **argv)
     }
   }
 
-  if (d == -1 || n == -1)
+  if (d == -1)
     usage (argv[0]);
 
   /* By default, keep all dimensions */
@@ -380,6 +380,7 @@ int main (int argc, char **argv)
 
   /*--- Action: compute the covariance matrix ---*/
   if (action_cov) {
+    if (n < 0) usage (argv[0]);
     if (!ivec_fname) usage(argv[0]);
     if (!cov_fname) usage(argv[0]);
     if (!avg_fname) usage(argv[0]);
