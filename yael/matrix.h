@@ -319,6 +319,11 @@ void pca_online_cov (struct pca_online_s * pca);
    The output is stored in the structure itself  */
 void pca_online_complete (struct pca_online_s * pca);
 
+/*! Same function as pca_online_complete but for compute only the eigenvectors 
+  associated with the nev largest eigenvalues */
+void pca_online_complete_part (struct pca_online_s * pca, int nev);
+
+
 /*! Project some vectors according to a PCA structure */
 void pca_online_project (const pca_online_t * pca, const float * v, float * vo, int d, long n, int dout);
 

@@ -1020,6 +1020,18 @@ void pca_online_complete (struct pca_online_s * pca)
 }
 
 
+/* compute the mean, the covariance matrix, and the eigenvectors.
+   They are stored in the structure itself  */
+void pca_online_complete_part (struct pca_online_s * pca, int nev)
+{
+  if (pca->n > 0)
+    pca_online_cov (pca);
+
+  int ret = eigs_sym_part(pca->d,pca->cov,nev,pca->eigval,pca->eigvec);
+  assert (ret == 0);
+}
+
+
 void pca_online_project (const pca_online_t * pca, const float * v, float * vo, int d, long n, int dout)
 {
   const char trmat[2] = {'T', 'N'};
@@ -1030,4 +1042,3 @@ void pca_online_project (const pca_online_t * pca, const float * v, float * vo, 
   fmat_mul_full (pca->eigvec, vb, dout, n, pca->d, trmat, vo);
   free (vb);
 }
-
