@@ -8,6 +8,7 @@
 
 
 /* sample test:
+   export OMP_NUM_THREADS=16
    ./run_pca cov -fi test.dat -favg test.avg -fcov test.cov -n 10 -d 4 
    ./run_pca eig -fcov test.cov -fevec test.evec -feval test.eval -d 4 -dout 2
    ./run_pca apply -favg test.avg -n 10 -d 4 -dout 2 -fevec test.evec -feval test.eval -fi test.dat -fo test.out
