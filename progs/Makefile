@@ -9,13 +9,13 @@ all: kmeans knn fvecfile ivecfile bvecfile
 
 
 ifeq "$(USEARPACK)" "yes"
-  EXTRAYAELLDFLAG=$(ARPACKLDFLAGS)
+  YAELLDFLAGS+=$(ARPACKLDFLAGS)
   EXTRAMATRIXFLAG=-DHAVE_ARPACK
 endif
 
 ifeq "$(USEOPENMP)" "yes"
   EXTRAMATRIXFLAG+=-fopenmp
-  EXTRAYAELLDFLAG+=-fopenmp
+  YAELLDFLAGS+=-fopenmp
 endif
 
 
