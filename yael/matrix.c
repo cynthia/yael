@@ -260,12 +260,17 @@ void fmat_shuffle_columns(float *a, int nrow, int ncol) {
 
 
 float *fmat_new_get_columns (const float *a, int nrow, int ncolout, const int *cols) {
-  int i,j;
   float *b = fmat_new (nrow, ncolout);
-  for(j=0;j<ncolout;j++)
-    for(i=0;i<nrow;i++) 
-      b[j*nrow+i]=a[i+nrow*cols[j]];
+  fmat_get_columns(a, nrow, ncolout, cols, b);
   return b;
+}
+
+void fmat_get_columns (const float *a, int d, int ncolout, const int *cols, float *b) {
+  int j;
+  for(j=0;j<ncolout;j++)
+    memcpy(b + j * d, 
+           a + cols[j] * d, 
+           d * sizeof(a[0]));
 }
 
 
@@ -308,6 +313,32 @@ float *fmat_new_sum_rows (const float *a, int nrow, int ncol)
   fmat_sum_rows (a, nrow, ncol, sums);
   return sums;
 }
+
+int fmat_remove_0_columns(float *a, int d, int n) {
+  int nnz = 0, i; 
+  for(i = 0; i < n; i++) {
+    if(!fvec_all_0(a + d * i, d)) {
+      if(nnz != i) 
+        memcpy(a + d * nnz, a + d * i, sizeof(float) * d);
+      nnz ++; 
+    }    
+  }
+  return nnz;
+}
+
+static int first = 1;
+
+void fmat_normalize_columns_l2sqr_pow(float *a, int d, int n, float pw) {
+  int i; 
+  for(i = 0; i < n; i++) {
+    double l2sqr = fvec_norm2sqr(a + d * i, d); 
+    double norm = pow(l2sqr, pw); 
+    fvec_mul_by(a + d * i, d, norm); 
+  }
+}
+
+
+
 
 /*---------------------------------------------------------------------------*/
 /* Special matrices                                                          */
@@ -591,56 +622,6 @@ float* fmat_new_transp (const float *a, int ncol, int nrow)
       vt[i*nrow+j]=a[j*ncol+i];
 
   return vt;
-}
-
-/* algo from http://cheshirekow.com/blog/?p=4 
-   complexity in O((ncol*nrow)^2) ??? */
-void fmat_inplace_transp(float *a, int ncol, int nrow)
-{
-  int length,k_start,k_new,k,i,j;
-
-  length=ncol*nrow;
-
-  for(k_start=1; k_start < length; k_start++)
-  {
-    float temp = a[k_start];
-    float aux;
-    int abort = 0;
-
-    k_new = k = k_start;
-    do
-    {
-      if( k_new < k_start )
-      {
-	abort = 1;
-	break;
-      }
-      k = k_new;
-      i = k% nrow;
-      j = k/nrow;
-      k_new = i*ncol + j;
-    }while(k_new != k_start);
-
-    if(abort)
-      continue;
-
-    k_new = k = k_start;
-    do
-    {
-      aux=temp;
-      temp = a[k_new];
-      a[k_new]=aux;
-
-      k       = k_new;
-      i       = k%nrow;
-      j       = k/nrow;
-      k_new   = i*ncol + j;
-    }while(k_new != k_start);
-    
-    aux=temp;
-    temp = a[k_new];
-    a[k_new]=aux;
-  }
 }
 
 

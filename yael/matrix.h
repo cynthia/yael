@@ -138,6 +138,8 @@ int *imat_get_submatrix (const int *a, int nrow,
 /*! return the submatrix defined by a list of columns  */
 float *fmat_new_get_columns (const float *a, int nrow, int ncolout, const int *cols);
 
+void fmat_get_columns (const float *a, int d, int ncolout, const int *cols, float *out);
+
 void fmat_shuffle_columns(float *a, int nrow, int ncol);
 
 /*! produce a vector by taking a particular row of a matrix */
@@ -170,8 +172,6 @@ float *fmat_new_vstack(const float *a,int da,
 
 float *fmat_new_transp (const float *a, int ncol, int nrow);
 
-void fmat_inplace_transp ( float *a, int ncol, int nrow);
-
 /*! RM 
  * a is ncol-by-nrow
  * accu is k-by-k
@@ -186,6 +186,14 @@ void fmat_splat_separable(const float *a,int nrow,int ncol,
                           float *accu); 
 
 int *imat_joint_histogram(int n,int k,int *row_assign,int *col_assign);
+
+
+/*! removes 0-filled columns of a matrix. Returns new number of columns */
+int fmat_remove_0_columns(float *a, int d, int n); 
+
+/*! replaces each column with colmn * (norm2sqr of column) ^ pw */
+void fmat_normalize_columns_l2sqr_pow(float *a, int d, int n, float pw); 
+
 
 /*---------------------------------------------------------------------------*/
 /* Special matrices                                                          */

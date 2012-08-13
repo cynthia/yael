@@ -1883,6 +1883,12 @@ void ivec_add_scalar (int * v, long n, int scal) {
     v[i] += scal;
 }
 
+void fvec_add_scalar (float * v, long n, float scal) {
+  long i = 0;
+  for (i = 0 ; i < n ; i++)
+    v[i] += scal;
+}
+
 
 /*---------------------------------------------------------------------------*/
 /* NaN's and non-finite elements                                             */

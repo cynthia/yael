@@ -19,6 +19,8 @@ def _check_row_float32(a):
     if not a.flags.c_contiguous:
         raise TypeError('expected C order matrix')
 
+
+
 def knn(queries, base, 
         nnn = 1, 
         distance_type = 2,
@@ -29,8 +31,8 @@ def knn(queries, base,
     nq, d2 = queries.shape
     assert d == d2, "base and queries must have same nb of rows (got %d != %d) " % (d, d2)
     
-    idx = numpy.zeros((nq, nnn), dtype = numpy.int32)
-    dis = numpy.zeros((nq, nnn), dtype = numpy.float32)
+    idx = numpy.empty((nq, nnn), dtype = numpy.int32)
+    dis = numpy.empty((nq, nnn), dtype = numpy.float32)
 
     yael.knn_full_thread(distance_type, 
                          nq, n, d, nnn,
@@ -58,9 +60,9 @@ def kmeans(v, k,
     n, d = v.shape
     
     centroids = numpy.zeros((k, d), dtype = numpy.float32)
-    dis = numpy.zeros(n, dtype = numpy.float32)
-    assign = numpy.zeros(n, dtype = numpy.int32)
-    nassign = numpy.zeros(k, dtype = numpy.int32)
+    dis = numpy.empty(n, dtype = numpy.float32)
+    assign = numpy.empty(n, dtype = numpy.int32)
+    nassign = numpy.empty(k, dtype = numpy.int32)
     
     flags = nt 
     if not verbose:          flags |= yael.KMEANS_QUIET
@@ -252,7 +254,7 @@ def cross_distances(a, b, distance_type = 12):
 
     assert d2 == d
 
-    dis = numpy.zeros((nb, na), dtype = numpy.float32)
+    dis = numpy.empty((nb, na), dtype = numpy.float32)
 
     yael.compute_cross_distances_alt_nonpacked(distance_type, d, na, nb,
                                                yael.numpy_to_fvec_ref(a), d,
@@ -263,4 +265,18 @@ def cross_distances(a, b, distance_type = 12):
 
 
     
+def extract_lines(a, indices):
+    " returns a[indices, :] (this operation is slow in numpy) "
+    _check_row_float32(a)
+    n, d = a.shape
+    if indices.dtype != numpy.int32: raise TypeError('expected int32 vector, got %s' % indices.dtype)
+    assert indices.min() >= 0 and indices.max() < n
+    out = numpy.empty((indices.size, d), dtype = numpy.float32)
+    yael.fmat_get_columns(yael.numpy_to_fvec_ref(a),
+                          d, indices.size,
+                          yael.numpy_to_ivec_ref(indices),
+                          yael.numpy_to_fvec_ref(out))
 
+    return out
+    
+    

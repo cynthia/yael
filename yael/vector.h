@@ -449,6 +449,7 @@ void ivec_sub (int * v1, const int * v2, long n);
 void ivec_mul_by (int * v1,long n, int scal);
 void ivec_mod_by (int * v1,long n, int scal);
 void ivec_add_scalar (int * v, long n, int scal);
+void fvec_add_scalar (float * v, long n, float scal);
 
 
 /*! Replace the "Not a number" values by a given value */
