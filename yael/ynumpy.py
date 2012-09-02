@@ -19,6 +19,12 @@ def _check_row_float32(a):
     if not a.flags.c_contiguous:
         raise TypeError('expected C order matrix')
 
+def _check_row_int32(a): 
+    if a.dtype != numpy.int32: 
+        raise TypeError('expected int32 matrix, got %s' % a.dtype)
+    if not a.flags.c_contiguous:
+        raise TypeError('expected C order matrix')
+
 
 
 def knn(queries, base, 
@@ -266,10 +272,10 @@ def cross_distances(a, b, distance_type = 12):
 
     
 def extract_lines(a, indices):
-    " returns a[indices, :] (this operation is slow in numpy) "
+    " returns a[indices, :] from a matrix a (this operation is slow in numpy) "
     _check_row_float32(a)
+    _check_row_int32(indices)
     n, d = a.shape
-    if indices.dtype != numpy.int32: raise TypeError('expected int32 vector, got %s' % indices.dtype)
     assert indices.min() >= 0 and indices.max() < n
     out = numpy.empty((indices.size, d), dtype = numpy.float32)
     yael.fmat_get_columns(yael.numpy_to_fvec_ref(a),
@@ -279,4 +285,19 @@ def extract_lines(a, indices):
 
     return out
     
-    
+def extract_rows_cols(K, subset_rows, subset_cols):
+    " returns K[numpy.ix_(subset_rows, subset_cols)] (also slow in pure numpy)"
+    _check_row_float32(K)
+    _check_row_int32(subset_rows)
+    _check_row_int32(subset_cols)
+    nr = subset_rows.size
+    nc = subset_cols.size
+    assert subset_rows.min() >= 0 and subset_rows.max() < K.shape[0]
+    assert subset_cols.min() >= 0 and subset_cols.max() < K.shape[1]    
+    Ksub = numpy.empty((nr, nc), dtype = numpy.float32)
+    yael.fmat_get_rows_cols(yael.numpy_to_fvec_ref(K),
+                            K.shape[0],
+                            nc, yael.numpy_to_ivec_ref(subset_cols),
+                            nr, yael.numpy_to_ivec_ref(subset_rows),
+                            yael.numpy_to_fvec_ref(Ksub))
+    return Ksub

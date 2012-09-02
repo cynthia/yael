@@ -427,27 +427,44 @@ PyObject * xvec ## _to_numpy_ref(ctype *src, long di) {
 }
 
 
-ctype *numpy_to_ ## xvec(PyObject *a) {
-  CHECK_NUMPY_ARRAY(numpytype)
-  size_t sz = PyArray_SIZE(a) * PyArray_ITEMSIZE(a);
+ctype *numpy_to_ ## xvec(long di, ctype *data) {
+  size_t sz = di * sizeof(ctype);
   void *ret = malloc(sz);
-  memcpy(ret, PyArray_DATA(a), sz);
+  memcpy(ret, data, sz);
   return ret;
 }
 
-ctype *numpy_to_ ## xvec ## _ref(PyObject *a) {
-  CHECK_NUMPY_ARRAY(numpytype)
-  return PyArray_DATA(a);
+ctype *numpy_to_ ## xvec ## _ref(long di, ctype *data) {
+  return data;
 }
 
 %}
+
+
 
 // re-declare for SWIG
 
 PyObject * xvec ## _to_numpy(const ctype *src,long di);
 PyObject * xvec ## _to_numpy_ref(ctype *src, long di);
-ctype *numpy_to_ ## xvec(PyObject *a);
-ctype *numpy_to_ ## xvec ## _ref(PyObject *a);
+
+%typemap(in, numinputs=1) (long di, ctype *data) {
+  if(!PyArray_Check($input)) {
+    PyErr_SetString(PyExc_ValueError, "input not a numpy array");
+    return NULL;
+  }
+  if(PyArray_TYPE($input) != numpytype) {
+    PyErr_SetString(PyExc_ValueError, "array has bad type");
+    return NULL;
+  }
+  
+  $1 = PyArray_SIZE($input);
+  $2 = PyArray_DATA($input);
+}
+
+ctype *numpy_to_ ## xvec(long di, ctype *data);
+ctype *numpy_to_ ## xvec ## _ref(long di, ctype *data);
+
+%typemap(in, numinputs=1) (long di, ctype *data);
 
 %enddef
 
@@ -461,21 +478,6 @@ ctype *numpy_to_ ## xvec ## _ref(PyObject *a);
 #define SWIG_FILE_WITH_INIT
 
 #include <numpy/arrayobject.h>
-
-#define CHECK_NUMPY_ARRAY(expected_npy)                                 \
-  if(!a) {                                                              \
-    fprintf(stderr,"%s: NULL input\n",__PRETTY_FUNCTION__);             \
-    return NULL;                                                        \
-  }                                                                     \
-  if(!PyArray_Check(a)) {                                               \
-    fprintf(stderr,"%s: input not numpy array\n",__PRETTY_FUNCTION__);  \
-    return NULL;                                                        \
-  }                                                                     \
-  if(PyArray_TYPE(a)!=expected_npy) {                                   \
-    fprintf(stderr,"%s: input has bad type (type id %d != expected %d)\n",__PRETTY_FUNCTION__, \
-            PyArray_TYPE(a),expected_npy);                              \
-    return NULL;                                                        \
-  }
 
 %}
 

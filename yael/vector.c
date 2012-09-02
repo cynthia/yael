@@ -1629,6 +1629,11 @@ void bvectofvec (const unsigned char * v, float * vb, long n)
     vb[i] = (float) v[i];
 }
 
+void fvectodvec (const float *a, double *b, long n) {
+  long i; 
+  for (i = 0 ; i < n ; i++)
+    b[i] = a[i];  
+}
 
 
 /*---------------------------------------------------------------------------*/

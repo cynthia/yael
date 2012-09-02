@@ -265,6 +265,22 @@ float *fmat_new_get_columns (const float *a, int nrow, int ncolout, const int *c
   return b;
 }
 
+void fmat_get_rows_cols(const float *a, int d, 
+                        int nrow, const int *rows, 
+                        int ncol, const int *cols, 
+                        float *out) {
+  int i, j, k = 0;
+
+  for(j = 0; j < ncol; j++) {
+    const float *a_col = a + cols[j] * d;
+    for(i = 0; i < nrow; i++) {
+      out[k++] = a_col[rows[i]];
+    }
+  }
+  
+}
+
+
 void fmat_get_columns (const float *a, int d, int ncolout, const int *cols, float *b) {
   int j;
   for(j=0;j<ncolout;j++)

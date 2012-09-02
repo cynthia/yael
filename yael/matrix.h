@@ -140,6 +140,16 @@ float *fmat_new_get_columns (const float *a, int nrow, int ncolout, const int *c
 
 void fmat_get_columns (const float *a, int d, int ncolout, const int *cols, float *out);
 
+/*! return the matrix defined by 
+
+out(i, j) = a(rows[i], cols[j])
+
+*/
+void fmat_get_rows_cols(const float *a, int d, 
+                          int n_row, const int *rows, 
+                          int n_col, const int *cols, 
+                          float *out);
+
 void fmat_shuffle_columns(float *a, int nrow, int ncol);
 
 /*! produce a vector by taking a particular row of a matrix */
