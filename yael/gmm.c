@@ -204,18 +204,6 @@ double static inline sqr (double x)
 }
 
 
-/* support function to compute log(a+b) from log(a) and log(b) 
-   without loss of precision */
-static double log_sum (double log_a, double log_b)
-{
-  double log_s;
-  if (log_a < log_b)
-    log_s = log_b + log (1 + exp (log_a - log_b));
-  else
-    log_s = log_a + log (1 + exp (log_b - log_a));
-  return log_s;
-}
-
 #define CHECKFINITE(a) if(!finite(a)) {fprintf(stderr,"!!!! gmm_compute_p: not finite " #a "=%g at line %d\n",a,__LINE__); abort(); }; 
 
 
@@ -267,6 +255,42 @@ static void compute_mahalanobis_sqr(int n,long k,long d,
 
 }
 
+
+/* This could be optimized a bit more with sse */
+static void softmax_ref(int k, int n, const float *f, float *p, float *coeffs) {
+  int i;
+
+#define F(i,j) f[(i) + (j) * k] 
+#define P(i,j) p[(i) + (j) * k] 
+
+  for (i = 0; i < n; i++) { /* loop over examples */
+    int l;
+
+    /* find max */
+    float maxval = -1e30;
+    for(l = 0; l < k; l++) /* loop over examples */
+      if(F(l, i) > maxval) maxval = F(l, i);
+
+    float s = 0.0;
+    for(l = 0; l < k; l++) {
+      P(l, i) = exp(F(l, i) - maxval);
+      s += P(l, i); 
+    }
+
+    if(coeffs) 
+      coeffs[i] = log(s) + maxval;
+    
+    float is = 1.0 / s;
+    for(l = 0; l < k; l++) 
+      P(l, i) *= is;
+  }
+
+#undef F
+#undef P
+
+}
+
+
 /* compute p(ci|x). Warning: also update det */
 
 void gmm_compute_p (int n, const float * v, 
@@ -280,7 +304,7 @@ void gmm_compute_p (int n, const float * v,
   double dtmp;
   long d=g->d, k=g->k;
 
-
+  /* p_i(x|\lambda)'s denominator, eq (7) */
   float * logdetnr = fvec_new(k);
 
   for (j = 0 ; j < k ; j++) {
@@ -291,7 +315,7 @@ void gmm_compute_p (int n, const float * v,
 
   /* compute all probabilities in log domain */
 
-  /* compute squared Mahalanobis distances (result in p) */
+  /* compute squared Mahalanobis distances (result in p), log of numerator eq (7)  */
 
   if(0) { /* simple & slow */
     for (i = 0 ; i < n ; i++) {
@@ -307,58 +331,23 @@ void gmm_compute_p (int n, const float * v,
     compute_mahalanobis_sqr(n,k,d,g->mu,g->sigma,v,p); 
   }
 
-  /* convert distances to probabilities, staying in the log domain 
-     until the very end */
-  for (i = 0 ; i < n ; i++) {
+  float *lg = (float*)malloc(sizeof(float) *  k); 
 
+  if(flags & GMM_FLAGS_W) {
+    for (j = 0 ; j < k ; j++) 
+      lg[j] = log(g->w[j]);      
+  } else
+    memset(lg, 0, sizeof(float) * k);
+  
+  for (i = 0 ; i < n ; i++) {      
+    /* p contains log(p_j(x|\lambda)) eq (7) */
     for (j = 0 ; j < k ; j++) {
-      p[i * k + j] = logdetnr[j] - 0.5 * p[i * k + j];
-      CHECKFINITE(p[i * k + j]);
+      p[i * k + j] = logdetnr[j] - 0.5 * p[i * k + j] + lg[j];
     }
-
-    /* at this point, we have p(x|ci) -> we want p(ci|x) */
-    
-
-    if(flags & GMM_FLAGS_NO_NORM) {     /* compute the normalization factor */
-
-      dtmp=0;
-
-    } else {
-
-      dtmp = p[i * k + 0];
-      
-      if(flags & GMM_FLAGS_W) 
-        dtmp+=log(g->w[0]);
-
-      for (j = 1 ; j < k ; j++) {
-        double log_p=p[i * k + j];
-
-        if(flags & GMM_FLAGS_W) 
-          log_p+=log(g->w[j]);
-
-        dtmp = log_sum (dtmp, log_p);
-      }
-
-      /* now dtmp contains the log of sums */
-    } 
-
-    for (j = 0 ; j < k ; j++) {
-      double log_norm=0;
-
-      if(flags & GMM_FLAGS_W)
-        log_norm=log(g->w[j])-dtmp;
-      else
-        log_norm=-dtmp;
-
-      p[i * k + j] = exp (p[i * k + j] + log_norm);
-      CHECKFINITE(p[i * k + j]);
-    }
-
-    //    printf ("p[%d] = ", i);
-    //    fvec_print (p + i * k, k);
   }
+  free(lg);
+  softmax_ref(k, n, p, p, NULL);
 
-  free(logdetnr);
 
 }
 
@@ -526,7 +515,7 @@ void gmm_fisher(int n, const float *v, const gmm_t * g, int flags, float *dp_dla
       dp_dlambda[ii++]=accu/sqrt(f);
     }
   } 
-  
+
   if(flags & GMM_FLAGS_MU) {
     float *dp_dmu=dp_dlambda+ii;
 
@@ -564,6 +553,7 @@ void gmm_fisher(int n, const float *v, const gmm_t * g, int flags, float *dp_dla
       }
 
     }
+
     /* normalization */
     if(!(flags & GMM_FLAGS_NO_NORM)) {
       for(j=0;j<k;j++) 
@@ -625,8 +615,10 @@ void gmm_fisher(int n, const float *v, const gmm_t * g, int flags, float *dp_dla
       float *v2 = fvec_new(n * d);
       for(i = n*d-1 ; i >= 0; i--) v2[i] = v[i] * v[i];
       float *v2p = fvec_new(k * d);
+
       fmat_mul_tr(v2,p,d,k,n,v2p);
       free(v2);
+
 
 #define V2P(l,j) v2p[(j)*d+(l)]
 #define DP_DSIGMA(i,j) dp_dsigma[(i)+(j)*d]
