@@ -209,6 +209,7 @@ def _numpy_to_gmm((w, mu, sigma)):
     gmm.__del__ = _gmm_del
     return gmm
 
+
 def gmm_learn(v, k,
               nt = 1,
               niter = 30,
@@ -228,6 +229,16 @@ def gmm_learn(v, k,
 
     yael.gmm_delete(gmm)    
     return gmm_npy
+
+def gmm_read(filename):
+    gmm = yael.gmm_read(open(filename, "r"))
+    gmm_npy = _gmm_to_numpy(gmm) 
+
+    yael.gmm_delete(gmm)    
+    return gmm_npy
+
+    
+    
 
 def fisher(gmm_npy, v, 
            include = 'mu'): 
