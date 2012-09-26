@@ -277,19 +277,33 @@ double getmillisecs()
  *
  * generic thread stuff */
 
+#ifdef _OPENMP 
+
 #include <omp.h>
 
+#define SET_NT omp_set_num_threads(nt)
+#define GET_THREAD_NUM omp_get_thread_num()
 
-void compute_tasks (int n, int nthread,
+#else
+
+#define SET_NT
+#define GET_THREAD_NUM 0
+
+/* #pragma's will be ignored */
+
+#endif
+
+
+void compute_tasks (int n, int nt,
                     void (*task_fun) (void *arg, int tid, int i),
                     void *task_arg)
 {
   int i;
 
-  omp_set_num_threads(nthread); 
+  SET_NT;
 
 #pragma omp parallel for schedule(dynamic) 
   for(i = 0; i < n; i++) 
-    (*task_fun)(task_arg, omp_get_thread_num(), i);
+    (*task_fun)(task_arg, GET_THREAD_NUM, i);
 
 }
