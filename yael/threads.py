@@ -1,5 +1,5 @@
 
-import sys,time,inspect,thread,threading,os,errno,types,traceback
+import sys,time,inspect,thread,threading,os,errno,types,traceback, random
 
 from yael import count_cpu
 import yael
@@ -270,7 +270,6 @@ class ParallelMap:
 def parallel_map(n,l,f):
   return ParallelMap(n,l,f).result
 
-
   
 
 class ParallelIter:
@@ -280,7 +279,10 @@ class ParallelIter:
   def __init__(self,n,l,f):
     (self.n,self.l,self.f)=(n,enumerate(l),f)
     self.exception=None
+    # condition variable to signal new result to consumer
     self.cv=threading.Condition()
+    # protect producer
+    self.src_lock = thread.allocate_lock()
     self.stop=False
     self.k_out=0
     self.results={}
@@ -294,13 +296,17 @@ class ParallelIter:
   def next(self):
     self.cv.acquire()
     try:
-      while True: 
-        if self.k_out in self.results:
+      while True:        
+        if self.exception not in (None, "src_stopped"):
+          # raise exception as soon as possible (useful for KeyboardInterrupt)
+          raise self.exception
+        elif self.k_out in self.results:
           res=self.results.pop(self.k_out)
           self.k_out+=1
           return res
-        elif self.exception and self.n_run==0:
-          raise self.exception
+        elif self.exception == "src_stopped":
+          # only when there are no results left
+          raise StopIteration()
         self.cv.wait()    
     finally:
       self.cv.release()
@@ -308,23 +314,25 @@ class ParallelIter:
       
   def loop(self):
     while True:
-      self.cv.acquire()
-      try: 
-        if self.exception:
-          self.n_run-=1
-          self.cv.notify()
-          return
+
+      self.src_lock.acquire()
+      try:
+        k, v = self.l.next()
+      except Exception,e:
+        self.src_lock.release()
         try:
-          k,v=self.l.next()
-        except Exception,e:
-          if not isinstance(e,StopIteration):
+          self.cv.acquire()                  
+          if isinstance(e,StopIteration):
+            self.exception = "src_stopped"
+          else:
             traceback.print_exc(50,sys.stderr)            
-          self.exception=e
+            self.exception = e
           self.n_run-=1
-          self.cv.notify()
+          self.cv.notifyAll()
           return
-      finally: 
-        self.cv.release()
+        finally:
+          self.cv.release()        
+      self.src_lock.release()
       
       try:
         res=self.f(v)
@@ -333,16 +341,20 @@ class ParallelIter:
         self.cv.acquire()
         if self.exception==None: self.exception=e
         self.n_run-=1
-        self.cv.notify()
+        self.cv.notifyAll()
         self.cv.release()
         return
-      
-      self.cv.acquire()
-      self.results[k]=res
-      self.cv.notify()      
-      self.cv.release()
 
-
+      try:
+        self.cv.acquire()
+        if self.exception not in ("src_stopped", None):
+          self.n_run-=1
+          return
+        else:
+          self.results[k]=res
+          self.cv.notifyAll()
+      finally:
+        self.cv.release()
 
 
 class PCIter:

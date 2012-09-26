@@ -362,8 +362,8 @@ void compute_cross_distances_alt (int distance_type, int d, int na, int nb,
 
 
 /*
- * Computations are done by blocks (nice for cache access, distance matrix must fit in mem and allows beautiful progress bar)
- * blocks are BLOCK_NPT * BLOCK_CLUST
+ * Computations are done by blocks (nice for cache access, distance matrix must fit in mem)
+ * blocks are BLOCK_N1 * BLOCK_N2
  */
 
 #define BLOCK_N1 256
