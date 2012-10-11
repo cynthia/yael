@@ -104,11 +104,19 @@ def fvecs_fsize(filename):
     # WARN: if file is empty, (d, n) = (-1, 0)
     return (n, d)
 
-def fvecs_read(filename, nmax = -1):
-    if nmax < 0: 
-        (fvecs, n, d) = yael.fvecs_new_read(filename)
-    else: 
-        (fvecs, n, d) = yael.fvecs_new_fread_max(open(filename, "r"), nmax)
+def fvecs_read(filename, nmax = -1, c_contiguous = True):   
+    if nmax < 0:
+        fv = numpy.fromfile(filename, dtype = numpy.float32)
+        dim = fv.view(numpy.int32)[0] 
+        assert dim>0
+        fv = fv.reshape(-1,1+dim)
+        if not all(fv.view(numpy.int32)[:,0]==dim):
+            raise IOError("non-uniform vector sizes in " + filename)
+        fv = fv[:,1:]
+        if c_contiguous:
+            fv = fv.copy()
+        return fv
+    (fvecs, n, d) = yael.fvecs_new_fread_max(open(filename, "r"), nmax)
     if n == -1: 
         raise IOError("could not read " + filename)
     elif n == 0: d = 0    

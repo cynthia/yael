@@ -304,7 +304,7 @@ class ParallelIter:
           res=self.results.pop(self.k_out)
           self.k_out+=1
           return res
-        elif self.exception == "src_stopped":
+        elif self.exception == "src_stopped" and self.n_run == 0:
           # only when there are no results left
           raise StopIteration()
         self.cv.wait()    

@@ -507,8 +507,12 @@ void knn_full (int distance_type,int n1, int n2, int d, int k,
 
     for (j1 = 0; j1 < m1; j1++) {
       fbinheap_t *mh = MINS(j1);
-      assert (mh->k == k);
+      /* mh->k may not be same as k if there are NaNs in the distances */
       fbinheap_sort(mh, vw + (i1+j1) * k, vwdis + (i1+j1) * k);
+      if(mh->k < k) {
+        memset(vw + (i1+j1) * k + mh->k, 0xff, sizeof(int) * (k - mh->k));
+        memset(vwdis + (i1+j1) * k + mh->k, 0xff, sizeof(float) * (k - mh->k));
+      }
     }
   }
 
