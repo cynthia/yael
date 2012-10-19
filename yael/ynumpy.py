@@ -12,6 +12,10 @@ import pdb
 import numpy
 import yael
 
+####################################################
+# Format checks
+
+
 
 def _check_row_float32(a): 
     if a.dtype != numpy.float32: 
@@ -25,6 +29,8 @@ def _check_row_int32(a):
     if not a.flags.c_contiguous:
         raise TypeError('expected C order matrix')
 
+####################################################
+# NN function & related
 
 
 def knn(queries, base, 
@@ -50,7 +56,22 @@ def knn(queries, base,
                          nt)
     return idx, dis
     
+def cross_distances(a, b, distance_type = 12):
+    _check_row_float32(a)
+    na, d = a.shape
+    _check_row_float32(b)
+    nb, d2 = b.shape
 
+    assert d2 == d
+
+    dis = numpy.empty((nb, na), dtype = numpy.float32)
+
+    yael.compute_cross_distances_alt_nonpacked(distance_type, d, na, nb,
+                                               yael.numpy_to_fvec_ref(a), d,
+                                               yael.numpy_to_fvec_ref(b), d,
+                                               yael.numpy_to_fvec_ref(dis), na)
+    
+    return dis                                 
 
 
 def kmeans(v, k,
@@ -96,6 +117,8 @@ def kmeans(v, k,
         return (centroids, qerr, dis, assign, nassign)
 
 
+####################################################
+# I/O
 
 def fvecs_fsize(filename): 
     (fsize, d, n) = yael.fvecs_fsize(filename)
@@ -179,6 +202,10 @@ def siftgeo_read(filename):
 
     return v, meta
 
+####################################################
+# GMM & Fisher manipulation
+
+
 # In numpy, we represent gmm's as 3 matrices (like in matlab)
 # when a gmm is needed, we build a "fake" yael gmm struct with 
 # 3 vectors
@@ -245,8 +272,7 @@ def gmm_read(filename):
     yael.gmm_delete(gmm)    
     return gmm_npy
 
-    
-    
+        
 
 def fisher(gmm_npy, v, 
            include = 'mu'): 
@@ -271,23 +297,8 @@ def fisher(gmm_npy, v,
 
     return fisher_out
 
-def cross_distances(a, b, distance_type = 12):
-    _check_row_float32(a)
-    na, d = a.shape
-    _check_row_float32(b)
-    nb, d2 = b.shape
-
-    assert d2 == d
-
-    dis = numpy.empty((nb, na), dtype = numpy.float32)
-
-    yael.compute_cross_distances_alt_nonpacked(distance_type, d, na, nb,
-                                               yael.numpy_to_fvec_ref(a), d,
-                                               yael.numpy_to_fvec_ref(b), d,
-                                               yael.numpy_to_fvec_ref(dis), na)
-    
-    return dis                                 
-
+####################################################
+# Fast versions of slow Numpy operations
 
     
 def extract_lines(a, indices):
@@ -320,3 +331,5 @@ def extract_rows_cols(K, subset_rows, subset_cols):
                             nr, yael.numpy_to_ivec_ref(subset_rows),
                             yael.numpy_to_fvec_ref(Ksub))
     return Ksub
+
+
