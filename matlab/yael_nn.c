@@ -44,6 +44,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   if (nrhs >= 4)
     distype = (int) mxGetScalar(prhs[3]);
 
+  /* If practice, the following is not used (all threads by default) */
   if (nrhs >= 5)
     nt = (int) mxGetScalar(prhs[4]); 
 

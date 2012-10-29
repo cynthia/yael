@@ -1,4 +1,4 @@
-% This function writes a vector from a file in the libit format
+% This function writes a vector from a file in the ivecs format
 
 function ivecs_write (filename, v)
 
