@@ -542,7 +542,7 @@ void knn_reorder_shortlist(int n, int nb, int d, int k,
 
       for(j=0;j<k;j++) {
         if(assigni[j]<0) break;
-        memcpy(subb+j*d,b+assigni[j]*d,sizeof(*subb)*d);
+        memcpy(subb+j*d,b+assigni[j]*(long) d,sizeof(*subb)*d);
       }
 
       ki=j;
