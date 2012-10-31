@@ -1,7 +1,7 @@
 
 import sys,time,inspect,thread,threading,os,errno,types,traceback, random
 
-from yael import count_cpu
+#from yael import count_cpu
 import yael
 
 

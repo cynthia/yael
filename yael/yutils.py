@@ -71,6 +71,7 @@ def load_vectors_fmt(fname,fmt,d,nuse=None,off=0,verbose=True):
         n = yael.bvecs_fread (f, v, nuse, d)
 
     elif fmt=='rawf':
+        print nuse, long(d), nuse * long(d)
         v = yael.fvec (nuse * long(d))
         n = yael.fvec_fread_raw(f, v, nuse * long(d)) / d
         
