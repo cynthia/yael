@@ -9,7 +9,7 @@ d = 128
 k = 1
 distance_type = 2
 slice_size = 16384
-
+matlab = False             # add 1 to the ids
 
 # File format
 fmt_b = 'fvecs'
@@ -43,6 +43,8 @@ while args:
          fmt_q = 'rawf'
      elif a == '-onn':
          fnn_name = args.pop(0)
+     elif a == '-matlab':
+         matlab = True
      elif a == '-odis':
          fdis_name = args.pop(0)
      elif a=='-k':
@@ -51,18 +53,23 @@ while args:
          d = int(args.pop(0))
      elif a=='-nt': 
          nt = threads.parse_nt(args.pop(0))
+     else: 
+         print >> sys.stderr, "unknown arg",a
+         sys.exit(1)
 
 (nb, sizeb, szb) = yutils.vecfile_stats (fb_name, d, fmt_b)
 (nq, sizeq, szq) = yutils.vecfile_stats (fq_name, d, fmt_q)
 
 (vb, nb) = yutils.load_vectors_fmt (fb_name, fmt_b, d)
-print vb
 
-print 'nb=%d  db=%d  nq=%d  dq=%d | %d %d' % (nb, sizeb, nq, sizeq, szb, szq)
+print 'nb=%d  db=%d  nq=%d  ' % (nb, sizeb, nq)
 
 
 nn = yael.ivec (slice_size * k)
 nndis = yael.fvec (slice_size * k)
+
+fnn = open (fnn_name, 'w')
+fdis = open (fdis_name, 'w')
 
 t0 = time.time()
 for istart in xrange (0, nq, slice_size):
@@ -72,12 +79,19 @@ for istart in xrange (0, nq, slice_size):
 
     # Read the queries
     (vq, nqslice2) = yutils.load_vectors_fmt (fq_name, fmt_q, d, nqslice, istart, verbose=False)
-
     assert nqslice == nqslice2
 
     yael.knn_full_thread(distance_type, nqslice, nb, d, k,
-                         vb, vq, None, 
-                         nn, nndis, nt)
+                         vb, vq, None, nn, nndis, nt)
 
     t1 = time.time()
-    print '\r%8.5f%%   -> Elapsed time:%.2fs' % (iend / float(nq), t1-t0),
+    print >> sys.stderr, '\r%8.5f%%   -> Elapsed time:%.2fs' % (iend * 100.0 / float(nq), t1-t0)
+    
+    # Matlab starts indexes from 1
+    if matlab: yael.ivec_incr (nn, nqslice * k, 1)
+
+    yael.ivec_fwrite_raw (fnn, nn, nqslice * k)
+    yael.fvec_fwrite_raw (fdis, nndis, nqslice * k)
+
+fnn.close()
+fdis.close()
