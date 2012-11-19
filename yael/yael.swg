@@ -406,24 +406,31 @@ void free(void*);
  * Numpy wrapper 
  */
 
-
 %define NUMPY_EXCHANGE(xvec, ctype, numpytype)
 
 %{
 
 // declare in C
 
-PyObject * xvec ## _to_numpy(const ctype *src,long di) {
-  npy_intp d = di;
-  PyObject* ob = PyArray_SimpleNew(1, &d, numpytype);
+PyObject * xvec ## _to_numpy(const ctype *src, int ndim, npy_intp shp[]) {
+  int i, totsize;
+  PyObject* ob = PyArray_SimpleNew(ndim, shp, numpytype);
   ctype *dest = PyArray_DATA(ob);
-  memcpy(dest, src, sizeof(ctype) * d);
+  totsize = (int)shp[0];
+  for (i=1; i<ndim; i++)
+    totsize *= (int)shp[i];
+  memcpy(dest, src, sizeof(ctype) * totsize);
   return ob;
 }
 
-PyObject * xvec ## _to_numpy_ref(ctype *src, long di) {
-  npy_intp d = di;
-  return PyArray_SimpleNewFromData(1, &d, numpytype, src);
+PyObject * xvec ## _to_numpy_ref(ctype *src, int ndim, npy_intp shp[]) {
+  return PyArray_SimpleNewFromData(ndim, shp, numpytype, src);
+}
+
+PyObject * xvec ## _to_numpy_acquire(ctype *src, int ndim, npy_intp shp[]) {
+  PyObject * ret = PyArray_SimpleNewFromData(ndim, shp, numpytype, src);
+  ((PyArrayObject*)ret)->flags |= NPY_OWNDATA;
+  return ret;
 }
 
 
@@ -444,8 +451,46 @@ ctype *numpy_to_ ## xvec ## _ref(long di, ctype *data) {
 
 // re-declare for SWIG
 
-PyObject * xvec ## _to_numpy(const ctype *src,long di);
-PyObject * xvec ## _to_numpy_ref(ctype *src, long di);
+%typemap(in) (int ndim, npy_intp shp[])(int _ndim, int _shp[8], npy_intp __shp[8]) {
+  if (PyTuple_Check($input)) {
+    _ndim = PyTuple_Size($input);
+    if (_ndim > 8) {
+      PyErr_SetString(PyExc_TypeError,"Invalid shape. Expecting tuple size <=8.");
+      return NULL;
+    }
+    if (!PyArg_ParseTuple($input, "i|iiiiiii", _shp, _shp+1, _shp+2, _shp+3, _shp+4, _shp+5, _shp+6, _shp+7)) {
+      PyErr_SetString(PyExc_TypeError,"Invalid shape. Expecting tuple of int.");
+      return NULL;
+    }
+  } else if(PyInt_Check($input)) {
+    _ndim = 1;
+    _shp[0] = PyInt_AsLong($input);
+  } else {
+    PyErr_SetString(PyExc_TypeError,"Invalid shape. Expected tuple or int.");
+    return NULL;
+  }
+  $1 = _ndim;
+  int i;
+  for (i=0; i<_ndim; i++)
+    __shp[i] = _shp[i];
+  $2 = __shp;
+}
+%feature("autodoc", "xvec _to_numpy(src, shape) -> numpy.ndarray\n\
+ shape can be an integer or a tuple of integers (maximum 8 dimentions)\n\
+ Creates a new ndarray of specified shape with a copy xvec data.") xvec ## _to_numpy;
+PyObject * xvec ## _to_numpy(const ctype *src, int ndim, npy_intp shp[]);
+
+%feature("autodoc", "xvec _to_numpy(src, shape) -> numpy.ndarray\n\
+ shape can be an integer or a tuple of integers (maximum 8 dimentions)\n\
+ Creates a new ndarray of specified shape pointing to xvec data\n\
+ *without taking ownership of the memory* (you will have to free it manually).") xvec ## _to_numpy_ref;
+ 
+PyObject * xvec ## _to_numpy_ref(ctype *src, int ndim, npy_intp shp[]);
+%feature("autodoc", "xvec _to_numpy(src, shape) -> numpy.ndarray\n\
+ shape can be an integer or a tuple of integers (maximum 8 dimentions)\n\
+ Creates a new ndarray of specified shape pointing to xvec data and \n\
+ *takes ownership of the memory* (it will be freed by the GC when the ndarray isn't referenced anymore).") xvec ## _to_numpy_acquire;
+PyObject * xvec ## _to_numpy_acquire(ctype *src, int ndim, npy_intp shp[]);
 
 %typemap(in, numinputs=1) (long di, ctype *data) {
   if(!PyArray_Check($input)) {
