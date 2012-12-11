@@ -1137,11 +1137,12 @@ int b2fvecs_new_read (const char *fname, int *d_out, float **v_out)
   assert (f || "bvecs_new_read: Unable to open the file");
   b2fvecs_fread (f, v, n);
   fclose (f);
-
-  v_out = &v;
+  
+  *v_out = v;
+  *d_out = d;
+  
   return n;
 }
-
 
 
 int fvec_fread_raw (FILE *f, float * v, long n) 
