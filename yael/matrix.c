@@ -346,10 +346,18 @@ static int first = 1;
 
 void fmat_normalize_columns_l2sqr_pow(float *a, int d, int n, float pw) {
   int i; 
-  for(i = 0; i < n; i++) {
-    double l2sqr = fvec_norm2sqr(a + d * i, d); 
-    double norm = pow(l2sqr, pw); 
-    fvec_mul_by(a + d * i, d, norm); 
+  if(pw == 0.5) {
+    for(i = 0; i < n; i++) {
+      double l2sqr = fvec_norm2sqr(a + d * i, d); 
+      double norm = sqrt(l2sqr); 
+      fvec_mul_by(a + d * i, d, norm); 
+    }
+  } else {
+    for(i = 0; i < n; i++) {
+      double l2sqr = fvec_norm2sqr(a + d * i, d); 
+      double norm = pow(l2sqr, pw); 
+      fvec_mul_by(a + d * i, d, norm); 
+    }
   }
 }
 

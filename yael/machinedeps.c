@@ -154,6 +154,8 @@ static void *collector_malloc (size_t size, const __malloc_ptr_t f) {
 
 
 static void collector_free (void *ptr, const __malloc_ptr_t f) {
+
+  if(!ptr) return; /* this one was not alloc'ed by malloc */
   
   UNSET_MALLOC_HOOKS;
 

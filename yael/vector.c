@@ -1459,7 +1459,8 @@ int fvecs_write (const char *fname, int d, int n, const float *vf)
 {
   FILE *fo = fopen (fname, "w");
   if (!fo) {
-    perror ("fvecs_write: cannot open file");
+    fprintf(stderr, "fvecs_write: cannot open %s for writing", fname);
+    perror ("");
     return -1;
   }
 

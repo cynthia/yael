@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <math.h>
 
 #include "binheap.h"
 #include "sorting.h"
@@ -218,4 +219,153 @@ void fbinheap_display (fbinheap_t * bh)
   for (i = 1 ; i <= bh->k ; i++)
     printf ("%d %.6f / ", bh->label[i], bh->val[i]);
   printf ("\n");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/******************************************************************
+ * abinheap implementation
+ * (yes I know, sometimes we regret templates...)
+ */
+
+#define LABEL(i) (void *)((char*)bh->label + (i) * bh->labelsize)
+#define COPY_LABEL(dest, src) memmove(LABEL(dest), LABEL(src), bh->labelsize)
+
+
+size_t abinheap_sizeof (int maxk, int labelsize) 
+{
+  return sizeof (abinheap_t) + maxk * (sizeof (float) + labelsize);
+}
+
+
+void abinheap_init (abinheap_t *bh, int maxk, int labelsize) 
+{
+  bh->k = 0;
+  bh->maxk = maxk;
+  bh->labelsize = labelsize; 
+
+  /* weirdly index the nodes from 1 (for the root) */
+  bh->val = (float *) ((char *) bh + sizeof (abinheap_t)) - 1;
+  bh->label = (void *) ((char *) bh + sizeof (abinheap_t)
+                        + maxk * sizeof (*bh->val) - bh->labelsize);
+} 
+
+
+abinheap_t * abinheap_new (int maxk, int labelsize)
+{
+  int bhsize = abinheap_sizeof (maxk, labelsize);
+  abinheap_t * bh = (abinheap_t *) malloc (bhsize);
+  abinheap_init (bh, maxk, labelsize);
+  return bh;
+}
+
+void abinheap_reset (abinheap_t *bh)
+{
+  bh->k = 0;
+}
+
+void abinheap_delete (abinheap_t * bh)
+{
+  free (bh);
+}
+
+
+void abinheap_pop (abinheap_t * bh)
+{
+  assert (bh->k > 0);
+
+  float val = bh->val[bh->k];
+  int i = 1, i1, i2;
+
+  while (1) {
+    i1 = i << 1;
+    i2 = i1 + 1;
+
+    if (i1 > bh->k)
+      break;
+
+    if (i2 == bh->k + 1 || bh->val[i1] > bh->val[i2]) {
+      if (val > bh->val[i1])
+        break;
+      bh->val[i] = bh->val[i1];
+      COPY_LABEL(i, i1);
+      i = i1;
+    } 
+    else {
+      if (val > bh->val[i2])
+        break;
+      
+      bh->val[i] = bh->val[i2];
+      COPY_LABEL(i, i2);
+      i = i2;
+    }
+  }
+  
+  bh->val[i] = bh->val[bh->k];
+  COPY_LABEL(i, bh->k);
+  bh->k--;
+}
+
+
+static void abinheap_push (abinheap_t * bh, void *label, float val)
+{
+  assert (bh->k < bh->maxk);
+
+  int i = ++bh->k, i_father;
+
+  while (i > 1) {
+    i_father = i >> 1;
+    if (bh->val[i_father] >= val)  /* the heap structure is ok */
+      break; 
+
+    bh->val[i] = bh->val[i_father];
+    COPY_LABEL(i, i_father);
+
+    i = i_father;
+  }
+  bh->val[i] = val;
+  memcpy(LABEL(i), label, bh->labelsize);
+}
+
+
+void abinheap_add (abinheap_t * bh, void *label, float val)
+{
+  if (bh->k < bh->maxk) {
+    abinheap_push (bh, label, val);
+    return;
+  }
+
+  if (val < bh->val[1]) {  
+    abinheap_pop (bh);
+    abinheap_push (bh, label, val);
+  }
+}
+
+
+
+void abinheap_sort (abinheap_t * bh, void * labels, float *values)
+{
+  int i, heappos;
+  /* TODO use binheap structure to get in the correct order */
+  int * perm = ivec_new(bh->k);
+  fvec_sort_index (bh->val + 1, bh->k, perm);
+  for (i = 0 ; i < bh->k ; i++) {
+    heappos = perm[i] + 1;
+    memcpy(labels + i * bh->labelsize, LABEL(heappos), bh->labelsize);
+    values[i] = bh->val[heappos];
+  }
+  free(perm);
+}
+
+void *abinheap_get_label (abinheap_t *bh, int i) {
+  return LABEL(i + 1);
 }

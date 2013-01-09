@@ -86,4 +86,60 @@ void fbinheap_display (fbinheap_t * bh);
 /*! @} */
 
 
+
+
+
+
+
+
+
+
+
+/*! idem for arbitrary data. The size of the labels is provided on construction */
+
+struct abinheap_s {
+  float * val;     /*!< valid values are val[1] to val[k] */
+  void * label;
+  int k;           /*!< number of elements stored  */
+  int maxk;        /*!< maximum number of elements */
+  int labelsize;
+};
+
+typedef struct abinheap_s abinheap_t;
+
+/*! create the maxheap structure for maxk elements (maximum)
+ @param maxk maximum number of elements to be stored in the heap*/
+struct abinheap_s * abinheap_new (int maxk, int labelsize);
+
+/*! return the size of a maxheap structure 
+ @param maxk the maximum number of elements that the structure will receive */
+size_t abinheap_sizeof (int maxk, int labelsize); 
+
+/*! A binheap can be stored in an externally allocated memory area 
+  of abinheap_sizeof(maxk) bytes. The abinheap_init() function is used 
+  to initialize this memory area */
+void abinheap_init (abinheap_t *bh, int maxk, int labelsize);
+
+/*! free allocated memory */
+void abinheap_delete (abinheap_t * bh);
+
+/*! remove all the elements from the heap */
+void abinheap_reset (abinheap_t *bh);
+
+/*! insert an element on the heap (if the value val is small enough) */
+void abinheap_add (abinheap_t * bh, void *label, float val);
+
+/*! remove largest value from binheap (low-level access!) */
+void abinheap_pop (abinheap_t * bh);
+
+/*! output both sorted results: labels and corresponding values  */
+void abinheap_sort (abinheap_t * bh, void *labels, float *v);
+
+/*! show the heap content */
+void abinheap_display (abinheap_t * bh);
+
+/*! get the i'th label (0-based) */
+void *abinheap_get_label (abinheap_t *bh, int i);
+
+
 #endif
