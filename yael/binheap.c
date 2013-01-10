@@ -356,11 +356,11 @@ void abinheap_sort (abinheap_t * bh, void * labels, float *values)
 {
   int i, heappos;
   /* TODO use binheap structure to get in the correct order */
-  int * perm = ivec_new(bh->k);
+  int * perm = malloc(bh->k * sizeof(*perm));
   fvec_sort_index (bh->val + 1, bh->k, perm);
   for (i = 0 ; i < bh->k ; i++) {
     heappos = perm[i] + 1;
-    memcpy(labels + i * bh->labelsize, LABEL(heappos), bh->labelsize);
+    memcpy((char*)labels + i * bh->labelsize, LABEL(heappos), bh->labelsize);
     values[i] = bh->val[heappos];
   }
   free(perm);
