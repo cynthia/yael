@@ -61,7 +61,7 @@ machinedeps.o:  EXTRACFLAGS=$(OPENMPFLAG)
 
 
 yael_wrap.c : yael.swg common.swg nn.h kmeans.h gmm.h eigs.h hkm.h \
-	sorting.h matrix.h vector.h machinedeps.h vlad.h kmlsh.h
+	sorting.h matrix.h vector.h machinedeps.h vlad.h kmlsh.h binheap.h
 	$(SWIG) -I.. $(NUMPYSWIGFLAGS) $< 
 
 _yael.so: yael_wrap.o libyael.$(SHAREDEXT)
