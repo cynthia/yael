@@ -348,7 +348,7 @@ void gmm_compute_p (int n, const float * v,
   free(lg);
   softmax_ref(k, n, p, p, NULL);
 
-
+  free(logdetnr);
 }
 
 

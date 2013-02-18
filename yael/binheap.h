@@ -135,9 +135,6 @@ void abinheap_pop (abinheap_t * bh);
 /*! output both sorted results: labels and corresponding values  */
 void abinheap_sort (abinheap_t * bh, void *labels, float *v);
 
-/*! show the heap content */
-void abinheap_display (abinheap_t * bh);
-
 /*! get the i'th label (0-based) */
 void *abinheap_get_label (abinheap_t *bh, int i);
 
