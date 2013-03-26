@@ -174,7 +174,7 @@ void fmat_print (const float *a, int nrow, int ncol)
 
 void fmat_print_tranposed(const float *a, int nrow, int ncol)
 {
-  int i, j;
+  long i, j;
 
   printf ("[");
   for (i = 0; i < nrow; i++) {
@@ -232,7 +232,7 @@ float *fmat_new_get_row (const float *a, int nrow, int ncol, int row)
 float *fmat_new_get_rows (const float *a, int d, int n,                              
 			  int nrowout, const int *rows) {
   float *b=fmat_new(nrowout,n);
-  int i,j;
+  long i, j;
   long ii=0;
   for(j=0;j<n;j++) {
     const float *aj = a + d*(long)j;
@@ -244,12 +244,12 @@ float *fmat_new_get_rows (const float *a, int d, int n,
 }
 
 void fmat_shuffle_columns(float *a, int nrow, int ncol) {
-  int k,i;
+  long k,i;
   for (i = 0; i < ncol ; i++) {
-    int j = i +  random() % (ncol - i);
+    int j = i + random() % (ncol - i);
     /* swap i and j */
     float *ci=a+i*nrow;
-    float *cj=a+j*nrow;
+    float *cj=a+(long)j*nrow;
     for(k=0;k<nrow;k++) {
       float tmp=ci[k];
       ci[k]=cj[k];
@@ -269,10 +269,10 @@ void fmat_get_rows_cols(const float *a, int d,
                         int nrow, const int *rows, 
                         int ncol, const int *cols, 
                         float *out) {
-  int i, j, k = 0;
+  long i, j, k = 0;
 
   for(j = 0; j < ncol; j++) {
-    const float *a_col = a + cols[j] * d;
+    const float *a_col = a + cols[j] * (long) d;
     for(i = 0; i < nrow; i++) {
       out[k++] = a_col[rows[i]];
     }
@@ -282,10 +282,10 @@ void fmat_get_rows_cols(const float *a, int d,
 
 
 void fmat_get_columns (const float *a, int d, int ncolout, const int *cols, float *b) {
-  int j;
+  long j;
   for(j=0;j<ncolout;j++)
     memcpy(b + j * d, 
-           a + cols[j] * d, 
+           a + cols[j] * (long) d, 
            d * sizeof(a[0]));
 }
 
@@ -345,7 +345,7 @@ int fmat_remove_0_columns(float *a, int d, int n) {
 static int first = 1;
 
 void fmat_normalize_columns_l2sqr_pow(float *a, int d, int n, float pw) {
-  int i; 
+  long i; 
   if(pw == 0.5) {
     for(i = 0; i < n; i++) {
       double l2sqr = fvec_norm2sqr(a + d * i, d); 
@@ -369,7 +369,7 @@ void fmat_normalize_columns_l2sqr_pow(float *a, int d, int n, float pw) {
 /*---------------------------------------------------------------------------*/
 float *fmat_new_rand_gauss (int nrow, int ncol)
 {
-  int i;
+  long i;
   float *m = fmat_new (nrow, ncol);
 
   for (i = 0; i < nrow * ncol; i++)
@@ -384,7 +384,7 @@ float *fmat_new_rand_gauss (int nrow, int ncol)
 float *random_orthogonal_basis (int di)
 { 
   FINTEGER d=di;
-  int i;
+  long i;
 
 
   /* generate a Gaussian matrix */
@@ -533,7 +533,7 @@ void fmat_splat_separable(const float *a,int nrow,int ncol,
                           const int *row_assign,const int *col_assign,
                           int k,
                           float *accu) {
-  int i,j;
+  long i,j;
 
   for(i=0;i<nrow;i++) for(j=0;j<ncol;j++) {
     accu[row_assign[i]*k+col_assign[j]]+=a[i*ncol+j];
@@ -546,7 +546,7 @@ int *imat_joint_histogram(int n,int k,int *row_assign,int *col_assign) {
   int i;
 
   for(i=0;i<n;i++) 
-    hist[row_assign[i]*k+col_assign[i]]++;
+    hist[row_assign[i]*(long)k+col_assign[i]]++;
 
   return hist;
 }
