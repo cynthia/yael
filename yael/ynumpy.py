@@ -81,6 +81,7 @@ def kmeans(v, k,
            seed = 0, 
            redo = 1, 
            verbose = True,
+           normalize = False, 
            init = 'random',
            output = 'centroids'):
     _check_row_float32(v)
@@ -101,6 +102,8 @@ def kmeans(v, k,
     if init == 'random':     flags |= yael.KMEANS_INIT_RANDOM
     elif init == 'kmeans++': pass # default
 
+    if normalize:            flags |= yael.KMEANS_NORMALIZE_CENTS
+
     qerr = yael.kmeans(d, n, k, niter, 
                        yael.numpy_to_fvec_ref(v), flags, seed, redo, 
                        yael.numpy_to_fvec_ref(centroids), 
@@ -117,6 +120,28 @@ def kmeans(v, k,
         return (centroids, qerr, dis, assign, nassign)
 
 
+def partial_pca(mat, nev = 6, nt = 1):
+    _check_row_float32(mat)
+    n, d = mat.shape
+
+    avg = mat.mean(axis = 0)
+    mat = mat - avg[numpy.newaxis, :]
+    
+    singvals = numpy.empty(nev, dtype = numpy.float32)
+    # pdb.set_trace()
+
+    pcamat = yael.fmat_new_pca_part(d, n, nev,
+                                    yael.numpy_to_fvec_ref(mat),
+                                    yael.numpy_to_fvec_ref(singvals))
+    assert pcamat != None
+    
+    #print "SVs", singvals
+    pcamat = yael.fvec.acquirepointer(pcamat)
+    pcamat = yael.fvec_to_numpy(pcamat, (nev, d))
+
+    return avg, singvals, pcamat
+    
+
 ####################################################
 # I/O
 
@@ -130,6 +155,8 @@ def fvecs_fsize(filename):
 def fvecs_read(filename, nmax = -1, c_contiguous = True):   
     if nmax < 0:
         fv = numpy.fromfile(filename, dtype = numpy.float32)
+        if fv.size == 0:
+            return numpy.zeros((0,0))            
         dim = fv.view(numpy.int32)[0] 
         assert dim>0
         fv = fv.reshape(-1,1+dim)
@@ -306,7 +333,7 @@ def extract_lines(a, indices):
     _check_row_float32(a)
     _check_row_int32(indices)
     n, d = a.shape
-    assert indices.min() >= 0 and indices.max() < n
+    assert indices.size == 0 or indices.min() >= 0 and indices.max() < n
     out = numpy.empty((indices.size, d), dtype = numpy.float32)
     yael.fmat_get_columns(yael.numpy_to_fvec_ref(a),
                           d, indices.size,

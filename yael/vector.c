@@ -897,21 +897,22 @@ int fvecs_read (const char *fname, int d, int n, float *a)
         break;
       else {
         perror ("fvecs_read error 1");
-        // TODO free mem
+        fclose(f);
         return -1;
       }
     }
 
     if (new_d != d) {
       fprintf (stderr, "fvecs_read error 2: unexpected vector dimension\n");
+      fclose(f);
       return -1;
     }
 
     if (fread (a + d * (long) i, sizeof (float), d, f) != d) {
       fprintf (stderr, "fvecs_read error 3\n");
+      fclose(f);
       return -1;
     }
-    n++;
   }
   fclose (f);
 

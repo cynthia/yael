@@ -541,6 +541,21 @@ void fmat_splat_separable(const float *a,int nrow,int ncol,
 
 }
 
+void fmat_splat_separable_1D(const float *a,int nrow,int ncol,
+                             const int *assign,
+                             float *accu) {
+  long i, j;
+  const float *acol = a;
+  for(i = 0; i < ncol; i++) {
+    if(assign[i] < 0) continue;
+    float *ocol = accu + nrow * (long)assign[i];
+    for(j = 0; j < nrow; j++) 
+      ocol[j] += acol[j];
+    acol += nrow;
+  }  
+}
+
+
 int *imat_joint_histogram(int n,int k,int *row_assign,int *col_assign) {
   int *hist=ivec_new_0(k*k);
   int i;
@@ -737,9 +752,8 @@ void fmat_mul_v(int mi,int ni,const float*a,int ldai,
                  float *y,int nt) {
   int i;
   FINTEGER lda=ldai,n=ni,m=mi;
-  SET_NT;
   
-#pragma omp parallel 
+#pragma omp parallel num_threads(nt)
   {
 #pragma omp for 
     for(i=0;i<nt;i++) {
@@ -763,12 +777,10 @@ void fmat_mul_tv(int mi,int ni,const float*a,int ldai,
   int i,j;
   FINTEGER lda=ldai,n=ni,m=mi;
   
-  SET_NT;
-
   float *ybuf=malloc(sizeof(float)*nt*m);
 
   if(nt>n) nt=n;
-#pragma omp parallel 
+#pragma omp parallel num_threads(nt)
   {
 #pragma omp for 
     for(i=0;i<nt;i++) {

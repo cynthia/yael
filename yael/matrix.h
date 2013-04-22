@@ -195,6 +195,22 @@ void fmat_splat_separable(const float *a,int nrow,int ncol,
                           int k,
                           float *accu); 
 
+/*! Accumulate columns depending on assignment
+ *
+ * a(nrow, ncol)
+ * accu(nrow, ?) 
+ *
+ * for i=0..ncol-1 do 
+ *    accu(:, assign[i]) += a(:, i)
+ *
+ */ 
+void fmat_splat_separable_1D(const float *a,int nrow,int ncol,
+                             const int *assign,
+                             float *accu); 
+
+
+
+
 int *imat_joint_histogram(int n,int k,int *row_assign,int *col_assign);
 
 
