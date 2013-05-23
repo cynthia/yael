@@ -194,6 +194,41 @@ void match_hamming_thres (const uint8 * qbs, const uint8 * dbs, int nb, int ht,
 }
 
 
+void match_hamming_thres_generic (const uint8 * qbs, const uint8 * dbs, int nb, int ht,
+                                  int bufsize, hammatch_t ** hmptr, int * nptr, int ncodes)
+{
+  int j, posm = 0;
+  uint16 h;
+  *hmptr = hammatch_new (bufsize);
+  hammatch_t * hm = *hmptr;
+  
+  for (j = 0 ; j < nb ; j++) {
+    
+    /* Here perform the real work of computing the distance */
+    h = hamming_generic (qbs, dbs, ncodes);
+    
+    /* collect the match only if this satisfies the threshold */
+    if (h <= ht) {
+      /* Enough space to store another match ? */
+      if (posm >= bufsize) {
+        bufsize = HAMMATCH_REALLOC_NEWSIZE (bufsize);
+        *hmptr = hammatch_realloc (*hmptr, bufsize);
+        assert (*hmptr != NULL);
+        hm = (*hmptr) + posm;
+      }
+      
+      hm->bid = j;
+      hm->score = h;
+      hm++;
+      posm++;
+    }
+    dbs += ncodes;  /* next signature */
+  }
+  
+  *nptr = posm;
+}
+
+
 /*-------------------------------------------*/
 /* Threaded versions, if OpenMP is available */
 #ifdef _OPENMP

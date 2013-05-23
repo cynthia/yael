@@ -118,7 +118,7 @@ void ivf_addn (ivf_t * ivf, const int * ids, const int * keys,
       assert (ivf->ids[w]);
 
       if (elem_size == 0)
-	continue;
+        continue;
 
       ivf->adat[w] = (unsigned char *)realloc (ivf->adat[w], (int) ivf->seg_size[w] * elem_size);
       assert (ivf->adat[w]);
@@ -192,7 +192,7 @@ unsigned char * ivf_find_vals (const ivf_t * ivf, int * keys, int * ids, int n)
 
 	}
 
-return dat;
+  return dat;
 }
 
 
@@ -403,7 +403,6 @@ ivfmatch_t * ivf_hequery (const ivf_t * ivf,
 
   /* output the number of elements that been actually selected */
   *buffer_size = posm;
-
   return matches;
 }
 
@@ -448,7 +447,7 @@ ivfmatch_t * ivf_hequery2 (const ivf_t * ivf,
   int i, j;  
   assert (ivf->elem_size == BITVECBYTE);
   
-  /* Match entities and number of matches per query */
+  /* Match entities to count number of matches per query */
   int * nmatches = (int *) malloc (sizeof(*nmatches) * nq);
   hammatch_t ** hmlist = ivf_he_collect (ivf, keys, qbs, nq, ht, nmatches);
                                             

@@ -50,10 +50,10 @@ uint16 hamming_64 (const uint64 * bs1, const uint64 * bs2);
 /* Define the Hamming distance by selecting the most appropriate function,
    using the generic version as a backup */
 #if BITVECSIZE==32
-#define hamming(a,b)  hamming_32((uint32*) (a), (uint32*) (b));
+#define hamming(a,b)  hamming_32((uint32*) (a), (uint32*) (b))
 
 #elif BITVECSIZE==64
-#define hamming(a,b)  hamming_64 ((uint64*) (a), (uint64*) (b));
+#define hamming(a,b)  hamming_64((uint64*) (a), (uint64*) (b))
 
 #elif BITVECSIZE==128
 #define hamming(a,b)  (hamming_64(a,b)+hamming_64(((uint64 *) (a)) + 1, ((uint64 *) (b)) + 1))
@@ -79,6 +79,9 @@ void compute_hamming_thread (uint16 * dis, const uint8 * a, const uint8 * b, int
 /* Compute hamming distance and report those below a given threshold in a structure array */
 void match_hamming_thres (const uint8 * qbs, const uint8 * dbs, int nb, int ht,
                           int bufsize, hammatch_t ** hmptr, int * nptr);
+
+void match_hamming_thres_generic (const uint8 * qbs, const uint8 * dbs, int nb, int ht,
+                                  int bufsize, hammatch_t ** hmptr, int * nptr, int ncodes);
 
 
 #endif /* __hamming_h */
