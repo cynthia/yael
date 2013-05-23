@@ -81,7 +81,7 @@ ivfmatch_t * ivf_hequery (const ivf_t * ivf, const int * qids, const int * keys,
                           int * buffer_size, int ht);
 
 /* Alternate implementations, which weights the scores */
-ivfmatch_t * ivf_hequery_2 (const ivf_t * ivf, const int * qids, const int * keys,
+ivfmatch_t * ivf_hequeryw (const ivf_t * ivf, const int * qids, const int * keys,
                            const unsigned char * adat, int nq, int ht, int * nm, 
                            const float * score_map_, const float * list_w_);
 

@@ -438,7 +438,7 @@ hammatch_t ** ivf_he_collect (const ivf_t * ivf, const int * keys,
   
 
 
-ivfmatch_t * ivf_hequery_w (const ivf_t * ivf, 
+ivfmatch_t * ivf_hequeryw (const ivf_t * ivf, 
                             const int * qids, const int * keys,
                             const unsigned char * qbs, int nq,
                             int ht, int * totmatches,
