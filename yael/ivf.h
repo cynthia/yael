@@ -27,7 +27,7 @@ typedef struct ivf_s {
 typedef struct ivfmatch_s {
   int qid;               /* query id */
   int bid;               /* base id */
-  unsigned char score;   /* matching score */
+  float score;           /* matching score */
 } ivfmatch_t;
 
 
@@ -80,8 +80,8 @@ ivfmatch_t * ivf_hequery (const ivf_t * ivf, const int * qids, const int * keys,
                           const unsigned char * adat, int nq,
                           int * buffer_size, int ht);
 
-/* Alternate implementations (which includes multi-threading) */
-ivfmatch_t * ivf_hequery2 (const ivf_t * ivf, const int * qids, const int * keys,
+/* Alternate implementations, which weights the scores */
+ivfmatch_t * ivf_hequery_2 (const ivf_t * ivf, const int * qids, const int * keys,
                            const unsigned char * adat, int nq, int ht, int * nm, 
                            const float * score_map_, const float * list_w_);
 

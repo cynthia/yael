@@ -438,11 +438,11 @@ hammatch_t ** ivf_he_collect (const ivf_t * ivf, const int * keys,
   
 
 
-ivfmatch_t * ivf_hequery2 (const ivf_t * ivf, 
-                           const int * qids, const int * keys,
-                           const unsigned char * qbs, int nq,
-                           int ht, int * totmatches,
-                           const float * score_map_, const float * list_w_)
+ivfmatch_t * ivf_hequery_w (const ivf_t * ivf, 
+                            const int * qids, const int * keys,
+                            const unsigned char * qbs, int nq,
+                            int ht, int * totmatches,
+                            const float * score_map_, const float * list_w_)
 {
   int i, j;  
   assert (ivf->elem_size == BITVECBYTE);
