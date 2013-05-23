@@ -21,5 +21,8 @@ mex -v -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_
 
 mex -v -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_cross_distances.c ../yael/binheap.c ../yael/nn.c ../yael/vector.c  ../yael/machinedeps.c ../yael/sorting.c
 
+mex -v -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_cross_distances.c ../yael/binheap.c ../yael/nn.c ../yael/vector.c  ../yael/machinedeps.c ../yael/sorting.c
+
+mex -v -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_hamming.c ../yael/hamming.c
 
 !rm *.o
