@@ -5,6 +5,7 @@
 /* See http://www.cecill.info/licences.en.html                          */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 
 #ifdef _OPENMP
@@ -100,6 +101,7 @@ uint16 hamming_64 (const uint64 * bs1, const uint64 * bs2)
 
   return ham;
 }
+
 #endif
 
 
@@ -116,6 +118,29 @@ void compute_hamming (uint16 * dis, const uint8 * a, const uint8 * b, int na, in
       dis++;
     }
     pb += BITVECBYTE;
+  }
+}
+
+
+void compute_hamming_generic (uint16 * dis, const uint8 * a, const uint8 * b, 
+                              int na, int nb, int ncodes)
+{
+  if (ncodes == BITVECBYTE) {
+    compute_hamming (dis, a, b, na, nb);
+    return;
+  }
+  fprintf (stderr, "# Warning: non-optimized version of the Hamming distance\n");  
+     
+  int i, j;
+  const uint8 * pb = b;
+  for (j = 0 ; j < nb ; j++) {
+    const uint8 * pa = a;
+    for (i = 0 ; i < na ; i++) {
+      *dis = hamming_generic (pa, pb, ncodes);
+      pa += ncodes;
+      dis++;
+    }
+    pb += ncodes;
   }
 }
 

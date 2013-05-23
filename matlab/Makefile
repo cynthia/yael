@@ -43,11 +43,12 @@ else
 endif
 
 
-all: $(YAELAR) yael_kmeans yael_gmm yael_fisher yael_nn yael_kmin yael_kmax yael_fvecs_normalize yael_L2sqr yael_cross_distances yael_eigs yael_svds
+all: $(YAELAR) yael_kmeans yael_gmm yael_fisher yael_nn yael_kmin yael_kmax yael_fvecs_normalize \
+               yael_L2sqr yael_cross_distances yael_eigs yael_svds yael_hamming
 
 
-LIBOBJ=vector.o matrix.o eigs.o nn.o kmeans.o gmm.o sorting.o binheap.o machinedeps.o vlad.o
-YAELSRC=../yael/binheap.c ../yael/eigs.c ../yael/gmm.c ../yael/kmeans.c ../yael/machinedeps.c ../yael/matrix.c ../yael/nn.c ../yael/sorting.c ../yael/vector.c ../yael/vlad.c
+LIBOBJ=vector.o matrix.o eigs.o nn.o kmeans.o gmm.o sorting.o binheap.o machinedeps.o vlad.o hamming.o
+YAELSRC=../yael/binheap.c ../yael/eigs.c ../yael/gmm.c ../yael/kmeans.c ../yael/machinedeps.c ../yael/matrix.c ../yael/nn.c ../yael/sorting.c ../yael/vector.c ../yael/vlad.c ../yael/hamming.c
 
 
 
@@ -80,6 +81,9 @@ vector.o: ../yael/vector.c ../yael/vector.h
 
 vlad.o: ../yael/vlad.c ../yael/vlad.h
 	gcc -o $@ -c $(CFLAGS) ../yael/vlad.c
+
+hamming.o: ../yael/hamming.c ../yael/hamming.h
+	gcc -o $@ -c $(CFLAGS) ../yael/hamming.c
 
 # dependencies generated with 
 # for i in ../yael/*.c ; do cpp -MM $i ; done
@@ -143,6 +147,9 @@ yael_eigs: yael_eigs.c $(YAELAR)
 
 yael_svds: yael_svds.c $(YAELAR)
 	$(MEX) yael_svds.c -I.. $(LDFLAGS)
+
+yael_hamming: yael_hamming.c $(YAELAR)
+	$(MEX) yael_hamming.c -I.. $(LDFLAGS)
 
 clean:
 	rm -f  *.a *.mexa64 *.mexmaci64 *.mex *.o *~

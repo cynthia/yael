@@ -29,8 +29,12 @@ uint16 hamming_64 (const uint64 * bs1, const uint64 * bs2);
 
 #else  /* Use SSE 4.2 */
 #include <nmmintrin.h>
+#ifndef hamming_32
 #define hamming_32(pa,pb) _mm_popcnt_u32((*((uint32 *) (pa)) ^ *((uint32 *) (pb))))
+#endif
+#ifndef hamming_64
 #define hamming_64(pa,pb) _mm_popcnt_u64((*((uint64 *) (pa)) ^ *((uint64 *) (pb))))
+#endif
 #endif
 
 
@@ -62,6 +66,10 @@ uint16 hamming_64 (const uint64 * bs1, const uint64 * bs2);
 
 /* Compute a set of Hamming distances between na and nb binary vectors */
 void compute_hamming (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb);
+
+/* The same but with a generic function */
+void compute_hamming_generic (uint16 * dis, const uint8 * a, const uint8 * b, 
+                              int na, int nb, int ncodes);
 
 /* Threaded versions, when OpenMP is available */
 #ifdef _OPENMP
