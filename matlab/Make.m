@@ -1,6 +1,6 @@
 
 
-setenv ('YAELCFLAGS', '-msse4 -fopenmp -I/usr/include -I.. -DFINTEGER=long -DHAVE_ARPACK');
+setenv ('YAELCFLAGS', '-msse4 -fopenmp -I/usr/include -I.. -DFINTEGER=long -DHAVE_ARPACK ');
 setenv ('YAELLDFLAGS', '-lmwblas -lmwlapack -lmwarpack -fopenmp');
 
 mex -v -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_kmeans.c ../yael/kmeans.c ../yael/vector.c ../yael/machinedeps.c ../yael/binheap.c ../yael/nn.c ../yael/sorting.c

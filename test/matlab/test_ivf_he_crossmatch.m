@@ -31,7 +31,7 @@ anndata_load_vectors;
 
 ht = 64;              % Hamming threshold
 nbits = 64;           % number of subquantizers to be used (m in the paper)
-coarsek = 256;        % number of centroids for the coarse quantizer
+coarsek = 1024;       % number of centroids for the coarse quantizer
 w = 4;                % number of cell visited per query
 
 tic;
@@ -66,10 +66,10 @@ ivfhe = yael_ivf_he (fivf_name);
 
 % Perform the queries
 nquery = size (vquery, 2);
-nquery = 10000;
-vquery = vquery (:, 1:nquery);
+nquery = nbase;
+vquery = vbase (:, 1:nquery);
 
-for hti = [12:2:24]
+for hti = [20]
   ht = floor (hti * nbits / 64);
   tic
   matches = ivfhe.query (ivfhe, int32(1:nquery), vquery, ht);
@@ -77,9 +77,13 @@ for hti = [12:2:24]
   fprintf ('-> found %d matches\n', size (matches, 2));
 end
 
-ivfhe.scoremap = single (exp(- ((0:nbits)/16).^2))
+tic
+m = yael_ivf ('crossmatch', 20);
+toc
 
-for hti = [12:2:24]
+ivfhe.scoremap = single (exp(- ((0:nbits)/16).^2));
+
+for hti = [20]
 ht = floor (hti * nbits / 64);
 tic
 matches2 = ivfhe.queryw (ivfhe, int32(1:nquery), vquery, ht);

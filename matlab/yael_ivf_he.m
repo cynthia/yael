@@ -131,8 +131,8 @@ end
 
 %------------------------------------------------------------
 % ivfhe_binsign: Compute the binary signature associated with a set of vectors
-% Usage: bs = ivfhe_binsign (ivfhe, v);
-% Usage: bs = ivfhe_binsign (ivfhe, v, idx, w);
+% Usage: bs = ivfhe_binsign (v);
+% Usage: bs = ivfhe_binsign (v, idx, w);
 %
 % Parameters:
 %  ivfhe   The inverted file parameter structure

@@ -18,7 +18,7 @@
 #define HAMMATCH_SLICESIZE 16
 
 /* geometric re-allocation: add a constant size plus a relative 50% of additional memory */
-#define HAMMATCH_REALLOC_NEWSIZE(oldsize) (HAMMATCH_SLICESIZE+((oldsize * 3) / 2))
+#define HAMMATCH_REALLOC_NEWSIZE(oldsize) (HAMMATCH_SLICESIZE+((oldsize * 5) / 4))
 
 
 
@@ -227,6 +227,49 @@ void match_hamming_thres_generic (const uint8 * qbs, const uint8 * dbs, int nb, 
   
   *nptr = posm;
 }
+
+
+void crossmatch_hamming_thres (const uint8 * dbs, int n, int ht,
+                               int bufsize, hammatch_t ** hmptr, int * nptr)
+{
+  int i, j, posm = 0;
+  uint16 h;
+  *hmptr = hammatch_new (bufsize);
+  hammatch_t * hm = *hmptr;
+  const uint8 * bs1 = dbs;
+  
+  for (i = 0 ; i < n ; i++) {
+    const uint8 * bs2 = bs1 + BITVECBYTE;
+    
+    for (j = i + 1 ; j < n ; j++) {
+      
+      /* Here perform the real work of computing the distance */
+      h = hamming (bs1, bs2);
+      
+      /* collect the match only if this satisfies the threshold */
+      if (h <= ht) {
+        /* Enough space to store another match ? */
+        if (posm >= bufsize) {
+          bufsize = HAMMATCH_REALLOC_NEWSIZE (bufsize);
+          *hmptr = hammatch_realloc (*hmptr, bufsize);
+          assert (*hmptr != NULL);
+          hm = (*hmptr) + posm;
+        }
+        
+        hm->qid = i;
+        hm->bid = j;
+        hm->score = h;
+        hm++;
+        posm++;
+      }
+      bs2 += BITVECBYTE;
+    }
+    bs1  += BITVECBYTE;  /* next signature */
+  }
+  
+  *nptr = posm;
+}
+
 
 
 /*-------------------------------------------*/

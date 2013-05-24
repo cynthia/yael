@@ -83,5 +83,10 @@ void match_hamming_thres (const uint8 * qbs, const uint8 * dbs, int nb, int ht,
 void match_hamming_thres_generic (const uint8 * qbs, const uint8 * dbs, int nb, int ht,
                                   int bufsize, hammatch_t ** hmptr, int * nptr, int ncodes);
 
+/* Compute all cross-distances between two sets of binary vectors */
+void crossmatch_hamming_thres (const uint8 * dbs, int n, int ht,
+                               int bufsize, hammatch_t ** hmptr, int * nptr);
+
+
 
 #endif /* __hamming_h */

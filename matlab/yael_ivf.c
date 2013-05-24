@@ -1,8 +1,7 @@
 #include <yael/ivf.h>
+#include <yael/hamming.h>
 #include "mex.h"
 #include <string.h>
-
-typedef unsigned char uint8;
 
 /* The different possible functions */
 #define IVF_FUNCTION_STATUS       0
@@ -17,6 +16,7 @@ typedef unsigned char uint8;
 #define IVF_FUNCTION_IMBFACTOR    9
 #define IVF_FUNCTION_QUERYHEW     10
 #define IVF_FUNCTION_FINDBS  		  12
+#define IVF_FUNCTION_CROSSMATCH   20
 
 static ivf_t * ivf = NULL;
 
@@ -91,6 +91,8 @@ void mexFunction (int nlhs, mxArray *plhs[],
     operation = IVF_FUNCTION_IMBFACTOR;
   else if (!strcmp(varname, "findbs")) 
     operation = IVF_FUNCTION_FINDBS;
+  else if (!strcmp(varname, "crossmatch")) 
+    operation = IVF_FUNCTION_CROSSMATCH;
   else mexErrMsgTxt("Unknown operation for this inverted file");  
   
 
@@ -389,5 +391,49 @@ void mexFunction (int nlhs, mxArray *plhs[],
     free (matches);
     }
     break;
+      
+      
+    case IVF_FUNCTION_CROSSMATCH: {
+      
+      if (nlhs != 1 || nrhs != 2)
+         mexErrMsgTxt ("Usage: matches = ivfmex ('crossmatch', ht)");
+      
+      if (ivf == NULL)
+        mexErrMsgTxt ("Inverted file is not defined\n Use ivfmex('new',...).");
+    
+      /* Hamming threshold for Hamming Embedding */
+      int ht = (int) mxGetScalar (prhs[1]);
+      
+      int * nmatches = (int *) malloc (sizeof(*nmatches) * ivf->k);
+      hammatch_t ** hmlist = ivf_he_collect_crossmatches (ivf, ht, nmatches);
+      
+      /* compute the cumulative number of matches */
+      int * cumnmatches = (int *) malloc (sizeof (*cumnmatches) * (ivf->k+1));
+      cumnmatches[0] = 0;
+      for (i = 0 ; i < ivf->k ; i++)
+        cumnmatches[i+1] = nmatches[i] + cumnmatches[i];
+      int totmatches = cumnmatches[ivf->k];
+          
+      /* Cast the match structure into matlab vectors */
+      plhs[0] = mxCreateNumericMatrix (3, totmatches, mxINT32_CLASS, mxREAL);
+  
+      int * matchinfo = (int *) mxGetPr (plhs[0]);
+      int i, j;
+      
+      for (j = 0 ; j < ivf->k ; j++)
+        for (i = 0 ; i < nmatches[j] ; i++) {
+          *(matchinfo++) = hmlist[j][i].qid;
+          *(matchinfo++) = hmlist[j][i].bid;
+          *(matchinfo++) = hmlist[j][i].score;
+        }
+    
+      for (i = 0 ; i < ivf->k ; i++)
+        free (hmlist[i]);
+      free (hmlist);
+      free (cumnmatches);
+      free (nmatches);
+    }
+      break;
+      
   }
 }

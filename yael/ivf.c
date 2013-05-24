@@ -167,12 +167,11 @@ unsigned char * ivf_get_vals (const ivf_t * ivf, int key)
 
 unsigned char * ivf_find_vals (const ivf_t * ivf, int * keys, int * ids, int n)
 {
-	unsigned char * dat = (unsigned char *) malloc (ivf->elem_size * n);
+  unsigned char * dat = (unsigned char *) malloc (ivf->elem_size * n);
 	int j = 0, i, f;
 	
-	while (j<n)
-	{
-		f = 0;
+	while (j<n) {
+	   f = 0;
 	 	for (i = 0; i < ivf->nbelems[keys[j]]; i++) {
 			if (ivf->ids[keys[j]][i] == ids[j])	{
 				f = 1;
@@ -506,4 +505,32 @@ ivfmatch_t * ivf_hequeryw (const ivf_t * ivf,
     free (list_w);
   return matches;
 }
+
+
+/* Collect cross-matches with Hamming distance */
+hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, int * nmatches)
+{
+  int i, nbufinit = 512;
+  assert (ivf->elem_size == BITVECBYTE);
+  
+  /* Match entities and number of matches per query */
+  hammatch_t ** hmlist = (hammatch_t **) malloc (sizeof(*hmlist) * ivf->k);
+  
+#ifdef _OPENMP
+#pragma omp parallel for private (i)
+  for (i = 0 ; i < ivf->k ; i++) {
+    crossmatch_hamming_thres (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                              ht, nbufinit, hmlist+i, nmatches+i);
+  }
+#else
+  for (i = 0 ; i < ivf->k ; i++) {
+    crossmatch_hamming_thres (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                              ht, nbufinit, hmlist+i, nmatches+i);
+  }
+#endif
+
+  return hmlist;
+}
+
+
 

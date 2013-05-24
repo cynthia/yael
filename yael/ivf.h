@@ -4,6 +4,7 @@
 #define __ivfc_h
 
 #include <stdio.h>
+#include "hamming.h"
 
 #define KEYNULL (2147483647)
 #define IVFCHECKSUM (0xf0f0f0fa)
@@ -92,6 +93,10 @@ int ivf_save (const char * fname, const ivf_t * ivf);
 ivf_t * ivf_load (const char * fname);
 
 ivfmatch_t * ivfmatch_new (int n);
+
+/* Cross-match all elements based on binary signature */
+hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, int * nmatches);
+
 
 
 #endif
