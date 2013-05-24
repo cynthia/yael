@@ -3,8 +3,8 @@
 % Usage: [val, idx] = yael_kmin (v,k)
 %
 % Parameters:
-%   v     the vector to be normalized. If v is a matrix, then the k smallest values
-%         of each column are returned (similar to the min function)
+%   v     the vector to be partially ranked. If v is a matrix, the function
+%         returns the k largest values of each column (like min function)
 %   k     the number of neighbors to be returned. Must be smaller than vector length
 %
 % Output:
