@@ -30,7 +30,7 @@ anndata_load_vectors;
 %---[ Search parameters ]---
 
 ht = 64;              % Hamming threshold
-nbits = 64;           % number of subquantizers to be used (m in the paper)
+nbits = 128;          % number of projection bits
 coarsek = 1024;       % number of centroids for the coarse quantizer
 w = 4;                % number of cell visited per query
 
@@ -77,9 +77,10 @@ for hti = [20]
   fprintf ('-> found %d matches\n', size (matches, 2));
 end
 
-tic
-m = yael_ivf ('crossmatch', 20);
-toc
+for hti = [20]
+  m = yael_ivf ('crossmatch', 20);
+end
+
 
 ivfhe.scoremap = single (exp(- ((0:nbits)/16).^2));
 
