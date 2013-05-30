@@ -7,6 +7,7 @@
 #include <math.h>
 #include <sys/time.h>
 
+#include <yael/vector.h>
 #include <yael/gmm.h>
 #include <yael/machinedeps.h>
 

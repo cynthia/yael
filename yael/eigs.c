@@ -286,7 +286,7 @@ int arpack_eigs_step(arpack_eigs_t *ae,
   
   *x=*y=NULL;
   if(ae->info<0) {
-    fprintf(stderr, "arpack_eigs_step: ssaupd_ error info=%d\n",ae->info);
+    fprintf(stderr, "arpack_eigs_step: ssaupd_ error info=%ld\n",ae->info);
     
     return ae->info;
   } 
@@ -324,7 +324,7 @@ int arpack_eigs_end(arpack_eigs_t *ae,
             &ierr);
 
     if(ierr!=0) {
-      fprintf(stderr, "arpack_eigs_end: sseupd_ error: %d\n",ierr);
+      fprintf(stderr, "arpack_eigs_end: sseupd_ error: %ld\n",ierr);
       ret=ierr;
       goto error;
     }

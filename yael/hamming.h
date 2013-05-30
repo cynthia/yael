@@ -10,9 +10,9 @@ typedef unsigned long long uint64;
 
 /* matching elements (those returned) */
 typedef struct hammatch_s {
-  uint16 score;   /* Hamming distance */
-  uint16 qid;     /* query id */
+  int qid;        /* query id */
   int bid;        /* base id */
+  uint16 score;   /* Hamming distance */
 } hammatch_t;
 
 
@@ -84,8 +84,8 @@ void match_hamming_thres_generic (const uint8 * qbs, const uint8 * dbs, int nb, 
                                   int bufsize, hammatch_t ** hmptr, int * nptr, int ncodes);
 
 /* Compute all cross-distances between two sets of binary vectors */
-void crossmatch_hamming_thres (const uint8 * dbs, int n, int ht,
-                               int bufsize, hammatch_t ** hmptr, int * nptr);
+void crossmatch_he (const uint8 * dbs, int n, int ht,
+                    int bufsize, hammatch_t ** hmptr, int * nptr);
 
 
 

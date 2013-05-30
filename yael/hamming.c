@@ -229,8 +229,8 @@ void match_hamming_thres_generic (const uint8 * qbs, const uint8 * dbs, int nb, 
 }
 
 
-void crossmatch_hamming_thres (const uint8 * dbs, int n, int ht,
-                               int bufsize, hammatch_t ** hmptr, int * nptr)
+void crossmatch_he (const uint8 * dbs, int n, int ht,
+                    int bufsize, hammatch_t ** hmptr, int * nptr)
 {
   int i, j, posm = 0;
   uint16 h;
@@ -269,6 +269,32 @@ void crossmatch_hamming_thres (const uint8 * dbs, int n, int ht,
   
   *nptr = posm;
 }
+
+
+
+void crossmatch_he_count (const uint8 * dbs, int n, int ht,
+                          int bufsize, int * nptr)
+{
+  int i, j, posm = 0;
+  const uint8 * bs1 = dbs;
+  
+  for (i = 0 ; i < n ; i++) {
+    const uint8 * bs2 = bs1 + BITVECBYTE;
+    
+    for (j = i + 1 ; j < n ; j++) {
+      
+      /* collect the match only if this satisfies the threshold */
+      if (hamming (bs1, bs2) <= ht) 
+        posm++;
+      
+      bs2 += BITVECBYTE;
+    }
+    bs1  += BITVECBYTE;  /* next signature */
+  }
+  
+  *nptr = posm;
+}
+
 
 
 

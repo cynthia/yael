@@ -478,7 +478,7 @@ ivfmatch_t * ivf_hequeryw (const ivf_t * ivf,
   }
 
   for (i = 0 ; i < nq ; i++) {
-    int * listids = ivf->ids[keys[i]];
+    const int * listids = ivf->ids[keys[i]];
     
     ivfmatch_t * m = matches + cumnmatches[i];
     hammatch_t * hm = hmlist[i];
@@ -519,13 +519,32 @@ hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, int * nmat
 #ifdef _OPENMP
 #pragma omp parallel for private (i)
   for (i = 0 ; i < ivf->k ; i++) {
-    crossmatch_hamming_thres (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
-                              ht, nbufinit, hmlist+i, nmatches+i);
+    crossmatch_he (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                   ht, nbufinit, hmlist+i, nmatches+i);
+    
+    hammatch_t *m = hmlist[i];
+    const int * listids = ivf->ids[i];
+    int j, n = nmatches[i];
+    
+    for (j = 0 ; j < n ; j++) {
+      m->qid = listids[m->qid];
+      m->bid = listids[m->bid];
+      m++;
+    }
+    
   }
 #else
   for (i = 0 ; i < ivf->k ; i++) {
-    crossmatch_hamming_thres (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
-                              ht, nbufinit, hmlist+i, nmatches+i);
+    crossmatch_he (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                   ht, nbufinit, hmlist+i, nmatches+i);
+    hammatch_t *m = hmlist[i];
+    const int * listids = ivf->ids[i];
+    int j;
+    for (j = 0 ; j < nmatches[i] ; j++) {
+        m->qid = listids[m->qid];
+        m->bid = listids[m->bid];
+        m++;
+    }
   }
 #endif
 

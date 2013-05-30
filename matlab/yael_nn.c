@@ -69,7 +69,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
 
   /* post-processing: convert to matlab indices, and enforce full sort */
 
-  int i, j;
+  int i;
 
   for (i = 0 ; i < nq * k ; i++)
     assign[i]++;

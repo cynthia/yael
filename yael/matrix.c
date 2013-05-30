@@ -342,8 +342,6 @@ int fmat_remove_0_columns(float *a, int d, int n) {
   return nnz;
 }
 
-static int first = 1;
-
 void fmat_normalize_columns_l2sqr_pow(float *a, int d, int n, float pw) {
   long i; 
   if(pw == 0.5) {

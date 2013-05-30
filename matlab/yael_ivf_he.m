@@ -249,17 +249,31 @@ bs = yael_ivf ('findbs', keys, int32(ids));
 function ivfhe = ivfhe_load (fivf_name)
 
 % Parameter file
-ivfhe = load ([fivf_name '.mat'], '-mat')
+ivfhe = load ([fivf_name '.mat'], '-mat');
 yael_ivf ('free');
 yael_ivf ('load', fivf_name);
 
+% The methods associated with the ivfhe structure
+ivfhe.quantizer = @yael_nn;
+
+ivfhe.binsign = @ivfhe_binsign;
+ivfhe.add = @ivfhe_add;
+ivfhe.query = @ivfhe_query;
+ivfhe.queryw = @ivfhe_queryw;
+ivfhe.getids = @ivfhe_getids;
+ivfhe.save = @ivfhe_save;
+ivfhe.load = @ivfhe_load;
+ivfhe.imbfactor = @ivfhe_imbfactor;
+ivfhe.findbs = @ivfhe_findbs;
+
 
 %------------------------------------------------------------
-function ivfhe_save (ivfhe, fivf_name)
+function ivfhe_save (ivfhe, fivf_name, quantizer)
 
 % Parameter file (The matlab part)
-save ([fivf_name '.mat'], '-mat', '-struct', 'ivfhe')
-       
+save ([fivf_name '.mat'], '-mat', '-struct', 'ivfhe', 'd', 'k', ...
+      'nbits', 'Q', 'quantizer_params', 'medians', 'bin2compactbin');
+
 % Content of the inverted file
 yael_ivf ('save', fivf_name);
 

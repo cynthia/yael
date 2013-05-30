@@ -11,8 +11,6 @@
 % This package was written by Herve Jegou
 % Copyright (C) INRIA 2008-2013
 
-setenv ('YAELCFLAGS', '-msse4 -I/usr/include -I/Users/hjegou/src/yael -DFINTEGER=long -DHAVE_ARPACK');
-
 
 % load the vectors from test/training/query sets, and the groundtruth
 % if dataset='random', a random dataset is generated on the fly
@@ -29,10 +27,10 @@ anndata_load_vectors;
 
 %---[ Search parameters ]---
 
-ht = 64;              % Hamming threshold
 nbits = 128;          % number of projection bits
 coarsek = 1024;       % number of centroids for the coarse quantizer
 w = 4;                % number of cell visited per query
+htlist = [18];        % list of test hamming thresholds (assuming nbits=64)
 
 tic;
 
@@ -65,27 +63,40 @@ ivfhe = yael_ivf_he (fivf_name);
 %---[ perform the search and compare with the ground-truth ]---
 
 % Perform the queries
-nquery = size (vquery, 2);
 nquery = nbase;
 vquery = vbase (:, 1:nquery);
 
-for hti = [20]
+for hti = htlist
   ht = floor (hti * nbits / 64);
   tic
   matches = ivfhe.query (ivfhe, int32(1:nquery), vquery, ht);
+
+  % Remove duplicate matches due to symmetry and self-matches
+  idx = find (matches(1,:) < matches(2,:));
+  matches = matches (:, idx);
+
   fprintf ('* %d Queries performed in %.3f seconds - ht=%d\n', nquery, toc, ht);
   fprintf ('-> found %d matches\n', size (matches, 2));
 end
 
-for hti = [20]
-  m = yael_ivf ('crossmatch', 20);
+
+for hti = htlist
+  tic
+  ht = floor (hti * nbits / 64)
+  m = yael_ivf ('crossmatch', ht);
+  toc
 end
 
+matches = double(matches);
+m = double (m);
+smatches = sparse(matches(1,:), matches(2,:), matches(3,:));
+sm = sparse(m(1,:), m(2,:), m(3,:));
 
-ivfhe.scoremap = single (exp(- ((0:nbits)/16).^2));
 
-for hti = [20]
+for hti = htlist
 ht = floor (hti * nbits / 64);
+ivfhe.scoremap = nbits * single (exp(- ((0:nbits)/(nbits/4)).^2));
+
 tic
 matches2 = ivfhe.queryw (ivfhe, int32(1:nquery), vquery, ht);
 fprintf ('* %d Queries performed in %.3f seconds - ht=%d\n', nquery, toc, ht);

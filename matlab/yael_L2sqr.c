@@ -34,7 +34,6 @@ void mexFunction (int nlhs, mxArray *plhs[],
 
   float *a = (float*) mxGetPr (prhs[0]);  
   float *b = (float*) mxGetPr (prhs[1]); 
-  int nt = 1;
 
   /* ouptut: centroids, assignment, distances */
   plhs[0] = mxCreateNumericMatrix (na, nb, mxSINGLE_CLASS, mxREAL);
