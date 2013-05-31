@@ -57,4 +57,4 @@ mex -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_ham
 
 mex -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_ivf.c ../yael/ivf.c ../yael/hamming.c
 
-!rm *.o
+

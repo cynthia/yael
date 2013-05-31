@@ -21,7 +21,7 @@ dataset = 'sift';
 
 % Load the vectors contained in a basedir
 % Best is to define the variable datadir before executing this script
-datadir = '/nfs/annex/scratch/hjegou/annfvecs';
+datadir = '/nfs/pyrex/raid6/vectors/annfvecs/';
 anndata_load_vectors;
 
 
