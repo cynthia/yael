@@ -760,7 +760,7 @@ void fmat_mul_v(int mi,int ni,const float*a,int ldai,
       FINTEGER m1=i1-i0;
       float one=1.0,zero=0.0;
       FINTEGER ione=1;
-      // printf("%d %d\n",i,m1);
+      /* printf("%d %d\n",i,m1); */
       sgemv_("Trans",&n,&m1,&one,
              a+lda*(long)i0,&lda,x,&ione,&zero,y+i0,&ione);
       

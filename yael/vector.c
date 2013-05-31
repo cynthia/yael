@@ -953,7 +953,7 @@ int fvecs_read_txt (const char *fname, int d, int n, float *v)
 	break;
       else {
         perror ("fvecs_read_txt error 1");
-        // TODO free mem
+        /* TODO free mem */
         return -1;
       }
     }

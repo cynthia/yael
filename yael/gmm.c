@@ -198,7 +198,7 @@ static void gmm_compute_params (int n, const float * v, const float * p,
 
 
 
-double static inline sqr (double x)
+double static sqr (double x)
 {
   return x * x;
 }

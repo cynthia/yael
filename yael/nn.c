@@ -466,7 +466,8 @@ void knn_full (int distance_type,int n1, int n2, int d, int k,
 
   /* allocate all heaps at once */
   long oneh = fbinheap_sizeof(k);
-  // oneh=(oneh+7) & ~7; /* round up to 8 bytes */
+  /* oneh=(oneh+7) & ~7; */  /* round up to 8 bytes */
+
   char *minbuf = malloc (oneh * step1);
 
 #define MINS(i) ((fbinheap_t*)(minbuf + oneh * i))
