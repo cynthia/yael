@@ -249,7 +249,8 @@ bs = yael_ivf ('findbs', keys, int32(ids));
 function ivfhe = ivfhe_load (fivf_name)
 
 % Parameter file
-ivfhe = load ([fivf_name '.mat'], '-mat');
+ivfhe = load ([fivf_name '.mat'], '-mat', 'd', 'k', ...
+              'nbits', 'Q', 'quantizer_params', 'medians', 'bin2compactbin');
 yael_ivf ('free');
 yael_ivf ('load', fivf_name);
 
