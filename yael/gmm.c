@@ -177,6 +177,8 @@ static void gmm_compute_params (int n, const float * v, const float * p,
 
   if(nz) printf("WARN %ld sigma diagonals are too small (set to %g)\n",nz,min_sigma);
 
+  assert(finite(fvec_sum(g->mu, k*d)));
+
   for (j = 0 ; j < k ; j++) {
     fvec_div_by (g->mu + j * d, d, g->w[j]);
     fvec_div_by (g->sigma + j * d, d, g->w[j]);
@@ -374,19 +376,34 @@ void gmm_handle_empty(int n, const float *v, gmm_t *g, float *p) {
     int j2;
 
     j2=j;
+    retry:
     for(i=0;i<k;i++) {
       j2=(j2+bigprime)%k; 
       if(w[j2]>0) break;
     }
     assert(i<k || !"could not find centroid to split, veeeery bad input data");
-    
+
+    printf("try share with cent %d...", j2); 
+    fflush(stdout);    
+
     /* dimension to split: that with highest variance */
     int split_dim = fvec_arg_max (g->sigma + d * j2, d);
 
+    int nnz = 0; 
+    for(i=0;i<n;i++) {
+      if(p[j2+i*k]>0) 
+        nnz++; 
+    }
+    
+    if(nnz < n / k) { /* share only with centroid that has above-average nb of pts */
+      printf("has too few pts (%d)...", nnz); 
+      fflush(stdout);
+      goto retry; 
+    }      
+
     /* transfer half(?) of the points from j2 -> j */
-    int nt=0,nnz=0;
+    int nt=0;
     for(i=0;i<n;i++) if(p[j2+i*k]>0) { 
-      nnz++;
       if(v[i*d+split_dim]<g->mu[j2*d+split_dim]) {
         p[j+i*k]=p[j2+i*k];
         p[j2+i*k]=0;
@@ -395,8 +412,11 @@ void gmm_handle_empty(int n, const float *v, gmm_t *g, float *p) {
     }
 
     printf("split %d at dim %d (variance %g, transferred %d/%d pts)\n",                      
-           j2,split_dim,g->sigma[d*j2+split_dim],nt,nnz);    
-
+           j2,split_dim,g->sigma[d*j2+split_dim],nt,nnz);        
+    
+    if(nt == nnz || nt == 0) 
+      printf("  still not balanced !!! (expect crash)\n");
+    
     w[j2]=-1; /* avoid further splits */
   }
   

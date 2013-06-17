@@ -55,6 +55,8 @@ typedef struct {
 
 void malloc_stats_begin (void);
 
+malloc_stats_t malloc_stats_state (void);
+
 malloc_stats_t malloc_stats_end (void);
 
 

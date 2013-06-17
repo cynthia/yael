@@ -238,6 +238,11 @@ void malloc_stats_begin() {
       
 }
 
+malloc_stats_t malloc_stats_state() {
+  assert(msc.enabled || "malloc_stats_state: collector not enabled");
+  return msc.s;
+}
+
 
 malloc_stats_t malloc_stats_end() {
   assert(msc.enabled || "malloc_stats_begin: collector not enabled");
@@ -254,6 +259,12 @@ malloc_stats_t malloc_stats_end() {
 
 void malloc_stats_begin() {
   /* not implemented */
+}
+
+malloc_stats_t malloc_stats_state() {
+  malloc_stats_t s;
+  memset(&s,0,sizeof(malloc_stats_t));
+  return s;
 }
 
 malloc_stats_t malloc_stats_end() {
@@ -283,12 +294,12 @@ double getmillisecs()
 
 #include <omp.h>
 
-#define SET_NT omp_set_num_threads(nt)
+
 #define GET_THREAD_NUM omp_get_thread_num()
 
 #else
 
-#define SET_NT
+
 #define GET_THREAD_NUM 0
 
 /* #pragma's will be ignored */
@@ -302,9 +313,7 @@ void compute_tasks (int n, int nt,
 {
   int i;
 
-  SET_NT;
-
-#pragma omp parallel for schedule(dynamic) 
+#pragma omp parallel for schedule(dynamic) num_threads(nt)
   for(i = 0; i < n; i++) 
     (*task_fun)(task_arg, GET_THREAD_NUM, i);
 
