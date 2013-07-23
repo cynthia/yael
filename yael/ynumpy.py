@@ -99,8 +99,8 @@ def kmeans(v, k,
     elif distance_type == 1: flags |= yael.KMEANS_L1
     elif distance_type == 3: flags |= yael.KMEANS_CHI2
 
-    if init == 'random':     flags |= yael.KMEANS_INIT_RANDOM
-    elif init == 'kmeans++': pass # default
+    if init == 'random':     flags |= yael.KMEANS_INIT_RANDOM # also default
+    elif init == 'kmeans++': flags |= yael.KMEANS_INIT_BERKELEY 
 
     if normalize:            flags |= yael.KMEANS_NORMALIZE_CENTS
 
