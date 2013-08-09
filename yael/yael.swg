@@ -24,6 +24,7 @@
 #include "vlad.h"
 #include "machinedeps.h"
 #include "kmlsh.h"
+#include "ivf.h"
 
 /* seed generators used in the rest */
 void common_srandom(int seed) {
@@ -386,6 +387,27 @@ PARALLEL_FUNCTION(knn_full_thread)
  */
 
 %include "kmlsh.h"
+
+/*************************************************************************
+ * ivf.h
+ */
+
+%typemap(in,numinputs=0,noblock=1) int * buffer_size  {
+  int bufsize;
+  $1 = &bufsize;
+}
+
+%typemap(out) ivfmatch_t* ivf_hequery {
+  int i;
+  $result = PyList_New(bufsize);
+  for (i = 0; i < bufsize; i++) {
+    PyObject *o = Py_BuildValue("iif", $1[i].qid, $1[i].bid, $1[i].score);
+    PyList_SetItem($result,i,o);
+  }
+  free($1);
+}
+
+%include "ivf.h"
 
 /*************************************************************************
  * allows freeing some elements allocated by malloc/calloc in python
