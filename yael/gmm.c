@@ -261,6 +261,7 @@ static void compute_mahalanobis_sqr(int n,long k,long d,
 /* This could be optimized a bit more with sse */
 static void softmax_ref(int k, int n, const float *f, float *p, float *coeffs) {
   int i;
+  float norm_to_0 = 16.636; /* log(2^24) */
 
 #define F(i,j) f[(i) + (j) * k] 
 #define P(i,j) p[(i) + (j) * k] 
@@ -275,8 +276,12 @@ static void softmax_ref(int k, int n, const float *f, float *p, float *coeffs) {
 
     float s = 0.0;
     for(l = 0; l < k; l++) {
-      P(l, i) = exp(F(l, i) - maxval);
-      s += P(l, i); 
+      /* P(l, i) = exp(F(l, i) - maxval); */
+      if(F(l, i) > maxval - norm_to_0) {
+        P(l, i) = exp(F(l, i) - maxval);
+        s += P(l, i); 
+      } else 
+        P(l, i) = 0; 
     }
 
     if(coeffs) 
