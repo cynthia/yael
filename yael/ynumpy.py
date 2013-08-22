@@ -23,6 +23,12 @@ def _check_row_float32(a):
     if not a.flags.c_contiguous:
         raise TypeError('expected C order matrix')
 
+def _check_row_uint8(a): 
+    if a.dtype != numpy.uint8: 
+        raise TypeError('expected uint8 matrix, got %s' % a.dtype)
+    if not a.flags.c_contiguous:
+        raise TypeError('expected C order matrix')
+
 def _check_row_int32(a): 
     if a.dtype != numpy.int32: 
         raise TypeError('expected int32 matrix, got %s' % a.dtype)
@@ -194,8 +200,16 @@ def fvecs_write(filename, matrix):
     if ret != n:
         raise IOError("write error" + filename)
 
+def bvecs_write(filename, matrix):
+    _check_row_uint8(matrix)
+    n, d = matrix.shape
+    ret = yael.bvecs_write(filename, d, n, yael.numpy_to_bvec_ref(matrix))
+    if ret != n:
+        raise IOError("write error" + filename)
+    
+
 def ivecs_write(filename, matrix): 
-    pass
+    assert False, "not implemented"
 
 def siftgeo_read(filename):
 

@@ -1508,6 +1508,8 @@ int ivec_fwrite (FILE *f, const int *v, int d)
 }
 
 
+
+
 int ivecs_fwrite(FILE *f, int d, int n, const int *v)
 {
   int i;
@@ -1529,6 +1531,52 @@ int ivecs_write (const char *fname, int d, int n, const int *v)
   }
 
   ret = ivecs_fwrite (f, d, n, v);
+
+  fclose (f);
+  return ret;
+}
+
+
+int bvec_fwrite (FILE *f, const unsigned char *v, int d)
+{
+  int ret = fwrite (&d, sizeof (d), 1, f);
+  if (ret != 1) {
+    perror ("bvec_fwrite: write error 1");
+    return -1;
+  }
+
+  ret = fwrite (v, sizeof (*v), d, f);
+  if (ret != d) {
+    perror ("bvec_fwrite: write error 2");
+    return -2;
+  }
+  return 0;
+}
+
+
+
+
+int bvecs_fwrite(FILE *f, int d, int n, const unsigned char *v)
+{
+  int i;
+  for (i = 0 ; i < n ; i++) {    
+    bvec_fwrite (f, v, d);
+    v+=d;
+  }
+  return n;
+}
+
+
+int bvecs_write (const char *fname, int d, int n, const unsigned char *v)
+{
+  int ret = 0;
+  FILE *f = fopen (fname, "w");
+  if (!f) {
+    perror ("bvecs_write");
+    return -1;
+  }
+
+  ret = bvecs_fwrite (f, d, n, v);
 
   fclose (f);
   return ret;

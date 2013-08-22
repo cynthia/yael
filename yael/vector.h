@@ -209,6 +209,7 @@ int ivecs_write_txt (const char * fname, int d, int n, const int *v);
 int fvecs_write (const char *fname, int d, int n, const float *vf);
 int fvecs_write_txt (const char * fname, int d, int n, const float *vf);
 
+int bvecs_write (const char *fname, int d, int n, const unsigned char *v);
 
 /*!  load float vectors from file.
  *
