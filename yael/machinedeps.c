@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <assert.h>
@@ -10,6 +11,18 @@
 #include "machinedeps.h"
 
 
+static int count_cpu_from_env() {
+  int ncpu;
+   
+  if(!getenv("YAEL_COUNT_CPU")) return 0; 
+  
+  if(sscanf(getenv("YAEL_COUNT_CPU"), "%d", &ncpu) != 1 || ncpu <= 0) {
+    fprintf(stderr, "could not parse YAEL_CPU_COUNT environment variable, using default\n"); 
+    return 0; 
+  } 
+  return ncpu; 
+}
+
 #ifdef __linux__
 
 #define __USE_GNU
@@ -17,6 +30,9 @@
 
 int count_cpu (void)
 {
+  int ncpu = count_cpu_from_env(); 
+  if(ncpu) return ncpu; 
+
   cpu_set_t set;
   sched_getaffinity (0, sizeof (cpu_set_t), &set);
   int i, count = 0;
@@ -34,6 +50,9 @@ int count_cpu (void)
 
 
 int count_cpu (void) {
+  int ncpu = count_cpu_from_env(); 
+  if(ncpu) return ncpu; 
+
   int count=-1;
   size_t count_size=sizeof(count);
   sysctlbyname("hw.ncpu",&count,&count_size,NULL,0);
