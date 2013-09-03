@@ -24,6 +24,11 @@ int ivf_checksum (const ivf_t * ivf)
 ivf_t *ivf_new (int k, int elemsize, int seg_size)
 {
   int i;
+  if(BITVECSIZE != 8 * elemsize) {
+    int b = BITVECSIZE;
+    fprintf (stderr, "Error: elemsize (%d bytes) inconsistent with BITVECSIZE (%d bits) set at compile-time.\n", elemsize, b);
+    return NULL;
+  }
   if (seg_size == 0)
     seg_size = DEFAULT_SEG_SIZE;
 
