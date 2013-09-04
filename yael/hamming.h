@@ -39,8 +39,8 @@ uint16 hamming_64 (const uint64 * bs1, const uint64 * bs2);
 
 
 #ifndef BITVECSIZE
-#warning "# BITVECSIZE UNDEFINED. SET TO 64 BY DEFAULT." 
-#define BITVECSIZE 64
+#warning "# BITVECSIZE UNDEFINED. SET TO 128 BY DEFAULT." 
+#define BITVECSIZE 128
 #elif BITVECSIZE%8 != 0
 #error "Only power of 8 are possible for BITVECSIZE"
 #endif

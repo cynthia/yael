@@ -28,7 +28,7 @@ anndata_load_vectors;
 %---[ Search parameters ]---
 
 nbits = 128;          % number of projection bits
-coarsek = 1024;       % number of centroids for the coarse quantizer
+coarsek = 512;       % number of centroids for the coarse quantizer
 w = 4;                % number of cell visited per query
 htlist = [18];        % list of test hamming thresholds (assuming nbits=64)
 
@@ -44,7 +44,9 @@ fprintf ('* Learned the IVF structure in %.3f seconds\n', toc);
 % encode the database vectors: ivf is a structure containing two sets of k cells
 % Each cell contains a set of idx/codes associated with a given coarse centroid
 
+tic
 ivfhe.add (ivfhe, int32(1:nbase), vbase);
+fprintf ('* Add vectors to the structure in %.3f seconds\n', toc); 
 
 
 fivf_name = 'test.ivf';
@@ -62,6 +64,7 @@ ivfhe = yael_ivf_he (fivf_name);
 
 %---[ perform the search and compare with the ground-truth ]---
 
+if 0
 % Perform the queries
 nquery = nbase;
 vquery = vbase (:, 1:nquery);
@@ -78,7 +81,9 @@ for hti = htlist
   fprintf ('* %d Queries performed in %.3f seconds - ht=%d\n', nquery, toc, ht);
   fprintf ('-> found %d matches\n', size (matches, 2));
 end
-
+matches = double(matches);
+smatches = sparse(matches(1,:), matches(2,:), matches(3,:));
+end
 
 for hti = htlist
   tic
@@ -87,9 +92,8 @@ for hti = htlist
   toc
 end
 
-matches = double(matches);
+if 0
 m = double (m);
-smatches = sparse(matches(1,:), matches(2,:), matches(3,:));
 sm = sparse(m(1,:), m(2,:), m(3,:));
 
 
@@ -101,6 +105,7 @@ tic
 matches2 = ivfhe.queryw (ivfhe, int32(1:nquery), vquery, ht);
 fprintf ('* %d Queries performed in %.3f seconds - ht=%d\n', nquery, toc, ht);
 fprintf ('-> found %d matches\n', size (matches2, 2));
+end
 end
 
 
