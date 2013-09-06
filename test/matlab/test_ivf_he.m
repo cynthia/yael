@@ -77,15 +77,17 @@ for hti = [12:2:24]
   fprintf ('-> found %d matches\n', size (matches, 2));
 end
 
-ivfhe.scoremap = single (exp(- ((0:nbits)/16).^2))
+ivfhe.scoremap = single (exp(- ((0:nbits)/16).^2));
+ivfhe.scoremap = single (1:-2/nbits:-1).^2;
+ivfhe.scoremap(floor(nbits/2):nbits+1)=0;
 
-for hti = [12:2:24]
+for hti = [64]%[12:2:24]
 ht = floor (hti * nbits / 64);
 tic
-matches2 = ivfhe.queryw (ivfhe, int32(1:nquery), vquery, ht);
+[mids, msc] = ivfhe.queryw (ivfhe, int32(1:nquery), vquery, ht);
 fprintf ('* %d Queries performed in %.3f seconds - ht=%d\n', nquery, toc, ht);
-fprintf ('-> found %d matches\n', size (matches2, 2));
+fprintf ('-> found %d matches\n', size (mids, 2));
 end
 
 
-yael_ivf ('free');
+%yael_ivf ('free');

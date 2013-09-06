@@ -202,7 +202,7 @@ matches = yael_ivf ('queryhe', int32(ids), int32(vidx), codes, ht);
 %   ids: vectors identifiers
 %   idx: quantization cell
 %   codes:  binary code (int uint8 format)
-function matches = ivfhe_queryw (ivfhe, ids, v, ht, vidx, codes)
+function [mids, msc] = ivfhe_queryw (ivfhe, ids, v, ht, vidx, codes)
 
 if ~exist ('vidx')
   [vidx,dis] = ivfhe.quantizer (ivfhe.quantizer_params, v);
@@ -214,12 +214,12 @@ end
 
 if isfield (ivfhe, 'scoremap') 
   if isfield (ivfhe, 'listw')
-    matches = yael_ivf ('queryhew', int32(ids), int32(vidx), codes, ht, ivfhe.scoremap, ivfhe.listw);
+    [mids, msc] = yael_ivf ('queryhew', int32(ids), int32(vidx), codes, ht, ivfhe.scoremap, ivfhe.listw);
   else
-    matches = yael_ivf ('queryhew', int32(ids), int32(vidx), codes, ht, ivfhe.scoremap);
+    [mids, msc] = yael_ivf ('queryhew', int32(ids), int32(vidx), codes, ht, ivfhe.scoremap);
   end
 else 
-  matches = yael_ivf ('queryhew', int32(ids), int32(vidx), codes, ht);
+  [mids, msc] = yael_ivf ('queryhew', int32(ids), int32(vidx), codes, ht);
 end
 
 %------------------------------------------------------------

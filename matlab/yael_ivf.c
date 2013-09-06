@@ -326,8 +326,8 @@ void mexFunction (int nlhs, mxArray *plhs[],
     break;
     
   case IVF_FUNCTION_QUERYHEW: {
-    if (nlhs != 1 || (nrhs != 5 && nrhs != 6 && nrhs != 7))
-      mexErrMsgTxt ("Usage: matches = ivfmex ('queryhe', ids, keys, codes, ht [,scoremap, listw])");
+    if (nlhs != 2 || (nrhs != 5 && nrhs != 6 && nrhs != 7))
+      mexErrMsgTxt ("Usage: [ids, scores] = ivfmex ('queryhe', ids, keys, codes, ht [,scoremap, listw])");
 
     if (mxGetClassID(prhs[1]) != mxINT32_CLASS || mxGetM (prhs[1]) != 1)
       mexErrMsgTxt ("Argument 2 should a vector of int32 ids"); 
@@ -377,15 +377,17 @@ void mexFunction (int nlhs, mxArray *plhs[],
     fprintf (stderr, "Found %d matches\n", nmatches);
 
     /* Cast the match structure into matlab vectors */
-    plhs[0] = mxCreateNumericMatrix (3, nmatches, mxINT32_CLASS, mxREAL);
+    plhs[0] = mxCreateNumericMatrix (2, nmatches, mxINT32_CLASS, mxREAL);
+    plhs[1] = mxCreateNumericMatrix (1, nmatches, mxSINGLE_CLASS, mxREAL);
 
-    int * matchinfo = (int *) mxGetPr (plhs[0]);
+    int32_T * matchids = (int32_T *) mxGetPr (plhs[0]);
+    float * matchscores = (float *) mxGetPr (plhs[1]);
     int i;
 
     for (i = 0 ; i < nmatches ; i++) {
-      *(matchinfo++) = matches[i].qid;
-      *(matchinfo++) = matches[i].bid;
-      *(matchinfo++) = matches[i].score;
+      *(matchids++) = matches[i].qid;
+      *(matchids++) = matches[i].bid;
+      *(matchscores++) = matches[i].score;
     }
     
     free (matches);
