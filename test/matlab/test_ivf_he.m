@@ -81,6 +81,8 @@ ivfhe.scoremap = single (exp(- ((0:nbits)/16).^2));
 ivfhe.scoremap = single (1:-2/nbits:-1).^2;
 ivfhe.scoremap(floor(nbits/2):nbits+1)=0;
 
+ivfhe.listw = single(ones(1, coarsek));
+
 for hti = [64]%[12:2:24]
 ht = floor (hti * nbits / 64);
 tic

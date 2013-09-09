@@ -366,9 +366,15 @@ void mexFunction (int nlhs, mxArray *plhs[],
     if (nrhs >= 7) {
       if (mxGetClassID(prhs[6]) != mxSINGLE_CLASS)
         mexErrMsgTxt ("Argument 6 should be a single array to weights the lists"); 
-      if (! ((mxGetN (prhs[6])==1 && mxGetM (prhs[6])==ivf->k) 
-             || (mxGetN (prhs[6])==ivf->k && mxGetM (prhs[6])==1)))
-      list_w = (float *) mxGetPr (prhs[6]);
+      
+      if ( (mxGetN (prhs[6])==1 && mxGetM (prhs[6])==(ivf->k-1)) 
+           || (mxGetN (prhs[6])==(ivf->k-1) && mxGetM (prhs[6])==1) ) {
+        
+        list_w = (float *) malloc (ivf->k * sizeof (*list_w));
+        list_w[0] = 0;
+        memcpy (list_w+1, (float *) mxGetPr (prhs[6]), (ivf->k-1) * sizeof(*list_w));
+      }
+      else mexErrMsgTxt ("Length of argument 6 should be equal to the number of inverted lists"); 
     }
       
     int nmatches;
@@ -391,6 +397,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
     }
     
     free (matches);
+    free (list_w);
     }
     break;
       
