@@ -414,7 +414,7 @@ ivfmatch_t * ivf_hequery (const ivf_t * ivf,
 /* Collect matches */
 hammatch_t ** ivf_he_collect (const ivf_t * ivf, const int * keys,
                               const unsigned char * qbs, int nq,
-                              int ht, int64 * nmatches)
+                              int ht, size_t * nmatches)
 {
   int i, nbufinit = 512;
   assert (ivf->elem_size == BITVECBYTE);
@@ -445,18 +445,18 @@ hammatch_t ** ivf_he_collect (const ivf_t * ivf, const int * keys,
 ivfmatch_t * ivf_hequeryw (const ivf_t * ivf, 
                             const int * qids, const int * keys,
                             const unsigned char * qbs, int nq,
-                            int ht, int64 * totmatches,
+                            int ht, size_t * totmatches,
                             const float * score_map_, const float * list_w_)
 {
-  int64 i, j;  
+  size_t i, j;  
   assert (ivf->elem_size == BITVECBYTE);
   
   /* Match entities to count number of matches per query */
-  int64 * nmatches = (int64 *) malloc (sizeof(*nmatches) * nq);
+  size_t * nmatches = (size_t *) malloc (sizeof(*nmatches) * nq);
   hammatch_t ** hmlist = ivf_he_collect (ivf, keys, qbs, nq, ht, nmatches);
                                             
   /* compute the cumulative number of matches */
-  int64 * cumnmatches = (int64 *) malloc (sizeof (*cumnmatches) * (nq+1));
+  size_t * cumnmatches = (size_t *) malloc (sizeof (*cumnmatches) * (nq+1));
   cumnmatches[0] = 0;
   for (i = 0 ; i < nq ; i++)
     cumnmatches[i+1] = nmatches[i] + cumnmatches[i];
@@ -513,7 +513,7 @@ ivfmatch_t * ivf_hequeryw (const ivf_t * ivf,
 
 
 /* Collect cross-matches with Hamming distance */
-hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, long long * nmatches)
+hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, size_t * nmatches)
 {
   int i, nbufinit = 512;
   assert (ivf->elem_size == BITVECBYTE);
@@ -558,9 +558,9 @@ hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, long long 
 
 
 /* Collect cross-matches with Hamming distance */
-void ivf_he_count_crossmatches (const ivf_t * ivf, int ht, int64 * nmatches)
+void ivf_he_count_crossmatches (const ivf_t * ivf, int ht, size_t * nmatches)
 {
-  int64 i;
+  long i;
   assert (ivf->elem_size == BITVECBYTE);
   
 #ifdef _OPENMP

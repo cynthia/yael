@@ -160,9 +160,9 @@ hammatch_t * hammatch_realloc (hammatch_t * m, int n)
 
 
 void match_hamming_thres (const uint8 * qbs, const uint8 * dbs, int nb, int ht,
-                          int64 bufsize, hammatch_t ** hmptr, int64 * nptr)
+                          size_t bufsize, hammatch_t ** hmptr, size_t * nptr)
 {
-  int64 j, posm = 0;
+  size_t j, posm = 0;
   uint16 h;
   *hmptr = hammatch_new (bufsize);
   hammatch_t * hm = *hmptr;
@@ -195,10 +195,10 @@ void match_hamming_thres (const uint8 * qbs, const uint8 * dbs, int nb, int ht,
 
 
 void match_hamming_thres_generic (const uint8 * qbs, const uint8 * dbs, 
-                                  int nb, int ht, int64 bufsize, 
-                                  hammatch_t ** hmptr, int64 * nptr, int64 ncodes)
+                                  int nb, int ht, size_t bufsize, 
+                                  hammatch_t ** hmptr, size_t * nptr, size_t ncodes)
 {
-  int64 j, posm = 0;
+  size_t j, posm = 0;
   uint16 h;
   *hmptr = hammatch_new (bufsize);
   hammatch_t * hm = *hmptr;
@@ -231,9 +231,9 @@ void match_hamming_thres_generic (const uint8 * qbs, const uint8 * dbs,
 
 
 void crossmatch_he (const uint8 * dbs, long n, int ht,
-                    long bufsize, hammatch_t ** hmptr, int64 * nptr)
+                    long bufsize, hammatch_t ** hmptr, size_t * nptr)
 {
-  int64 i, j, posm = 0;
+  size_t i, j, posm = 0;
   uint16 h;
   *hmptr = hammatch_new (bufsize);
   hammatch_t * hm = *hmptr;
@@ -273,9 +273,9 @@ void crossmatch_he (const uint8 * dbs, long n, int ht,
 
 
 
-void crossmatch_he_count (const uint8 * dbs, int n, int ht, int64 * nptr)
+void crossmatch_he_count (const uint8 * dbs, int n, int ht, size_t * nptr)
 {
-  int64 i, j, posm = 0;
+  size_t i, j, posm = 0;
   const uint8 * bs1 = dbs;
   
   for (i = 0 ; i < n ; i++) {
@@ -304,7 +304,7 @@ void crossmatch_he_count (const uint8 * dbs, int n, int ht, int64 * nptr)
 void compute_hamming_thread (uint16 * dis, const uint8 * a, const uint8 * b, 
                              int na, int nb)
 {
-  int64 i, j;
+  long i, j;
 #pragma omp parallel shared (dis, a, b, na, nb) private (i, j)
     {
 #pragma omp for 

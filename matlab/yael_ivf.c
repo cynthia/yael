@@ -380,10 +380,10 @@ void mexFunction (int nlhs, mxArray *plhs[],
       else mexErrMsgTxt ("Length of argument 6 should be equal to the number of inverted lists"); 
     }
       
-    int64_T nmatches;
+    size_t nmatches;
     ivfmatch_t * matches = ivf_hequeryw (ivf, qids, keys, codes, nq, ht, &nmatches, score_map, list_w);
 
-    fprintf (stderr, "Found %lld matches\n", nmatches);
+    fprintf (stderr, "Found %ld matches\n", nmatches);
 
     /* Cast the match structure into matlab vectors */
     plhs[0] = mxCreateNumericMatrix (2, nmatches, mxINT32_CLASS, mxREAL);
@@ -391,7 +391,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
 
     int32_T * matchids = (int32_T *) mxGetPr (plhs[0]);
     float * matchscores = (float *) mxGetPr (plhs[1]);
-    int64_T i;
+    size_t i;
 
     for (i = 0 ; i < nmatches ; i++) {
       *(matchids++) = matches[i].qid;
@@ -416,18 +416,19 @@ void mexFunction (int nlhs, mxArray *plhs[],
       /* Hamming threshold for Hamming Embedding */
       int ht = (int) mxGetScalar (prhs[1]);
       
-      int64_T * nmatches = (int64_T *) malloc (sizeof(*nmatches) * ivf->k);
+      size_t * nmatches = (size_t *) malloc (sizeof(*nmatches) * ivf->k);
       hammatch_t ** hmlist = ivf_he_collect_crossmatches (ivf, ht, nmatches);
       
       /* compute the cumulative number of matches */
-      int64_T * cumnmatches = (int64_T *) malloc (sizeof (*cumnmatches) * (ivf->k+1));
+      size_t * cumnmatches = (size_t *) malloc (sizeof (*cumnmatches) * (ivf->k+1));
       cumnmatches[0] = 0;
       for (i = 0 ; i < ivf->k ; i++)
         cumnmatches[i+1] = nmatches[i] + cumnmatches[i];
-      int64_T totmatches = cumnmatches[ivf->k];
+      size_t totmatches = cumnmatches[ivf->k];
           
       /* Cast the match structure into matlab vectors */
       plhs[0] = mxCreateNumericMatrix (3, totmatches, mxINT32_CLASS, mxREAL);
+      mexPrintf ("totmatches =%d\n", totmatches);
       plhs[1] = mxCreateNumericMatrix (1, ivf->k-1, mxINT64_CLASS, mxREAL);
       memcpy (mxGetPr(plhs[1]), nmatches + 1, sizeof (*nmatches) * (ivf->k-1));
       
@@ -460,7 +461,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
       /* Hamming threshold for Hamming Embedding */
       int ht = (int) mxGetScalar (prhs[1]);
       
-      int64_T * nmatches = (int64_T *) malloc (sizeof(*nmatches) * ivf->k);
+      size_t * nmatches = (size_t *) malloc (sizeof(*nmatches) * ivf->k);
       
       ivf_he_count_crossmatches (ivf, ht, nmatches);
       
