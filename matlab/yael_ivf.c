@@ -55,6 +55,19 @@ int ivfmex_status (int verbose)
   return ivf->n;
 }
 
+/* Check empirically if the inverted file start at 0.
+   Return */
+
+#define IVF_MATLAB    1    /* likely to be matlab */
+#define IVF_FROM0     0    /* should be C (idx at 0) */
+int ivfmex_offsetidx()
+{
+  if (ivf->nbelems[0] == 0 && ivf->nbelems[1] > 0)
+    return IVF_MATLAB;
+
+  return IVF_FROM0;
+}
+
 
 void mexFunction (int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray*prhs[])
@@ -406,13 +419,14 @@ void mexFunction (int nlhs, mxArray *plhs[],
       
       
     case IVF_FUNCTION_CROSSMATCH: {
-      
       if (nlhs != 2 || nrhs != 2)
          mexErrMsgTxt ("Usage: [matches, nmatches] = ivfmex ('crossmatch', ht)");
       
       if (ivf == NULL)
         mexErrMsgTxt ("Inverted file is not defined\n Use ivfmex('new',...).");
     
+      int off = ivfmex_offsetidx();
+
       /* Hamming threshold for Hamming Embedding */
       int ht = (int) mxGetScalar (prhs[1]);
       
@@ -428,14 +442,14 @@ void mexFunction (int nlhs, mxArray *plhs[],
           
       /* Cast the match structure into matlab vectors */
       plhs[0] = mxCreateNumericMatrix (3, totmatches, mxINT32_CLASS, mxREAL);
-      mexPrintf ("totmatches =%d\n", totmatches);
       plhs[1] = mxCreateNumericMatrix (1, ivf->k-1, mxINT64_CLASS, mxREAL);
-      memcpy (mxGetPr(plhs[1]), nmatches + 1, sizeof (*nmatches) * (ivf->k-1));
+      
+      memcpy (mxGetPr(plhs[1]), nmatches + off, sizeof (*nmatches) * (ivf->k-1));
       
       int * matchinfo = (int *) mxGetPr (plhs[0]);
       int i, j;
       
-      for (j = 0 ; j < ivf->k ; j++)
+      for (j = off ; j < ivf->k - 1 + off ; j++)
         for (i = 0 ; i < nmatches[j] ; i++) {
           *(matchinfo++) = hmlist[j][i].qid;
           *(matchinfo++) = hmlist[j][i].bid;
@@ -451,12 +465,13 @@ void mexFunction (int nlhs, mxArray *plhs[],
       break;
       
     case IVF_FUNCTION_CROSSMATCH_COUNT: {
-      
       if (nlhs != 1 || nrhs != 2)
          mexErrMsgTxt ("Usage: nmatches = ivfmex ('crossmatchcount', ht)");
       
       if (ivf == NULL)
         mexErrMsgTxt ("Inverted file is not defined\n Use ivfmex('new',...).");
+
+      int off = ivfmex_offsetidx();
 
       /* Hamming threshold for Hamming Embedding */
       int ht = (int) mxGetScalar (prhs[1]);
@@ -466,7 +481,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
       ivf_he_count_crossmatches (ivf, ht, nmatches);
       
       plhs[0] = mxCreateNumericMatrix (1, ivf->k-1, mxINT64_CLASS, mxREAL);
-      memcpy (mxGetPr(plhs[0]), nmatches + 1, sizeof (*nmatches) * (ivf->k-1));  
+      memcpy (mxGetPr(plhs[0]), nmatches + off, sizeof (*nmatches) * (ivf->k-1));  
       free (nmatches);
     }
       break;
