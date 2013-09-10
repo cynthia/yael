@@ -4,20 +4,20 @@
 #include <string.h>
 
 /* The different possible functions */
-#define IVF_FUNCTION_STATUS       0
-#define IVF_FUNCTION_NEW          1
-#define IVF_FUNCTION_FREE         2
-#define IVF_FUNCTION_ADD          3
-#define IVF_FUNCTION_LOAD         4
-#define IVF_FUNCTION_SAVE         5
-#define IVF_FUNCTION_GETIDS       6
-#define IVF_FUNCTION_GETBINSIG    7
-#define IVF_FUNCTION_QUERYHE      8
-#define IVF_FUNCTION_IMBFACTOR    9
-#define IVF_FUNCTION_QUERYHEW     10
-#define IVF_FUNCTION_FINDBS  		  12
-#define IVF_FUNCTION_CROSSMATCH   20
-#define IVF_FUNCTION_CROSSMATCHC  21
+#define IVF_FUNCTION_STATUS            0
+#define IVF_FUNCTION_NEW               1
+#define IVF_FUNCTION_FREE              2
+#define IVF_FUNCTION_ADD               3
+#define IVF_FUNCTION_LOAD              4
+#define IVF_FUNCTION_SAVE              5
+#define IVF_FUNCTION_GETIDS            6
+#define IVF_FUNCTION_GETBINSIG         7
+#define IVF_FUNCTION_QUERYHE           8
+#define IVF_FUNCTION_IMBFACTOR         9
+#define IVF_FUNCTION_QUERYHEW          10
+#define IVF_FUNCTION_FINDBS  		       12
+#define IVF_FUNCTION_CROSSMATCH        20
+#define IVF_FUNCTION_CROSSMATCH_COUNT  21
 
 static ivf_t * ivf = NULL;
 
@@ -94,8 +94,8 @@ void mexFunction (int nlhs, mxArray *plhs[],
     operation = IVF_FUNCTION_FINDBS;
   else if (!strcmp(varname, "crossmatch")) 
     operation = IVF_FUNCTION_CROSSMATCH;
-  else if (!strcmp(varname, "crossmatchc")) 
-    operation = IVF_FUNCTION_CROSSMATCHC;
+  else if (!strcmp(varname, "crossmatchcount")) 
+    operation = IVF_FUNCTION_CROSSMATCH_COUNT;
   else mexErrMsgTxt("Unknown operation for this inverted file");  
   
 
@@ -380,10 +380,10 @@ void mexFunction (int nlhs, mxArray *plhs[],
       else mexErrMsgTxt ("Length of argument 6 should be equal to the number of inverted lists"); 
     }
       
-    long nmatches;
+    int64_T nmatches;
     ivfmatch_t * matches = ivf_hequeryw (ivf, qids, keys, codes, nq, ht, &nmatches, score_map, list_w);
 
-    fprintf (stderr, "Found %ld matches\n", nmatches);
+    fprintf (stderr, "Found %lld matches\n", nmatches);
 
     /* Cast the match structure into matlab vectors */
     plhs[0] = mxCreateNumericMatrix (2, nmatches, mxINT32_CLASS, mxREAL);
@@ -391,7 +391,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
 
     int32_T * matchids = (int32_T *) mxGetPr (plhs[0]);
     float * matchscores = (float *) mxGetPr (plhs[1]);
-    int i;
+    int64_T i;
 
     for (i = 0 ; i < nmatches ; i++) {
       *(matchids++) = matches[i].qid;
@@ -408,7 +408,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
     case IVF_FUNCTION_CROSSMATCH: {
       
       if (nlhs != 2 || nrhs != 2)
-         mexErrMsgTxt ("Usage: matches = ivfmex ('crossmatch', ht)");
+         mexErrMsgTxt ("Usage: [matches, nmatches] = ivfmex ('crossmatch', ht)");
       
       if (ivf == NULL)
         mexErrMsgTxt ("Inverted file is not defined\n Use ivfmex('new',...).");
@@ -449,57 +449,23 @@ void mexFunction (int nlhs, mxArray *plhs[],
     }
       break;
       
-    case IVF_FUNCTION_CROSSMATCHC: {
+    case IVF_FUNCTION_CROSSMATCH_COUNT: {
       
       if (nlhs != 1 || nrhs != 2)
-         mexErrMsgTxt ("Usage: [mids, ham, idx] = ivfmex ('crossmatch', ht)");
+         mexErrMsgTxt ("Usage: nmatches = ivfmex ('crossmatchcount', ht)");
       
       if (ivf == NULL)
         mexErrMsgTxt ("Inverted file is not defined\n Use ivfmex('new',...).");
 
-      
-      /* Create a 2-by-2 cell array. */
-      int nsubs=1, subs[1];
-      mxArray *cell_array_ptr = mxCreateCellArray(1, &ivf->k);
-      /* mxSetName(cell_array_ptr, "matchesc"); */
-      plhs[0] = cell_array_ptr;
-      
       /* Hamming threshold for Hamming Embedding */
       int ht = (int) mxGetScalar (prhs[1]);
       
       int64_T * nmatches = (int64_T *) malloc (sizeof(*nmatches) * ivf->k);
-      hammatch_t ** hmlist = ivf_he_collect_crossmatches (ivf, ht, nmatches);
       
-      /* compute the cumulative number of matches */
-      int64_T * cumnmatches = (int64_T *) malloc (sizeof (*cumnmatches) * (ivf->k+1));
-      cumnmatches[0] = 0;
-      for (i = 0 ; i < ivf->k ; i++)
-        cumnmatches[i+1] = nmatches[i] + cumnmatches[i];
-      int64_T totmatches = cumnmatches[ivf->k];
-          
-      /* Cast the match structure into matlab vectors */
-      int64_T i, j;
+      ivf_he_count_crossmatches (ivf, ht, nmatches);
       
-      for (j = 1 ; j < ivf->k ; j++) {
-        subs[0] = j - 1; 
-        int index = mxCalcSingleSubscript(cell_array_ptr, 1, subs); 
-        mxArray * varray = mxCreateNumericMatrix (3, nmatches[j], mxINT32_CLASS, mxREAL);
-        float * v = (float *) varray;
-        
-        for (i = 0 ; i < nmatches[j] ; i++) {
-          *(v++) = hmlist[j][i].qid;
-          *(v++) = hmlist[j][i].bid;
-          *(v++) = hmlist[j][i].score;
-        }
-        
-        mxSetCell(cell_array_ptr, index, varray);
-      }
-
-        
-      for (i = 0 ; i < ivf->k ; i++)
-        free (hmlist[i]);
-      free (hmlist);
-      free (cumnmatches);
+      plhs[0] = mxCreateNumericMatrix (1, ivf->k-1, mxINT64_CLASS, mxREAL);
+      memcpy (mxGetPr(plhs[0]), nmatches + 1, sizeof (*nmatches) * (ivf->k-1));  
       free (nmatches);
     }
       break;

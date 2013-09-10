@@ -32,7 +32,6 @@ typedef struct ivfmatch_s {
 } ivfmatch_t;
 
 
-
 /*-------------------- Ivf interface --------------------*/
 
 /* Check if the inverted file looks Ok */
@@ -83,7 +82,7 @@ ivfmatch_t * ivf_hequery (const ivf_t * ivf, const int * qids, const int * keys,
 
 /* Alternate implementations, which weights the scores */
 ivfmatch_t * ivf_hequeryw (const ivf_t * ivf, const int * qids, const int * keys,
-                           const unsigned char * adat, int nq, int ht, long * nm, 
+                           const unsigned char * adat, int nq, int ht, int64 * nm, 
                            const float * score_map_, const float * list_w_);
 
 
@@ -95,7 +94,9 @@ ivf_t * ivf_load (const char * fname);
 ivfmatch_t * ivfmatch_new (int n);
 
 /* Cross-match all elements based on binary signature */
-hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, long long * nmatches);
+hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, int64 * nmatches);
+
+void ivf_he_count_crossmatches (const ivf_t * ivf, int ht, int64 * nmatches);
 
 
 

@@ -7,6 +7,8 @@ typedef unsigned short uint16;
 typedef unsigned int uint32;
 typedef unsigned long long uint64;
 
+typedef long long int64;
+
 
 /* matching elements (those returned) */
 typedef struct hammatch_s {
@@ -78,16 +80,18 @@ void compute_hamming_thread (uint16 * dis, const uint8 * a, const uint8 * b, int
 
 /* Compute hamming distance and report those below a given threshold in a structure array */
 void match_hamming_thres (const uint8 * qbs, const uint8 * dbs, int nb, int ht,
-                          long bufsize, hammatch_t ** hmptr, long * nptr);
+                          int64 bufsize, hammatch_t ** hmptr, int64 * nptr);
 
-void match_hamming_thres_generic (const uint8 * qbs, const uint8 * dbs, int nb, int ht,
-                                  long bufsize, hammatch_t ** hmptr, long * nptr, int ncodes);
+void match_hamming_thres_generic (const uint8 * qbs, const uint8 * dbs, 
+                                  int nb, int ht, int64 bufsize, 
+                                  hammatch_t ** hmptr, int64 * nptr, 
+                                  int64 ncodes);
 
 /* Compute all cross-distances between two sets of binary vectors */
 void crossmatch_he (const uint8 * dbs, long n, int ht,
-                    long bufsize, hammatch_t ** hmptr, long long * nptr);
+                    long bufsize, hammatch_t ** hmptr, int64 * nptr);
 
-void crossmatch_he_count (const uint8 * dbs, int n, int ht, long long * nptr);
+void crossmatch_he_count (const uint8 * dbs, int n, int ht, int64 * nptr);
 
 
 #endif /* __hamming_h */

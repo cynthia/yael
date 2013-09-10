@@ -87,8 +87,14 @@ end
 
 if 1
 for hti = htlist
-  tic
   ht = floor (hti * nbits / 64);
+
+  tic
+  nm2 = yael_ivf ('crossmatchcount', ht);
+  fprintf ('* Cross-matching count in %.3f seconds - ht=%d -> %ld matches\n', ...
+           toc, ht, sum(nm2));
+  
+  tic
   [m, nm] = yael_ivf ('crossmatch', ht);
   fprintf ('* Cross-matching performed in %.3f seconds - ht=%d -> %ld matches\n', ...
     toc, ht, sum(nm));

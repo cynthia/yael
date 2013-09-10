@@ -414,7 +414,7 @@ ivfmatch_t * ivf_hequery (const ivf_t * ivf,
 /* Collect matches */
 hammatch_t ** ivf_he_collect (const ivf_t * ivf, const int * keys,
                               const unsigned char * qbs, int nq,
-                              int ht, long * nmatches)
+                              int ht, int64 * nmatches)
 {
   int i, nbufinit = 512;
   assert (ivf->elem_size == BITVECBYTE);
@@ -445,18 +445,18 @@ hammatch_t ** ivf_he_collect (const ivf_t * ivf, const int * keys,
 ivfmatch_t * ivf_hequeryw (const ivf_t * ivf, 
                             const int * qids, const int * keys,
                             const unsigned char * qbs, int nq,
-                            int ht, long * totmatches,
+                            int ht, int64 * totmatches,
                             const float * score_map_, const float * list_w_)
 {
-  int i, j;  
+  int64 i, j;  
   assert (ivf->elem_size == BITVECBYTE);
   
   /* Match entities to count number of matches per query */
-  long * nmatches = (long *) malloc (sizeof(*nmatches) * nq);
+  int64 * nmatches = (int64 *) malloc (sizeof(*nmatches) * nq);
   hammatch_t ** hmlist = ivf_he_collect (ivf, keys, qbs, nq, ht, nmatches);
                                             
   /* compute the cumulative number of matches */
-  int * cumnmatches = (int *) malloc (sizeof (*cumnmatches) * (nq+1));
+  int64 * cumnmatches = (int64 *) malloc (sizeof (*cumnmatches) * (nq+1));
   cumnmatches[0] = 0;
   for (i = 0 ; i < nq ; i++)
     cumnmatches[i+1] = nmatches[i] + cumnmatches[i];
@@ -554,6 +554,27 @@ hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, long long 
 #endif
 
   return hmlist;
+}
+
+
+/* Collect cross-matches with Hamming distance */
+void ivf_he_count_crossmatches (const ivf_t * ivf, int ht, int64 * nmatches)
+{
+  int64 i;
+  assert (ivf->elem_size == BITVECBYTE);
+  
+#ifdef _OPENMP
+#pragma omp parallel for private (i)
+  for (i = 0 ; i < ivf->k ; i++) {
+    crossmatch_he_count (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                         ht, nmatches+i);   
+  }
+#else
+  for (i = 0 ; i < ivf->k ; i++) {
+    crossmatch_he_count (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                         ht, nmatches+i);   
+  }
+#endif
 }
 
 
