@@ -74,7 +74,8 @@ void mexFunction (int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray*prhs[])
 
 {
-  int i, operation = 0;
+  long i;
+  int operation = 0;
   char varname[256];
   int verbose = 0;
 
@@ -490,7 +491,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
       break;
       
     case IVF_FUNCTION_CROSSMATCH_ALT: {
-      if (nlhs != 3 || nrhs != 2)
+      if ((nlhs != 3 && nlhs != 4) || nrhs != 2)
          mexErrMsgTxt ("Usage: nmatches = ivfmex ('crossmatchcount', ht)");    
       if (ivf == NULL)
         mexErrMsgTxt ("Inverted file is not defined\n Use ivfmex('new',...).");
@@ -518,7 +519,19 @@ void mexFunction (int nlhs, mxArray *plhs[],
       ivf_he_crossmatches_prealloc (ivf, ht, (int *) mxGetPr(plhs[0]), 
                                     (uint16 *) mxGetPr(plhs[1]), cumnmatches);
       
-      memcpy (mxGetPr(plhs[2]), nmatches + off, sizeof (*nmatches) * (ivf->k-1));  
+      memcpy (mxGetPr(plhs[2]), nmatches + off, sizeof (*nmatches) * (ivf->k-1)); 
+      
+      if (nlhs == 4) {
+        plhs[3] = mxCreateNumericMatrix (1, totmatches, mxINT32_CLASS, mxREAL);
+        int * key = (int *) mxGetPr(plhs[3]);
+        long j;
+        for (i = 0 ; i < ivf->k ; i++)
+          for (j = cumnmatches[i] ; j < cumnmatches[i+1] ; j++) {
+            key[j] = i;
+          }
+      }
+      
+      
       free (nmatches);
       free (cumnmatches);
     }
