@@ -414,7 +414,7 @@ ivfmatch_t * ivf_hequery (const ivf_t * ivf,
 /* Collect matches */
 hammatch_t ** ivf_he_collect (const ivf_t * ivf, const int * keys,
                               const unsigned char * qbs, int nq,
-                              int ht, int * nmatches)
+                              int ht, long * nmatches)
 {
   int i, nbufinit = 512;
   assert (ivf->elem_size == BITVECBYTE);
@@ -445,14 +445,14 @@ hammatch_t ** ivf_he_collect (const ivf_t * ivf, const int * keys,
 ivfmatch_t * ivf_hequeryw (const ivf_t * ivf, 
                             const int * qids, const int * keys,
                             const unsigned char * qbs, int nq,
-                            int ht, int * totmatches,
+                            int ht, long * totmatches,
                             const float * score_map_, const float * list_w_)
 {
   int i, j;  
   assert (ivf->elem_size == BITVECBYTE);
   
   /* Match entities to count number of matches per query */
-  int * nmatches = (int *) malloc (sizeof(*nmatches) * nq);
+  long * nmatches = (long *) malloc (sizeof(*nmatches) * nq);
   hammatch_t ** hmlist = ivf_he_collect (ivf, keys, qbs, nq, ht, nmatches);
                                             
   /* compute the cumulative number of matches */
@@ -513,7 +513,7 @@ ivfmatch_t * ivf_hequeryw (const ivf_t * ivf,
 
 
 /* Collect cross-matches with Hamming distance */
-hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, int * nmatches)
+hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, long long * nmatches)
 {
   int i, nbufinit = 512;
   assert (ivf->elem_size == BITVECBYTE);
@@ -529,7 +529,7 @@ hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, int * nmat
     
     hammatch_t *m = hmlist[i];
     const int * listids = ivf->ids[i];
-    int j, n = nmatches[i];
+    long j, n = nmatches[i];
     
     for (j = 0 ; j < n ; j++) {
       m->qid = listids[m->qid];

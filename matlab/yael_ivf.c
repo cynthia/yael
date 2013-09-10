@@ -17,6 +17,7 @@
 #define IVF_FUNCTION_QUERYHEW     10
 #define IVF_FUNCTION_FINDBS  		  12
 #define IVF_FUNCTION_CROSSMATCH   20
+#define IVF_FUNCTION_CROSSMATCHC  21
 
 static ivf_t * ivf = NULL;
 
@@ -93,6 +94,8 @@ void mexFunction (int nlhs, mxArray *plhs[],
     operation = IVF_FUNCTION_FINDBS;
   else if (!strcmp(varname, "crossmatch")) 
     operation = IVF_FUNCTION_CROSSMATCH;
+  else if (!strcmp(varname, "crossmatchc")) 
+    operation = IVF_FUNCTION_CROSSMATCHC;
   else mexErrMsgTxt("Unknown operation for this inverted file");  
   
 
@@ -377,10 +380,10 @@ void mexFunction (int nlhs, mxArray *plhs[],
       else mexErrMsgTxt ("Length of argument 6 should be equal to the number of inverted lists"); 
     }
       
-    int nmatches;
+    long nmatches;
     ivfmatch_t * matches = ivf_hequeryw (ivf, qids, keys, codes, nq, ht, &nmatches, score_map, list_w);
 
-    fprintf (stderr, "Found %d matches\n", nmatches);
+    fprintf (stderr, "Found %ld matches\n", nmatches);
 
     /* Cast the match structure into matlab vectors */
     plhs[0] = mxCreateNumericMatrix (2, nmatches, mxINT32_CLASS, mxREAL);
@@ -404,7 +407,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
       
     case IVF_FUNCTION_CROSSMATCH: {
       
-      if (nlhs != 1 || nrhs != 2)
+      if (nlhs != 2 || nrhs != 2)
          mexErrMsgTxt ("Usage: matches = ivfmex ('crossmatch', ht)");
       
       if (ivf == NULL)
@@ -413,19 +416,21 @@ void mexFunction (int nlhs, mxArray *plhs[],
       /* Hamming threshold for Hamming Embedding */
       int ht = (int) mxGetScalar (prhs[1]);
       
-      int * nmatches = (int *) malloc (sizeof(*nmatches) * ivf->k);
+      int64_T * nmatches = (int64_T *) malloc (sizeof(*nmatches) * ivf->k);
       hammatch_t ** hmlist = ivf_he_collect_crossmatches (ivf, ht, nmatches);
       
       /* compute the cumulative number of matches */
-      int * cumnmatches = (int *) malloc (sizeof (*cumnmatches) * (ivf->k+1));
+      int64_T * cumnmatches = (int64_T *) malloc (sizeof (*cumnmatches) * (ivf->k+1));
       cumnmatches[0] = 0;
       for (i = 0 ; i < ivf->k ; i++)
         cumnmatches[i+1] = nmatches[i] + cumnmatches[i];
-      int totmatches = cumnmatches[ivf->k];
+      int64_T totmatches = cumnmatches[ivf->k];
           
       /* Cast the match structure into matlab vectors */
       plhs[0] = mxCreateNumericMatrix (3, totmatches, mxINT32_CLASS, mxREAL);
-  
+      plhs[1] = mxCreateNumericMatrix (1, ivf->k-1, mxINT64_CLASS, mxREAL);
+      memcpy (mxGetPr(plhs[1]), nmatches + 1, sizeof (*nmatches) * (ivf->k-1));
+      
       int * matchinfo = (int *) mxGetPr (plhs[0]);
       int i, j;
       
@@ -436,6 +441,61 @@ void mexFunction (int nlhs, mxArray *plhs[],
           *(matchinfo++) = hmlist[j][i].score;
         }
     
+      for (i = 0 ; i < ivf->k ; i++)
+        free (hmlist[i]);
+      free (hmlist);
+      free (cumnmatches);
+      free (nmatches);
+    }
+      break;
+      
+    case IVF_FUNCTION_CROSSMATCHC: {
+      
+      if (nlhs != 1 || nrhs != 2)
+         mexErrMsgTxt ("Usage: [mids, ham, idx] = ivfmex ('crossmatch', ht)");
+      
+      if (ivf == NULL)
+        mexErrMsgTxt ("Inverted file is not defined\n Use ivfmex('new',...).");
+
+      
+      /* Create a 2-by-2 cell array. */
+      int nsubs=1, subs[1];
+      mxArray *cell_array_ptr = mxCreateCellArray(1, &ivf->k);
+      /* mxSetName(cell_array_ptr, "matchesc"); */
+      plhs[0] = cell_array_ptr;
+      
+      /* Hamming threshold for Hamming Embedding */
+      int ht = (int) mxGetScalar (prhs[1]);
+      
+      int64_T * nmatches = (int64_T *) malloc (sizeof(*nmatches) * ivf->k);
+      hammatch_t ** hmlist = ivf_he_collect_crossmatches (ivf, ht, nmatches);
+      
+      /* compute the cumulative number of matches */
+      int64_T * cumnmatches = (int64_T *) malloc (sizeof (*cumnmatches) * (ivf->k+1));
+      cumnmatches[0] = 0;
+      for (i = 0 ; i < ivf->k ; i++)
+        cumnmatches[i+1] = nmatches[i] + cumnmatches[i];
+      int64_T totmatches = cumnmatches[ivf->k];
+          
+      /* Cast the match structure into matlab vectors */
+      int64_T i, j;
+      
+      for (j = 1 ; j < ivf->k ; j++) {
+        subs[0] = j - 1; 
+        int index = mxCalcSingleSubscript(cell_array_ptr, 1, subs); 
+        mxArray * varray = mxCreateNumericMatrix (3, nmatches[j], mxINT32_CLASS, mxREAL);
+        float * v = (float *) varray;
+        
+        for (i = 0 ; i < nmatches[j] ; i++) {
+          *(v++) = hmlist[j][i].qid;
+          *(v++) = hmlist[j][i].bid;
+          *(v++) = hmlist[j][i].score;
+        }
+        
+        mxSetCell(cell_array_ptr, index, varray);
+      }
+
+        
       for (i = 0 ; i < ivf->k ; i++)
         free (hmlist[i]);
       free (hmlist);

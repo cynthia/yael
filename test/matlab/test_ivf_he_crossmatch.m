@@ -29,8 +29,8 @@ anndata_load_vectors;
 
 nbits = 128;          % number of projection bits
 coarsek = 512;       % number of centroids for the coarse quantizer
-w = 4;                % number of cell visited per query
-htlist = [18];        % list of test hamming thresholds (assuming nbits=64)
+w = 1;                % number of cell visited per query
+htlist = [18 24];        % list of test hamming thresholds (assuming nbits=64)
 
 tic;
 
@@ -85,11 +85,14 @@ matches = double(matches);
 smatches = sparse(matches(1,:), matches(2,:), matches(3,:));
 end
 
+if 1
 for hti = htlist
   tic
-  ht = floor (hti * nbits / 64)
-  m = yael_ivf ('crossmatch', ht);
-  toc
+  ht = floor (hti * nbits / 64);
+  [m, nm] = yael_ivf ('crossmatch', ht);
+  fprintf ('* Cross-matching performed in %.3f seconds - ht=%d -> %ld matches\n', ...
+    toc, ht, sum(nm));
+end
 end
 
 if 0
@@ -109,4 +112,4 @@ end
 end
 
 
-yael_ivf ('free');
+%yael_ivf ('free');

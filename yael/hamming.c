@@ -160,9 +160,9 @@ hammatch_t * hammatch_realloc (hammatch_t * m, int n)
 
 
 void match_hamming_thres (const uint8 * qbs, const uint8 * dbs, int nb, int ht,
-                          int bufsize, hammatch_t ** hmptr, int * nptr)
+                          long bufsize, hammatch_t ** hmptr, long * nptr)
 {
-  int j, posm = 0;
+  long j, posm = 0;
   uint16 h;
   *hmptr = hammatch_new (bufsize);
   hammatch_t * hm = *hmptr;
@@ -195,7 +195,7 @@ void match_hamming_thres (const uint8 * qbs, const uint8 * dbs, int nb, int ht,
 
 
 void match_hamming_thres_generic (const uint8 * qbs, const uint8 * dbs, int nb, int ht,
-                                  int bufsize, hammatch_t ** hmptr, int * nptr, int ncodes)
+                                  long bufsize, hammatch_t ** hmptr, long * nptr, int ncodes)
 {
   int j, posm = 0;
   uint16 h;
@@ -229,10 +229,10 @@ void match_hamming_thres_generic (const uint8 * qbs, const uint8 * dbs, int nb, 
 }
 
 
-void crossmatch_he (const uint8 * dbs, int n, int ht,
-                    int bufsize, hammatch_t ** hmptr, int * nptr)
+void crossmatch_he (const uint8 * dbs, long n, int ht,
+                    long bufsize, hammatch_t ** hmptr, long long * nptr)
 {
-  int i, j, posm = 0;
+  long long i, j, posm = 0;
   uint16 h;
   *hmptr = hammatch_new (bufsize);
   hammatch_t * hm = *hmptr;
@@ -272,10 +272,9 @@ void crossmatch_he (const uint8 * dbs, int n, int ht,
 
 
 
-void crossmatch_he_count (const uint8 * dbs, int n, int ht,
-                          int bufsize, int * nptr)
+void crossmatch_he_count (const uint8 * dbs, int n, int ht, long long * nptr)
 {
-  int i, j, posm = 0;
+  long long i, j, posm = 0;
   const uint8 * bs1 = dbs;
   
   for (i = 0 ; i < n ; i++) {
