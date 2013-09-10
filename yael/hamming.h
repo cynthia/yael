@@ -93,5 +93,10 @@ void crossmatch_he (const uint8 * dbs, long n, int ht,
 
 void crossmatch_he_count (const uint8 * dbs, int n, int ht, size_t * nptr);
 
+/* alternative variant with pre-allocated external memory.
+   return number of elements for safety check. */
+int crossmatch_he_prealloc (const uint8 * dbs, long n, int ht,  
+                            int * idx, uint16 * hams);
+
 
 #endif /* __hamming_h */

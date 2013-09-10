@@ -98,6 +98,11 @@ for hti = htlist
   [m, nm] = yael_ivf ('crossmatch', ht);
   fprintf ('* Cross-matching performed in %.3f seconds - ht=%d -> %ld matches\n', ...
     toc, ht, sum(nm));
+  
+  tic
+  [idx, sc, nm3] = yael_ivf ('crossmatchalt', ht);
+  fprintf ('* Cross-matching/alt performed in %.3f seconds - ht=%d -> %ld matches\n', ...
+    toc, ht, sum(nm));
 end
 end
 
@@ -118,4 +123,4 @@ end
 end
 
 
-yael_ivf ('free');
+%yael_ivf ('free');

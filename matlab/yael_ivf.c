@@ -17,7 +17,8 @@
 #define IVF_FUNCTION_QUERYHEW          10
 #define IVF_FUNCTION_FINDBS  		       12
 #define IVF_FUNCTION_CROSSMATCH        20
-#define IVF_FUNCTION_CROSSMATCH_COUNT  21
+#define IVF_FUNCTION_CROSSMATCH_ALT    21
+#define IVF_FUNCTION_CROSSMATCH_COUNT  22
 
 static ivf_t * ivf = NULL;
 
@@ -107,6 +108,8 @@ void mexFunction (int nlhs, mxArray *plhs[],
     operation = IVF_FUNCTION_FINDBS;
   else if (!strcmp(varname, "crossmatch")) 
     operation = IVF_FUNCTION_CROSSMATCH;
+  else if (!strcmp(varname, "crossmatchalt")) 
+    operation = IVF_FUNCTION_CROSSMATCH_ALT;
   else if (!strcmp(varname, "crossmatchcount")) 
     operation = IVF_FUNCTION_CROSSMATCH_COUNT;
   else mexErrMsgTxt("Unknown operation for this inverted file");  
@@ -483,6 +486,41 @@ void mexFunction (int nlhs, mxArray *plhs[],
       plhs[0] = mxCreateNumericMatrix (1, ivf->k-1, mxINT64_CLASS, mxREAL);
       memcpy (mxGetPr(plhs[0]), nmatches + off, sizeof (*nmatches) * (ivf->k-1));  
       free (nmatches);
+    }
+      break;
+      
+    case IVF_FUNCTION_CROSSMATCH_ALT: {
+      if (nlhs != 3 || nrhs != 2)
+         mexErrMsgTxt ("Usage: nmatches = ivfmex ('crossmatchcount', ht)");    
+      if (ivf == NULL)
+        mexErrMsgTxt ("Inverted file is not defined\n Use ivfmex('new',...).");
+
+      int off = ivfmex_offsetidx();
+
+      /* Count the number of matches */
+      int ht = (int) mxGetScalar (prhs[1]);
+      
+      size_t * nmatches = (size_t *) malloc (sizeof(*nmatches) * ivf->k);
+      ivf_he_count_crossmatches (ivf, ht, nmatches);
+      
+      /* compute the cumulative number of matches */
+      size_t * cumnmatches = (size_t *) malloc (sizeof (*cumnmatches) * (ivf->k+1));
+      cumnmatches[0] = 0;
+      for (i = 0 ; i < ivf->k ; i++)
+        cumnmatches[i+1] = nmatches[i] + cumnmatches[i];
+      size_t totmatches = cumnmatches[ivf->k];
+
+            
+      plhs[0] = mxCreateNumericMatrix (2, totmatches, mxINT32_CLASS, mxREAL);
+      plhs[1] = mxCreateNumericMatrix (1, totmatches, mxUINT16_CLASS, mxREAL);
+      plhs[2] = mxCreateNumericMatrix (1, ivf->k-1, mxINT64_CLASS, mxREAL);
+
+      ivf_he_crossmatches_prealloc (ivf, ht, (int *) mxGetPr(plhs[0]), 
+                                    (uint16 *) mxGetPr(plhs[1]), cumnmatches);
+      
+      memcpy (mxGetPr(plhs[2]), nmatches + off, sizeof (*nmatches) * (ivf->k-1));  
+      free (nmatches);
+      free (cumnmatches);
     }
       break;
       

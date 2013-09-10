@@ -273,6 +273,41 @@ void crossmatch_he (const uint8 * dbs, long n, int ht,
 }
 
 
+int crossmatch_he_prealloc (const uint8 * dbs, long n, int ht,  
+                            int * idx, uint16 * hams)
+{
+  size_t i, j, posm = 0;
+  uint16 h;
+
+  const uint8 * bs1 = dbs;
+  
+  for (i = 0 ; i < n ; i++) {
+    const uint8 * bs2 = bs1 + BITVECBYTE;
+    
+    for (j = i + 1 ; j < n ; j++) {
+      
+      /* Here perform the real work of computing the distance */
+      h = hamming (bs1, bs2);
+      
+      /* collect the match only if this satisfies the threshold */
+      if (h <= ht) {
+        
+        /* Enough space to store another match ? */
+        *idx = i; idx++;
+        *idx = j; idx++;
+        
+        *hams = h;
+        hams++;
+        posm++;
+      }
+      bs2 += BITVECBYTE;
+    }
+    bs1 += BITVECBYTE;  /* next signature */
+  }
+  
+  return posm;
+}
+
 
 void crossmatch_he_count (const uint8 * dbs, int n, int ht, size_t * nptr)
 {
