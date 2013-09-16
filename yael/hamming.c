@@ -107,6 +107,53 @@ uint16 hamming_64 (const uint64 * bs1, const uint64 * bs2)
 
 
 
+void compute_hamming_32 (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb)
+{
+  int i, j;
+  const uint8 * pb = b;
+  for (j = 0 ; j < nb ; j++) {
+    const uint8 * pa = a;
+    for (i = 0 ; i < na ; i++) {
+      *dis = hamming_32 (pa, pb);
+      pa += 4;
+      dis++;
+    }
+    pb += 4;
+  }
+}
+
+
+void compute_hamming_64 (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb)
+{
+  int i, j;
+  const uint8 * pb = b;
+  for (j = 0 ; j < nb ; j++) {
+    const uint8 * pa = a;
+    for (i = 0 ; i < na ; i++) {
+      *dis = hamming_64 (pa, pb);
+      pa += 8;
+      dis++;
+    }
+    pb += 8;
+  }
+}
+
+
+void compute_hamming_128 (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb)
+{
+  int i, j;
+  const uint8 * pb = b;
+  for (j = 0 ; j < nb ; j++) {
+    const uint8 * pa = a;
+    for (i = 0 ; i < na ; i++) {
+      *dis = hamming_128 (pa, pb);
+      pa += 16;
+      dis++;
+    }
+    pb += 16;
+  }
+}
+
 void compute_hamming (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb)
 {
   int i, j;
@@ -123,13 +170,27 @@ void compute_hamming (uint16 * dis, const uint8 * a, const uint8 * b, int na, in
 }
 
 
+
 void compute_hamming_generic (uint16 * dis, const uint8 * a, const uint8 * b, 
                               int na, int nb, int ncodes)
 {
+  switch (ncodes) {
+    case 4: 
+      compute_hamming_32 (dis, a, b, na, nb);
+      return;
+    case 8: 
+      compute_hamming_64 (dis, a, b, na, nb);
+      return;
+    case 16: 
+      compute_hamming_128 (dis, a, b, na, nb);
+      return;
+  }
+      
   if (ncodes == BITVECBYTE) {
     compute_hamming (dis, a, b, na, nb);
     return;
   }
+  
   fprintf (stderr, "# Warning: non-optimized version of the Hamming distance\n");  
      
   int i, j;

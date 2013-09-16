@@ -39,6 +39,9 @@ uint16 hamming_64 (const uint64 * bs1, const uint64 * bs2);
 #endif
 #endif
 
+#ifndef hamming_128
+#define hamming_128(a,b)  (hamming_64(a,b)+hamming_64(((uint64 *) (a)) + 1, ((uint64 *) (b)) + 1))
+#endif
 
 #ifndef BITVECSIZE
 #warning "# BITVECSIZE UNDEFINED. SET TO 128 BY DEFAULT." 
@@ -58,7 +61,7 @@ uint16 hamming_64 (const uint64 * bs1, const uint64 * bs2);
 #define hamming(a,b)  hamming_64((uint64*) (a), (uint64*) (b))
 
 #elif BITVECSIZE==128
-#define hamming(a,b)  (hamming_64(a,b)+hamming_64(((uint64 *) (a)) + 1, ((uint64 *) (b)) + 1))
+#define hamming(a,b)  hamming_128(a,b)
 
 #else
 #define hamming(a,b) hamming_generic((uint8*) (a), (uint8*) (b), BITVECBYTE);
@@ -68,6 +71,9 @@ uint16 hamming_64 (const uint64 * bs1, const uint64 * bs2);
 
 /* Compute a set of Hamming distances between na and nb binary vectors */
 void compute_hamming (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb);
+void compute_hamming_32 (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb);
+void compute_hamming_64 (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb);
+void compute_hamming_128 (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb);
 
 /* The same but with a generic function */
 void compute_hamming_generic (uint16 * dis, const uint8 * a, const uint8 * b, 
