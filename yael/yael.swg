@@ -392,17 +392,23 @@ PARALLEL_FUNCTION(knn_full_thread)
  * ivf.h
  */
 
-%typemap(in,numinputs=0,noblock=1) int * buffer_size  {
+%typemap(in,noblock=1) int * buffer_size  {
   int bufsize;
+  bufsize = $input;
   $1 = &bufsize;
 }
 
 %typemap(out) ivfmatch_t* ivf_hequery {
   int i;
-  $result = PyList_New(bufsize);
+  npy_intp shp[2];
+  shp[0] = bufsize;
+  shp[1] = 3;
+  $result = PyArray_SimpleNew(2, shp, NPY_INT32);
+  int *dest = PyArray_DATA($result);
   for (i = 0; i < bufsize; i++) {
-    PyObject *o = Py_BuildValue("iif", $1[i].qid, $1[i].bid, $1[i].score);
-    PyList_SetItem($result,i,o);
+    dest[i * 3    ] = $1[i].qid;
+    dest[i * 3 + 1] = $1[i].bid;
+    dest[i * 3 + 2] = (int)$1[i].score;
   }
   free($1);
 }
