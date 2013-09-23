@@ -100,12 +100,12 @@ for hti = htlist
          toc, ht, sum(nm));
 
   tic
-  [m2, nm2] = yael_ivf ('crossmatch2', ht);
+  [idx2, sc2, nm2, keys2] = yael_ivf ('crossmatch2', ht);
   fprintf ('* Cross-matching performed in %.3f seconds - ht=%d -> %ld matches\n', ...
     toc, ht, sum(nm2));
   
   tic
-  [idx, sc, nm3, keys] = yael_ivf ('crossmatchalt', ht);
+  [idx3, sc, nm3, keys] = yael_ivf ('crossmatchalt', ht);
   fprintf ('* Cross-matching/alt performed in %.3f seconds - ht=%d -> %ld matches\n', ...
     toc, ht, sum(nm3));
 end

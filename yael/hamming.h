@@ -93,14 +93,14 @@ void match_hamming_thres_generic (const uint8 * qbs, const uint8 * dbs,
                                   hammatch_t ** hmptr, size_t * nptr, 
                                   size_t ncodes);
 
-/* Compute all cross-distances between two sets of binary vectors */
+/* Compute all cross-distances between two sets of binary vectors 
+   crossmatch_he2 is same as crossmatch_he, but includes 
+   - twice the matches: match (i,j,h) also gives the match (j,i,h)
+   - self-matches of the form (i,i,0)
+*/
 void crossmatch_he (const uint8 * dbs, long n, int ht,
                     long bufsize, hammatch_t ** hmptr, size_t * nptr);
 
-/* Same as crossmatch_he, but includes 
- - twice the matches: match (i,j,h) also gives the match (j,i,h)
- - self-matches of the form (i,i,0)
- */
 void crossmatch_he2 (const uint8 * dbs, long n, int ht,
                     long bufsize, hammatch_t ** hmptr, size_t * nptr);
 
@@ -109,9 +109,12 @@ void crossmatch_he2 (const uint8 * dbs, long n, int ht,
    Typical usage is to first invoke crossmatch_he_count, allocate memory,
    and then invoke crossmatch_he_prealloc */
 void crossmatch_he_count (const uint8 * dbs, int n, int ht, size_t * nptr);
+void crossmatch_he_count2 (const uint8 * dbs, int n, int ht, size_t * nptr);
 
 int crossmatch_he_prealloc (const uint8 * dbs, long n, int ht,  
                             int * idx, uint16 * hams);
+int crossmatch_he_prealloc2 (const uint8 * dbs, long n, int ht,  
+                             int * idx, uint16 * hams);
 
 
 #endif /* __hamming_h */

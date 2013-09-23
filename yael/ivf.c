@@ -654,6 +654,56 @@ void ivf_he_crossmatches_prealloc (const ivf_t * ivf, int ht,
 }
 
 
+/* Collect cross-matches with Hamming distance */
+void ivf_he_crossmatches_prealloc2 (const ivf_t * ivf, int ht, 
+                                   int * idx, uint16 * hams, 
+                                   size_t * cumnmatches)
+{
+  long i;
+  assert (ivf->elem_size == BITVECBYTE);
+  
+#ifdef _OPENMP
+#pragma omp parallel for private (i)
+  for (i = 0 ; i < ivf->k ; i++) {
+    crossmatch_he_prealloc2 (ivf->adat[i], 
+                            ivf_get_nb_elems (ivf, i), ht, 
+                            idx + 2 * cumnmatches[i], 
+                            hams + cumnmatches[i]);
+    
+    long n = cumnmatches[i+1] - cumnmatches[i];
+    int * m = idx + 2 * cumnmatches[i];
+    
+    const int * listids = ivf->ids[i];
+    
+    long j;
+    for (j = 0 ; j < n ; j++) {
+      *m = listids[*m]; m++;
+      *m = listids[*m]; m++;
+    }    
+  }
+#else
+  for (i = 0 ; i < ivf->k ; i++) {
+    int nout = crossmatch_he_prealloc2 (ivf->adat[i], 
+                                       ivf_get_nb_elems (ivf, i), ht, 
+                                       idx + 2 * cumnmatches[i], 
+                                       hams + cumnmatches[i]);
+    
+    long n = cumnmatches[i+1] - cumnmatches[i];
+    assert (nout == n);
+    
+    int * m = idx + 2 * cumnmatches[i];
+    
+    const int * listids = ivf->ids[i];
+    
+    long j;
+    for (j = 0 ; j < n ; j++) {
+      *m = listids[*m]; m++;
+      *m = listids[*m]; m++;
+    }    
+  }
+#endif
+}
+
 
 /* Collect cross-matches with Hamming distance */
 void ivf_he_count_crossmatches (const ivf_t * ivf, int ht, size_t * nmatches)
@@ -674,6 +724,28 @@ void ivf_he_count_crossmatches (const ivf_t * ivf, int ht, size_t * nmatches)
   }
 #endif
 }
+
+
+void ivf_he_count_crossmatches2 (const ivf_t * ivf, int ht, size_t * nmatches)
+{
+  long i;
+  assert (ivf->elem_size == BITVECBYTE);
+  
+#ifdef _OPENMP
+#pragma omp parallel for private (i)
+  for (i = 0 ; i < ivf->k ; i++) {
+    crossmatch_he_count2 (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                         ht, nmatches+i);   
+  }
+#else
+  for (i = 0 ; i < ivf->k ; i++) {
+    crossmatch_he_count2 (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                         ht, nmatches+i);   
+  }
+#endif
+}
+
+
 
 
 

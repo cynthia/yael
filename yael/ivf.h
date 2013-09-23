@@ -101,12 +101,18 @@ hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, size_t * n
 hammatch_t ** ivf_he_collect_crossmatches2 (const ivf_t * ivf, int ht, size_t * nmatches);
 
 void ivf_he_count_crossmatches (const ivf_t * ivf, int ht, size_t * nmatches);
+void ivf_he_count_crossmatches2 (const ivf_t * ivf, int ht, size_t * nmatches);
 
 /* Alternate implementation: slower when combined with 
- * ivf_he_count_crossmatches, but uses half the memory */
+   ivf_he_count_crossmatches, but uses half the memory.
+   ivf_he_crossmatches_prealloc2 collects reverse matches (i.e., twice) and self-matches
+*/
 void ivf_he_crossmatches_prealloc (const ivf_t * ivf, int ht, 
                                    int * idx, uint16 * hams, 
                                    size_t * cumnmatches);
+void ivf_he_crossmatches_prealloc2 (const ivf_t * ivf, int ht, 
+                                    int * idx, uint16 * hams, 
+                                    size_t * cumnmatches);
 
 
 #endif
