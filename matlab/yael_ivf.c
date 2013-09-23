@@ -468,31 +468,9 @@ void mexFunction (int nlhs, mxArray *plhs[],
     }
       break;
       
-    case IVF_FUNCTION_CROSSMATCH_COUNT: {
-      if (nlhs != 1 || nrhs != 2)
-         mexErrMsgTxt ("Usage: nmatches = ivfmex ('crossmatchcount', ht)");
-      
-      if (ivf == NULL)
-        mexErrMsgTxt ("Inverted file is not defined\n Use ivfmex('new',...).");
-
-      int off = ivfmex_offsetidx();
-
-      /* Hamming threshold for Hamming Embedding */
-      int ht = (int) mxGetScalar (prhs[1]);
-      
-      size_t * nmatches = (size_t *) malloc (sizeof(*nmatches) * ivf->k);
-      
-      ivf_he_count_crossmatches (ivf, ht, nmatches);
-      
-      plhs[0] = mxCreateNumericMatrix (1, ivf->k-1, mxINT64_CLASS, mxREAL);
-      memcpy (mxGetPr(plhs[0]), nmatches + off, sizeof (*nmatches) * (ivf->k-1));  
-      free (nmatches);
-    }
-      break;
-      
     case IVF_FUNCTION_CROSSMATCH_ALT: {
       if ((nlhs != 3 && nlhs != 4) || nrhs != 2)
-         mexErrMsgTxt ("Usage: nmatches = ivfmex ('crossmatchcount', ht)");    
+         mexErrMsgTxt ("Usage: [idx, hamdis, keys] = ivfmex ('crossmatchalt', ht)");    
       if (ivf == NULL)
         mexErrMsgTxt ("Inverted file is not defined\n Use ivfmex('new',...).");
 
@@ -531,9 +509,31 @@ void mexFunction (int nlhs, mxArray *plhs[],
           }
       }
       
-      
       free (nmatches);
       free (cumnmatches);
+    }
+      break;
+      
+      
+    case IVF_FUNCTION_CROSSMATCH_COUNT: {
+      if (nlhs != 1 || nrhs != 2)
+        mexErrMsgTxt ("Usage: nmatches = ivfmex ('crossmatchcount', ht)");
+      
+      if (ivf == NULL)
+        mexErrMsgTxt ("Inverted file is not defined\n Use ivfmex('new',...).");
+      
+      int off = ivfmex_offsetidx();
+      
+      /* Hamming threshold for Hamming Embedding */
+      int ht = (int) mxGetScalar (prhs[1]);
+      
+      size_t * nmatches = (size_t *) malloc (sizeof(*nmatches) * ivf->k);
+      
+      ivf_he_count_crossmatches (ivf, ht, nmatches);
+      
+      plhs[0] = mxCreateNumericMatrix (1, ivf->k-1, mxINT64_CLASS, mxREAL);
+      memcpy (mxGetPr(plhs[0]), nmatches + off, sizeof (*nmatches) * (ivf->k-1));  
+      free (nmatches);
     }
       break;
       
