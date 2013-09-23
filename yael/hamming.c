@@ -348,7 +348,7 @@ void crossmatch_he2 (const uint8 * dbs, long n, int ht,
   const uint8 * bs1 = dbs;
   
   for (i = 0 ; i < n ; i++) {
-    const uint8 * bs2 = bs1 + BITVECBYTE;
+    const uint8 * bs2 = dbs;
     
     for (j = 0 ; j < n ; j++) {
       

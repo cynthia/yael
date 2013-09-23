@@ -90,19 +90,24 @@ for hti = htlist
   ht = floor (hti * nbits / 64);
 
   tic
-  nm2 = yael_ivf ('crossmatchcount', ht);
+  nm0 = yael_ivf ('crossmatchcount', ht);
   fprintf ('* Cross-matching count in %.3f seconds - ht=%d -> %ld matches\n', ...
-           toc, ht, sum(nm2));
+           toc, ht, sum(nm0));
   
   tic
   [m, nm] = yael_ivf ('crossmatch', ht);
   fprintf ('* Cross-matching performed in %.3f seconds - ht=%d -> %ld matches\n', ...
-    toc, ht, sum(nm));
+         toc, ht, sum(nm));
+
+  tic
+  [m2, nm2] = yael_ivf ('crossmatch2', ht);
+  fprintf ('* Cross-matching performed in %.3f seconds - ht=%d -> %ld matches\n', ...
+    toc, ht, sum(nm2));
   
   tic
   [idx, sc, nm3, keys] = yael_ivf ('crossmatchalt', ht);
   fprintf ('* Cross-matching/alt performed in %.3f seconds - ht=%d -> %ld matches\n', ...
-    toc, ht, sum(nm));
+    toc, ht, sum(nm3));
 end
 end
 

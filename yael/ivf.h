@@ -93,8 +93,12 @@ ivf_t * ivf_load (const char * fname);
 
 ivfmatch_t * ivfmatch_new (int n);
 
-/* Cross-match all elements based on binary signature */
+/* Cross-match all elements based on binary signature 
+ ivf_he_collect_crossmatches2 is similar to ivf_he_collect_crossmatches, 
+ yet it collects reverse matches and self-matches (see crossmatch_he2 in hamming.h)
+*/
 hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, size_t * nmatches);
+hammatch_t ** ivf_he_collect_crossmatches2 (const ivf_t * ivf, int ht, size_t * nmatches);
 
 void ivf_he_count_crossmatches (const ivf_t * ivf, int ht, size_t * nmatches);
 

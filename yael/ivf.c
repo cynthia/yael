@@ -557,6 +557,52 @@ hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, size_t * n
 }
 
 
+/* Same as ivf_he_collect_crossmatches, but includes reverse matches and self-matches
+   See crossmatch_he2 for details */
+hammatch_t ** ivf_he_collect_crossmatches2 (const ivf_t * ivf, int ht, size_t * nmatches)
+{
+  int i, nbufinit = 512;
+  assert (ivf->elem_size == BITVECBYTE);
+  
+  /* Match entities and number of matches per query */
+  hammatch_t ** hmlist = (hammatch_t **) malloc (sizeof(*hmlist) * ivf->k);
+  
+#ifdef _OPENMP
+#pragma omp parallel for private (i)
+  for (i = 0 ; i < ivf->k ; i++) {
+    crossmatch_he2 (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                   ht, nbufinit + ivf_get_nb_elems (ivf, i), hmlist+i, nmatches+i);
+    
+    hammatch_t *m = hmlist[i];
+    const int * listids = ivf->ids[i];
+    long j, n = nmatches[i];
+    
+    for (j = 0 ; j < n ; j++) {
+      m->qid = listids[m->qid];
+      m->bid = listids[m->bid];
+      m++;
+    }
+    
+  }
+#else
+  for (i = 0 ; i < ivf->k ; i++) {
+    crossmatch_he2 (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                   ht, nbufinit + ivf_get_nb_elems (ivf, i), hmlist+i, nmatches+i);
+    hammatch_t *m = hmlist[i];
+    const int * listids = ivf->ids[i];
+    int j;
+    for (j = 0 ; j < nmatches[i] ; j++) {
+      m->qid = listids[m->qid];
+      m->bid = listids[m->bid];
+      m++;
+    }
+  }
+#endif
+  
+  return hmlist;
+}
+
+
 /* Collect cross-matches with Hamming distance */
 void ivf_he_crossmatches_prealloc (const ivf_t * ivf, int ht, 
                                    int * idx, uint16 * hams, 
