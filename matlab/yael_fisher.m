@@ -10,12 +10,15 @@
 %   v is the set of descriptors to describe by the Fisher Kernel representation
 %   w, mu and sigma are the parameters of the mixture (learned by, e.g., yael_gmm)
 %
-% 
+%
+% Note : The GMM estimation always assume a diagonal-form matrix. 
+%        Use a PCA rotation on input vectors to be closer to this assumption. 
+%
 % By default, only the derivatives associated with the mu component are computed
 %
 % Options:
 %   'weights'   includes the mixture weights in the representation
-%   'sigma'     includes the terms associated with variacne
+%   'sigma'     includes the terms associated with variance
 %   'nomu'      do not compute the terms associated with mean
 %   'nonorm'    do not normalize the fisher vector
 %   'verbose'   
