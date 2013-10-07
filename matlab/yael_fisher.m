@@ -3,8 +3,8 @@
 %     by F. Perronnin and C. Dance, CVPR'2007
 % 
 % Usage: 
-%   fishervector = yael_kmeans (v, w, mu, sigma)
-%   fishervector = yael_kmeans (v, w, mu, sigma, 'opt1', 'opt2', ...)
+%   fishervector = yael_fisher (v, w, mu, sigma)
+%   fishervector = yael_fisher (v, w, mu, sigma, 'opt1', 'opt2', ...)
 %
 % where
 %   v is the set of descriptors to describe by the Fisher Kernel representation
