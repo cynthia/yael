@@ -39,6 +39,8 @@ mex -largeArrayDims -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELL
 
 mex -largeArrayDims -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_fisher.c ../yael/gmm.c ../yael/kmeans.c ../yael/vector.c ../yael/matrix.c ../yael/eigs.c ../yael/machinedeps.c ../yael/binheap.c ../yael/nn.c ../yael/sorting.c
 
+mex -largeArrayDims -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_fisher_elem.c ../yael/gmm.c ../yael/kmeans.c ../yael/vector.c ../yael/matrix.c ../yael/eigs.c ../yael/machinedeps.c ../yael/binheap.c ../yael/nn.c ../yael/sorting.c
+
 mex -largeArrayDims -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_nn.c ../yael/vector.c ../yael/machinedeps.c ../yael/binheap.c ../yael/nn.c ../yael/sorting.c
 
 mex -largeArrayDims -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_fvecs_normalize.c ../yael/vector.c
