@@ -17,5 +17,15 @@ tic
 			   'verbose', verbose, 'seed', seed);
 toc
 
-vt = single(rand(d,100));
-fvt = yael_fisher(vt,w,mu,sigma);
+% Compute a Fisher vector
+vt = single (rand(d,100));
+fvt = yael_fisher (vt,w,mu,sigma);
+
+
+% First compute the individual Fisher of each vector
+% Check that it is the same as direct Fisher for the set
+fvte = yael_fisher_elem (vt, w, mu, sigma);
+fvten = sum(fvte, 2);
+fvten = yael_fvecs_normalize (fvten);
+
+[fvt fvten]
