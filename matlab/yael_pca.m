@@ -35,10 +35,9 @@ opts.disp = 0;
 % PCA with covariance matrix
 if n > d 
   if verbose, fprintf ('PCA with covariance matrix: %d -> %d\n', d, dout); end
-  Xcov = X * X';
-  Xcov = (Xcov + Xcov') / (2 * n);
+  Xcov = (X * X') / n;
   
-  if dout < d
+  if 2 * dout < d
     [eigvec, eigval] = eigs (Xcov, dout, 'LM', opts);
   else
     [eigvec, eigval] = eig (Xcov);
@@ -48,7 +47,7 @@ else
   if verbose, fprintf ('PCA with gram matrix: %d -> %d\n', d, dout); end
   Xgram = X' * X;
   Xgram = (Xgram + Xgram') / 2;
-  if dout < d
+  if 2 * dout < d
     [eigvec, eigval] = eigs (Xgram, dout, 'LM', opts);
   else
     [eigvec, eigval] = eig (Xgram);
