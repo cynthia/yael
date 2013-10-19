@@ -6,7 +6,7 @@
 % 
 % Author: Herve Jegou, 2011. 
 % Last revision: 08/10/2013
-function [X, eigvec, eigval, Xm] = pca (X, dout, center, verbose)
+function [X, eigvec, eigval, Xm] = yael_pca (X, dout, center, verbose)
 
 if nargin < 3,         center = true; end
 if ~exist ('verbose'), verbose = false; end
@@ -30,14 +30,15 @@ end
 opts.issym = true;
 opts.isreal = true;
 opts.tol = eps;
-opts.disp = 0;
+opts.disp = 1;
 
 % PCA with covariance matrix
 if n > d 
   if verbose, fprintf ('PCA with covariance matrix: %d -> %d\n', d, dout); end
-  Xcov = (X * X') / n;
+  Xcov = X * X';
+  Xcov = (Xcov + Xcov') / (2 * n);
   
-  if 2 * dout < d
+  if dout < d
     [eigvec, eigval] = eigs (Xcov, dout, 'LM', opts);
   else
     [eigvec, eigval] = eig (Xcov);
@@ -47,7 +48,7 @@ else
   if verbose, fprintf ('PCA with gram matrix: %d -> %d\n', d, dout); end
   Xgram = X' * X;
   Xgram = (Xgram + Xgram') / 2;
-  if 2 * dout < d
+  if dout < d
     [eigvec, eigval] = eigs (Xgram, dout, 'LM', opts);
   else
     [eigvec, eigval] = eig (Xgram);
@@ -55,7 +56,8 @@ else
   eigvec = single (X * eigvec);
   eigvec = yael_fvecs_normalize (eigvec);
 end
- 
+           
+
 X = eigvec' * X;
 X = single (X);
 eigval = diag(eigval);
