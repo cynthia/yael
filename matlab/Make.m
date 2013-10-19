@@ -59,4 +59,6 @@ mex -largeArrayDims -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELL
 
 mex -largeArrayDims -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_ivf.c ../yael/ivf.c ../yael/hamming.c
 
+delete *.o
+
 
