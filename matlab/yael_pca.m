@@ -4,6 +4,8 @@
 %   dout    number of principal components to be computed
 %   center  need to center data?
 % 
+% Note: the eigenvalues are given in decreasing order of magnitude
+%
 % Author: Herve Jegou, 2011. 
 % Last revision: 08/10/2013
 function [X, eigvec, eigval, Xm] = yael_pca (X, dout, center, verbose)
@@ -30,7 +32,7 @@ end
 opts.issym = true;
 opts.isreal = true;
 opts.tol = eps;
-opts.disp = 1;
+opts.disp = 0;
 
 % PCA with covariance matrix
 if n > d 
@@ -61,3 +63,8 @@ end
 X = eigvec' * X;
 X = single (X);
 eigval = diag(eigval);
+
+% We prefer a consistent order
+[~, eigord] = sort (eigval, 'descend');
+eigval = eigval (eigord);
+eigvec = eigvec (:, eigord);
