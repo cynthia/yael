@@ -24,10 +24,7 @@
 #include "vlad.h"
 #include "machinedeps.h"
 #include "kmlsh.h"
-
-#ifdef HAVE_NUMPY
 #include "ivf.h"
-#endif
 
 /* seed generators used in the rest */
 void common_srandom(int seed) {
