@@ -480,7 +480,7 @@ long fvec_count_nonfinite (const float * v, long n)
 {
   long i, nnf = 0;
   for (i = 0 ; i < n ; i++)
-    if (!finite(v[i]))
+    if (!isfinite(v[i]))
       nnf++;
 
   return nnf;
@@ -1722,7 +1722,7 @@ int ivec_all_ge0 (const int * v, long n) {
 }
 
 int fvec_all_finite (const float * v, long n) {
-  while(n--) if(!finite(v[n])) return 0;
+  while(n--) if(!isfinite(v[n])) return 0;
   return 1;
 }
 
@@ -1966,7 +1966,7 @@ int fvec_purge_nans(float * v, long n, float replace_value) {
 int fvec_purge_nonfinite(float * v, long n, float replace_value) {
   long i, count=0;
   
-  for(i=0;i<n;i++) if(!finite(v[i])) {
+  for(i=0;i<n;i++) if(!isfinite(v[i])) {
     count++;
     v[i]=replace_value;
   }
@@ -1977,14 +1977,14 @@ int fvec_purge_nonfinite(float * v, long n, float replace_value) {
 long fvec_shrink_nonfinite(float * v, long n) {
   long i,j=0;
   
-  for(i=0;i<n;i++) if(finite(v[i])) 
+  for(i=0;i<n;i++) if(isfinite(v[i])) 
     v[j++]=v[i];
   return j;  
 }
 
 long fvec_index_nonfinite(float * v, long n) {
   long i;
-  for(i=0;i<n;i++) if(!finite(v[i])) return i;
+  for(i=0;i<n;i++) if(!isfinite(v[i])) return i;
   return -1;  
 }
 

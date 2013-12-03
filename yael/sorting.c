@@ -479,7 +479,7 @@ static stop_t *make_stops (const float *tab, int n,
   }
   qsort (stops, nval + 1, sizeof (stop_t), &cmp_stops_for_increasing);
   for(i=1;i<nval+1;i++) assert(stops[i-1].val<=stops[i].val);
-  assert (stops[0].no == -1 || !finite(stops[0].val));
+  assert (stops[0].no == -1 || !isfinite(stops[0].val));
 
   /* handle duplicate vals */
   int nstop = nval + 1;

@@ -97,3 +97,33 @@ Timings might be scaled in the range from 1 to 3, depending on your choice.
 In order to obtain the best performance, you should consider testing 
 the different version installed on your machine 
 (e.g., in /usr/lib and /usr/lib/atlas). 
+
+
+Troubleshooting
+===============
+
+In recent version of MacOS X (Maverick update), there is a compilation 
+issue trouble with the LLVM compiler when multi-threading is activated. 
+These occur both in all interface. While this problem is not related 
+directly to Yael, the problem may be solved by using gcc-4.9, 
+for instance as follows:
+
+1) download the compiler, 
+$ brew install homebrew/versions/gcc49 
+
+For this to work, you need brew package installer. It can be obtained with 
+following command line:
+
+$ ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)" 
+
+Ensure that gcc-4.9 is in the path
+
+2) Modify makefile.inc: replace 
+CC=gcc 
+by
+CC=gcc-4.9
+
+
+Alternately, you might consider deactivating multi-threading if you do not it. 
+This can be done in makefile.inc by replacing USEOPENMP=yes by USEOPENMP=no
+

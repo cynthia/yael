@@ -177,14 +177,14 @@ static void gmm_compute_params (int n, const float * v, const float * p,
 
   if(nz) printf("WARN %ld sigma diagonals are too small (set to %g)\n",nz,min_sigma);
 
-  assert(finite(fvec_sum(g->mu, k*d)));
+  assert(isfinite(fvec_sum(g->mu, k*d)));
 
   for (j = 0 ; j < k ; j++) {
     fvec_div_by (g->mu + j * d, d, g->w[j]);
     fvec_div_by (g->sigma + j * d, d, g->w[j]);
   }
 
-  assert(finite(fvec_sum(g->mu, k*d)));
+  assert(isfinite(fvec_sum(g->mu, k*d)));
 
   fvec_normalize (g->w, k, 1);
 
@@ -206,7 +206,7 @@ double static sqr (double x)
 }
 
 
-#define CHECKFINITE(a) if(!finite(a)) {fprintf(stderr,"!!!! gmm_compute_p: not finite " #a "=%g at line %d\n",a,__LINE__); abort(); }; 
+#define CHECKFINITE(a) if(!isfinite(a)) {fprintf(stderr,"!!!! gmm_compute_p: not finite " #a "=%g at line %d\n",a,__LINE__); abort(); }; 
 
 
 static void compute_mahalanobis_sqr(int n,long k,long d,

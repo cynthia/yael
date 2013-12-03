@@ -2,8 +2,6 @@
 
 include ../makefile.inc
 
-CC=gcc 
-
 all: libyael.a libyael.$(SHAREDEXT) _yael.so __init__.py
 
 
@@ -14,7 +12,7 @@ ifeq "$(USEARPACK)" "yes"
 endif
 
 ifeq "$(USEOPENMP)" "yes"
-  OPENMPFLAG = -fopenmp
+  OPENMPFLAG = -fopenmp 
   EXTRAMATRIXFLAG+=-fopenmp
   EXTRAYAELLDFLAG+=-fopenmp
 endif
@@ -31,7 +29,7 @@ libyael.a: $(LIBOBJ)
 	ar r libyael.a $^
 
 libyael.$(SHAREDEXT): $(LIBOBJ)
-	gcc $(LDFLAGS) $(YAELSHAREDFLAGS) -o libyael.$(SHAREDEXT) $^ $(LAPACKLDFLAGS) $(THREADLDFLAGS) $(EXTRAYAELLDFLAG)
+	$(CC) $(LDFLAGS) $(YAELSHAREDFLAGS) -o libyael.$(SHAREDEXT) $^ $(LAPACKLDFLAGS) $(THREADLDFLAGS) $(EXTRAYAELLDFLAG)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@ $(FLAGS) $(EXTRACFLAGS)
@@ -50,6 +48,7 @@ kmlsh.o: EXTRACFLAGS=$(THREADCFLAGS) $(LAPACKCFLAGS)
 
 eigs.o: EXTRACFLAGS=$(LAPACKCFLAGS) $(LAPACKCFLAGS) $(EXTRAEIGSFLAG) $(OPENMPFLAG)
 
+ivf.o: EXTRACFLAGS=$(THREADCFLAGS) $(OPENMPFLAGS)
 
 yael_wrap.o: EXTRACFLAGS=$(PYTHONCFLAGS) $(NUMPYCFLAGS)
 
@@ -92,7 +91,7 @@ spectral_clustering.o: spectral_clustering.c spectral_clustering.h nn.h eigs.h v
 vector.o: vector.c vector.h
 vlad.o: vlad.c vlad.h nn.h vector.h sorting.h
 kmlsh.o: kmlsh.c vector.h nn.h hkm.h sorting.h kmeans.h machinedeps.h kmlsh.h
-
+ivf.o: ivf.c ivf.h hamming.h
 
 clean:
 	rm -f libyael.a libyael.$(SHAREDEXT)* *.o yael.py *.pyc yael_wrap.c _yael.so 

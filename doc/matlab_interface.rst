@@ -57,6 +57,10 @@ where ``YAELROOT`` should be set to fit your local
 configuration. Inside Matlab, the ``addpath`` function can be used for
 the same purpose.
 
+Alternately, you can compile directly from Matlab by executing the ``Make.m`` 
+m-file. Just ensure that you are in the correct directory before launching
+this command. 
+
 Conveniently, Matlab and Yael use the same convention for matrix
 storage (column-major).
 

@@ -2,8 +2,6 @@
 
 include ../makefile.inc
 
-CC=gcc 
-
 all: kmeans knn fvecfile ivecfile bvecfile
 
 
