@@ -152,7 +152,7 @@ float minimize_sum_chi2(const float *a, int n) {
       break;
     }
     
-    assert(finite(x));  
+    assert(isfinite(x));  
 
   } while(fabs(x - prev_x) > 1e-4 * mag); 
  

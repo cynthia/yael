@@ -128,6 +128,7 @@ while [ $# -gt 0 ] ; do
 	--lapack=*) lapackldflags=${a#*=} ;;
         --enable-arpack) usearpack=yes;;
 	--arpack=*) arpackldflags=${a#*=} ;;
+  --msse4)    cflags="$cflags -msse4 " ;;
 	--fortran-64bit-int) 
             lapackcflags="$lapackcflags -DFINTEGER=long" ;;       
 

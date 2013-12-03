@@ -71,6 +71,10 @@ Installation
 For most configurations, nothing has to be done. However you might need 
 to adjust the variables defined in makefile.inc to fit your local config. 
 
+Moreover, we recommand to use --msse4 flags if your processor supports it, 
+in particular for better performance with Hamming distance computation:
+./configure.sh --msse4
+
 2- make
 
 
