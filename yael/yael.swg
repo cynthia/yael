@@ -24,7 +24,10 @@
 #include "vlad.h"
 #include "machinedeps.h"
 #include "kmlsh.h"
+
+#ifdef HAVE_NUMPY
 #include "ivf.h"
+#endif
 
 /* seed generators used in the rest */
 void common_srandom(int seed) {
@@ -413,7 +416,9 @@ PARALLEL_FUNCTION(knn_full_thread)
   free($1);
 }
 
+#ifdef HAVE_NUMPY
 %include "ivf.h"
+#endif
 
 /*************************************************************************
  * allows freeing some elements allocated by malloc/calloc in python
