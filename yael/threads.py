@@ -278,6 +278,8 @@ class ParallelIter:
   
   def __init__(self,n,l,f):
     (self.n,self.l,self.f)=(n,enumerate(l),f)
+    # simple case first: 1 thread
+    if n < 2: return      
     self.exception=None
     # condition variable to signal new result to consumer
     self.cv=threading.Condition()
@@ -294,6 +296,11 @@ class ParallelIter:
     return self
 
   def next(self):
+    if self.n < 2:
+      # handle single-thread case
+      k, v = self.l.next()
+      return self.f(v)      
+    
     self.cv.acquire()
     try:
       while True:        

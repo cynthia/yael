@@ -200,6 +200,15 @@ def fvecs_write(filename, matrix):
     if ret != n:
         raise IOError("write error" + filename)
 
+
+def fvecs_fwrite(fd, matrix): 
+    _check_row_float32(matrix)
+    n, d = matrix.shape
+    ret = yael.fvecs_fwrite(fd, d, n, yael.numpy_to_fvec_ref(matrix))
+    if ret != n:
+        raise IOError("write error")
+
+
 def bvecs_write(filename, matrix):
     _check_row_uint8(matrix)
     n, d = matrix.shape
