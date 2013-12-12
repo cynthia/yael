@@ -705,7 +705,7 @@ void ivf_he_crossmatches_prealloc2 (const ivf_t * ivf, int ht,
 }
 
 
-/* Collect cross-matches with Hamming distance */
+/* Couny cross-matches with Hamming distance */
 void ivf_he_count_crossmatches (const ivf_t * ivf, int ht, size_t * nmatches)
 {
   long i;

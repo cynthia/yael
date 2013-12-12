@@ -32,15 +32,15 @@ uint16 hamming_64 (const uint64 * bs1, const uint64 * bs2);
 #else  /* Use SSE 4.2 */
 #include <nmmintrin.h>
 #ifndef hamming_32
-#define hamming_32(pa,pb) _mm_popcnt_u32((*((uint32 *) (pa)) ^ *((uint32 *) (pb))))
+#define hamming_32(pa,pb) _mm_popcnt_u32((*((const uint32 *) (pa)) ^ *((const uint32 *) (pb))))
 #endif
 #ifndef hamming_64
-#define hamming_64(pa,pb) _mm_popcnt_u64((*((uint64 *) (pa)) ^ *((uint64 *) (pb))))
+#define hamming_64(pa,pb) _mm_popcnt_u64((*((const uint64 *) (pa)) ^ *((const uint64 *) (pb))))
 #endif
 #endif
 
 #ifndef hamming_128
-#define hamming_128(a,b)  (hamming_64(a,b)+hamming_64(((uint64 *) (a)) + 1, ((uint64 *) (b)) + 1))
+#define hamming_128(a,b)  (hamming_64((const uint64 *) (a),(const uint64 *) (b))+hamming_64(((const uint64 *) (a)) + 1, ((const uint64 *) (b)) + 1))
 #endif
 
 #ifndef BITVECSIZE

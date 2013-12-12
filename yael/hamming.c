@@ -43,7 +43,8 @@ static uint16 uint8_nbones[256] = {
 
 
 
-/* Elementary Hamming distance computation */
+/*-------------------------------------------------------*/
+/* Elementary Hamming distance computation               */
 
 uint16 hamming_generic (const uint8 *bs1, const uint8 * bs2, int ncodes)
 {
@@ -106,7 +107,8 @@ uint16 hamming_64 (const uint64 * bs1, const uint64 * bs2)
 #endif
 
 
-
+/*-------------------------------------------------------*/
+/* Compute a set of Hamming distances                    */
 void compute_hamming_32 (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb)
 {
   int i, j;
@@ -114,7 +116,7 @@ void compute_hamming_32 (uint16 * dis, const uint8 * a, const uint8 * b, int na,
   for (j = 0 ; j < nb ; j++) {
     const uint8 * pa = a;
     for (i = 0 ; i < na ; i++) {
-      *dis = hamming_32 (pa, pb);
+      *dis = hamming_32 ((const uint32 *) pa, (const uint32 *) pb);
       pa += 4;
       dis++;
     }
@@ -130,7 +132,7 @@ void compute_hamming_64 (uint16 * dis, const uint8 * a, const uint8 * b, int na,
   for (j = 0 ; j < nb ; j++) {
     const uint8 * pa = a;
     for (i = 0 ; i < na ; i++) {
-      *dis = hamming_64 (pa, pb);
+      *dis = hamming_64 ((const uint64 *) pa, (const uint64 *) pb);
       pa += 8;
       dis++;
     }
@@ -146,7 +148,7 @@ void compute_hamming_128 (uint16 * dis, const uint8 * a, const uint8 * b, int na
   for (j = 0 ; j < nb ; j++) {
     const uint8 * pa = a;
     for (i = 0 ; i < na ; i++) {
-      *dis = hamming_128 (pa, pb);
+      *dis = hamming_128 ((const uint64 *) pa, (const uint64 *) pb);
       pa += 16;
       dis++;
     }
@@ -205,6 +207,78 @@ void compute_hamming_generic (uint16 * dis, const uint8 * a, const uint8 * b,
     pb += ncodes;
   }
 }
+
+
+/*-------------------------------------------------------*/
+/* Count number of matches given a threshold            */
+
+int match_he_count (const uint8 * bs1, const uint8 * bs2, int n1, int n2, int ncodes, int ht)
+{
+  size_t i, j, nmatches = 0;
+
+  switch (ncodes) {
+    case 4:
+      for (i = 0 ; i < n1 ; i++) {
+        for (j = 0 ; j < n2 ; j++) {
+          /* collect the match only if this satisfies the threshold */
+      if (hamming (bs1, bs2) <= ht) 
+        nmatches++;
+      bs2 += BITVECBYTE;
+    }
+    bs1  += BITVECBYTE;  /* next signature */
+  }
+  
+  return nmatches; 
+}
+
+
+
+void crossmatch_he_count (const uint8 * dbs, int n, int ht, size_t * nptr)
+{
+  size_t i, j, posm = 0;
+  const uint8 * bs1 = dbs;
+  
+  for (i = 0 ; i < n ; i++) {
+    const uint8 * bs2 = bs1 + BITVECBYTE;
+    
+    for (j = i + 1 ; j < n ; j++) {
+      
+      /* collect the match only if this satisfies the threshold */
+      if (hamming (bs1, bs2) <= ht) 
+        posm++;
+      
+      bs2 += BITVECBYTE;
+    }
+    bs1  += BITVECBYTE;  /* next signature */
+  }
+  
+  *nptr = posm;
+}
+
+
+void crossmatch_he_count2 (const uint8 * dbs, int n, int ht, size_t * nptr)
+{
+  size_t i, j, posm = 0;
+  const uint8 * bs1 = dbs;
+  
+  for (i = 0 ; i < n ; i++) {
+    const uint8 * bs2 = dbs;
+    
+    for (j = 0 ; j < n ; j++) {
+      
+      /* collect the match only if this satisfies the threshold */
+      if (hamming (bs1, bs2) <= ht) 
+        posm++;
+      
+      bs2 += BITVECBYTE;
+    }
+    bs1  += BITVECBYTE;  /* next signature */
+  }
+  
+  *nptr = posm;
+}
+
+
 
 
 /* Compute hamming distance and report those below a given threshold in a structure array */
@@ -450,53 +524,6 @@ int crossmatch_he_prealloc2 (const uint8 * dbs, long n, int ht,
   
   return posm;
 }
-
-
-void crossmatch_he_count (const uint8 * dbs, int n, int ht, size_t * nptr)
-{
-  size_t i, j, posm = 0;
-  const uint8 * bs1 = dbs;
-  
-  for (i = 0 ; i < n ; i++) {
-    const uint8 * bs2 = bs1 + BITVECBYTE;
-    
-    for (j = i + 1 ; j < n ; j++) {
-      
-      /* collect the match only if this satisfies the threshold */
-      if (hamming (bs1, bs2) <= ht) 
-        posm++;
-      
-      bs2 += BITVECBYTE;
-    }
-    bs1  += BITVECBYTE;  /* next signature */
-  }
-  
-  *nptr = posm;
-}
-
-
-void crossmatch_he_count2 (const uint8 * dbs, int n, int ht, size_t * nptr)
-{
-  size_t i, j, posm = 0;
-  const uint8 * bs1 = dbs;
-  
-  for (i = 0 ; i < n ; i++) {
-    const uint8 * bs2 = dbs;
-    
-    for (j = 0 ; j < n ; j++) {
-      
-      /* collect the match only if this satisfies the threshold */
-      if (hamming (bs1, bs2) <= ht) 
-        posm++;
-      
-      bs2 += BITVECBYTE;
-    }
-    bs1  += BITVECBYTE;  /* next signature */
-  }
-  
-  *nptr = posm;
-}
-
 
 
 
