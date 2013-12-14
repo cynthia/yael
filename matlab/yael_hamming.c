@@ -7,13 +7,29 @@
 #include "mex.h"
 #include "../yael/hamming.h"
 
+void usage (const char * msg) 
+{
+  char msgtot[1024];
+  const char * msgusg = 
+    "There are two modes, depending on whether a threshold is given or not\n\n"
+    "H = yael_hamming (X, Y);\n\n"
+    "       X and Y are set of bit vectors, 1 vector per column\n"
+    "       H is the set of all Hamming distances, in uint16 format"
+    "[ids, hdis] = yael_hamming (X, Y, thres);\n"
+    "       ids: matching elements, thres: hamming threshold\n";
+  
+  sprintf (msgtot, "%s\n\n%s\n", msg, msgusg);
+  mexErrMsgTxt (msgtot);
+}
+
 
 void mexFunction (int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray*prhs[])
 
 {
-  if (nrhs != 2) 
-    mexErrMsgTxt ("This function requires exactly 2 input arguments");
+  int mode_thres = 0;
+  if (nrhs != 2 && nrhs != 3) 
+    mexErrMsgTxt ("This function requires either 2 input arguments.");
   
   if (nlhs > 1)
     mexErrMsgTxt ("This function output exactly 1 argument");
@@ -38,8 +54,40 @@ void mexFunction (int nlhs, mxArray *plhs[],
   plhs[0] = mxCreateNumericMatrix (na, nb, mxUINT16_CLASS, mxREAL);
   uint16 *dis = (uint16*) mxGetPr (plhs[0]);
 
-  if (BITVECBYTE == d) 
-    compute_hamming (dis, a, b, na, nb);
-  else
-    compute_hamming_generic (dis, a, b, na, nb, d); 
+  compute_hamming (dis, a, b, na, nb, d);
 }
+
+//%-------------------------------------------
+///* Count the number of matches */
+//int ht = (int) mxGetScalar (prhs[1]);
+//
+//size_t * nmatches = (size_t *) malloc (sizeof(*nmatches) * ivf->k);
+//ivf_he_count_crossmatches2 (ivf, ht, nmatches);
+//
+///* compute the cumulative number of matches */
+//size_t * cumnmatches = (size_t *) malloc (sizeof (*cumnmatches) * (ivf->k+1));
+//cumnmatches[0] = 0;
+//for (i = 0 ; i < ivf->k ; i++) 
+//cumnmatches[i+1] = nmatches[i] + cumnmatches[i];
+//
+//size_t totmatches = cumnmatches[ivf->k];
+//
+//
+//plhs[0] = mxCreateNumericMatrix (2, totmatches, mxINT32_CLASS, mxREAL);
+//plhs[1] = mxCreateNumericMatrix (1, totmatches, mxUINT16_CLASS, mxREAL);
+//plhs[2] = mxCreateNumericMatrix (1, ivf->k-1, mxINT64_CLASS, mxREAL);
+//
+//ivf_he_crossmatches_prealloc2 (ivf, ht, (int *) mxGetPr(plhs[0]), 
+//                               (uint16 *) mxGetPr(plhs[1]), cumnmatches);
+//
+//memcpy (mxGetPr(plhs[2]), nmatches + off, sizeof (*nmatches) * (ivf->k-1)); 
+//
+//if (nlhs == 4) {
+//  plhs[3] = mxCreateNumericMatrix (1, totmatches, mxINT32_CLASS, mxREAL);
+//  int * key = (int *) mxGetPr(plhs[3]);
+//  long j;
+//  for (i = 0 ; i < ivf->k ; i++)
+//    for (j = cumnmatches[i] ; j < cumnmatches[i+1] ; j++) {
+//      key[j] = i;
+//    }
+//}

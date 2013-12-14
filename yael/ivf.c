@@ -24,11 +24,7 @@ int ivf_checksum (const ivf_t * ivf)
 ivf_t *ivf_new (int k, int elemsize, int seg_size)
 {
   int i;
-  if(BITVECSIZE != 8 * elemsize) {
-    int b = BITVECSIZE;
-    fprintf (stderr, "Error: elemsize (%d bytes) inconsistent with BITVECSIZE (%d bits) set at compile-time.\n", elemsize, b);
-    return NULL;
-  }
+
   if (seg_size == 0)
     seg_size = DEFAULT_SEG_SIZE;
 
@@ -357,9 +353,9 @@ ivfmatch_t * ivfmatch_realloc (ivfmatch_t * m, int n)
    
 */
 ivfmatch_t * ivf_hequery (const ivf_t * ivf, 
-			  const int * qids, const int * keys, 
-			  const unsigned char * adat, const int nq,
-			  int * buffer_size, int ht)
+                          const int * qids, const int * keys, 
+                          const unsigned char * adat, const int nq,
+                          int * buffer_size, int ht)
 {						
   int i, j, posm = 0;
   int bufsize = *buffer_size;
@@ -380,7 +376,7 @@ ivfmatch_t * ivf_hequery (const ivf_t * ivf,
 
     for (j = 0 ; j < listlen ; j++) {
       /* Here perform the real work of computing the distance */
-      h = hamming (qbs, dbs);
+      h = hamming (qbs, dbs, elem_size);
 
       /* collect the match only if this satisfies the threshold */ 
       if (h <= ht) {
@@ -417,7 +413,6 @@ hammatch_t ** ivf_he_collect (const ivf_t * ivf, const int * keys,
                               int ht, size_t * nmatches)
 {
   int i, nbufinit = 512;
-  assert (ivf->elem_size == BITVECBYTE);
     
   /* Match entities and number of matches per query */
   hammatch_t ** hmlist = (hammatch_t **) malloc (sizeof(*hmlist) * nq);
@@ -425,15 +420,15 @@ hammatch_t ** ivf_he_collect (const ivf_t * ivf, const int * keys,
 #ifdef _OPENMP
 #pragma omp parallel for private (i)
   for (i = 0 ; i < nq ; i++) {
-    match_hamming_thres (qbs + i * BITVECBYTE, ivf->adat[keys[i]], 
-                         ivf_get_nb_elems (ivf, keys[i]),  /* size of the inverted list */
-                         ht, nbufinit, hmlist+i, nmatches+i);
+    match_hamming_thres (qbs + i * ivf->elem_size, ivf->adat[keys[i]], 
+                         1, ivf_get_nb_elems (ivf, keys[i]),  /* size of the inverted list */
+                         ht, ivf->elem_size, nbufinit, hmlist+i, nmatches+i);
   }
 #else
   for (i = 0 ; i < nq ; i++) {
-    match_hamming_thres (qbs + i * BITVECBYTE, ivf->adat[keys[i]], 
-                         ivf_get_nb_elems (ivf, keys[i]),  /* size of the inverted list */
-                         ht, nbufinit, hmlist+i, nmatches+i);
+    match_hamming_thres (qbs + i * ivf->elem_size, ivf->adat[keys[i]], 
+                         1, ivf_get_nb_elems (ivf, keys[i]),  /* size of the inverted list */
+                         ht, ivf->elem_size, nbufinit, hmlist+i, nmatches+i);
   }
 #endif
   
@@ -449,7 +444,6 @@ ivfmatch_t * ivf_hequeryw (const ivf_t * ivf,
                             const float * score_map_, const float * list_w_)
 {
   size_t i, j;  
-  assert (ivf->elem_size == BITVECBYTE);
   
   /* Match entities to count number of matches per query */
   size_t * nmatches = (size_t *) malloc (sizeof(*nmatches) * nq);
@@ -516,7 +510,6 @@ ivfmatch_t * ivf_hequeryw (const ivf_t * ivf,
 hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, size_t * nmatches)
 {
   int i, nbufinit = 512;
-  assert (ivf->elem_size == BITVECBYTE);
   
   /* Match entities and number of matches per query */
   hammatch_t ** hmlist = (hammatch_t **) malloc (sizeof(*hmlist) * ivf->k);
@@ -541,7 +534,7 @@ hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, size_t * n
 #else
   for (i = 0 ; i < ivf->k ; i++) {
     crossmatch_he (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
-                   ht, nbufinit, hmlist+i, nmatches+i);
+                   ht, ivf->elem_size, nbufinit, hmlist+i, nmatches+i);
     hammatch_t *m = hmlist[i];
     const int * listids = ivf->ids[i];
     int j;
@@ -557,65 +550,17 @@ hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, size_t * n
 }
 
 
-/* Same as ivf_he_collect_crossmatches, but includes reverse matches and self-matches
-   See crossmatch_he2 for details */
-hammatch_t ** ivf_he_collect_crossmatches2 (const ivf_t * ivf, int ht, size_t * nmatches)
-{
-  int i, nbufinit = 512;
-  assert (ivf->elem_size == BITVECBYTE);
-  
-  /* Match entities and number of matches per query */
-  hammatch_t ** hmlist = (hammatch_t **) malloc (sizeof(*hmlist) * ivf->k);
-  
-#ifdef _OPENMP
-#pragma omp parallel for private (i)
-  for (i = 0 ; i < ivf->k ; i++) {
-    crossmatch_he2 (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
-                   ht, nbufinit + ivf_get_nb_elems (ivf, i), hmlist+i, nmatches+i);
-    
-    hammatch_t *m = hmlist[i];
-    const int * listids = ivf->ids[i];
-    long j, n = nmatches[i];
-    
-    for (j = 0 ; j < n ; j++) {
-      m->qid = listids[m->qid];
-      m->bid = listids[m->bid];
-      m++;
-    }
-    
-  }
-#else
-  for (i = 0 ; i < ivf->k ; i++) {
-    crossmatch_he2 (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
-                   ht, nbufinit + ivf_get_nb_elems (ivf, i), hmlist+i, nmatches+i);
-    hammatch_t *m = hmlist[i];
-    const int * listids = ivf->ids[i];
-    int j;
-    for (j = 0 ; j < nmatches[i] ; j++) {
-      m->qid = listids[m->qid];
-      m->bid = listids[m->bid];
-      m++;
-    }
-  }
-#endif
-  
-  return hmlist;
-}
-
-
 /* Collect cross-matches with Hamming distance */
 void ivf_he_crossmatches_prealloc (const ivf_t * ivf, int ht, 
                                    int * idx, uint16 * hams, 
                                    size_t * cumnmatches)
 {
   long i;
-  assert (ivf->elem_size == BITVECBYTE);
-  
 #ifdef _OPENMP
 #pragma omp parallel for private (i)
   for (i = 0 ; i < ivf->k ; i++) {
-    crossmatch_he_prealloc (ivf->adat[i], 
-                            ivf_get_nb_elems (ivf, i), ht, 
+    crossmatch_he_prealloc (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                            ht,  ivf->elem_size,
                             idx + 2 * cumnmatches[i], 
                             hams + cumnmatches[i]);
     
@@ -632,61 +577,8 @@ void ivf_he_crossmatches_prealloc (const ivf_t * ivf, int ht,
   }
 #else
   for (i = 0 ; i < ivf->k ; i++) {
-    int nout = crossmatch_he_prealloc (ivf->adat[i], 
-                            ivf_get_nb_elems (ivf, i), ht, 
-                            idx + 2 * cumnmatches[i], 
-                            hams + cumnmatches[i]);
-    
-    long n = cumnmatches[i+1] - cumnmatches[i];
-    assert (nout == n);
-    
-    int * m = idx + 2 * cumnmatches[i];
-    
-    const int * listids = ivf->ids[i];
-    
-    long j;
-    for (j = 0 ; j < n ; j++) {
-      *m = listids[*m]; m++;
-      *m = listids[*m]; m++;
-    }    
-  }
-#endif
-}
-
-
-/* Collect cross-matches with Hamming distance */
-void ivf_he_crossmatches_prealloc2 (const ivf_t * ivf, int ht, 
-                                   int * idx, uint16 * hams, 
-                                   size_t * cumnmatches)
-{
-  long i;
-  assert (ivf->elem_size == BITVECBYTE);
-  
-#ifdef _OPENMP
-#pragma omp parallel for private (i)
-  for (i = 0 ; i < ivf->k ; i++) {
-    crossmatch_he_prealloc2 (ivf->adat[i], 
-                            ivf_get_nb_elems (ivf, i), ht, 
-                            idx + 2 * cumnmatches[i], 
-                            hams + cumnmatches[i]);
-    
-    long n = cumnmatches[i+1] - cumnmatches[i];
-    int * m = idx + 2 * cumnmatches[i];
-    
-    const int * listids = ivf->ids[i];
-    
-    long j;
-    for (j = 0 ; j < n ; j++) {
-      *m = listids[*m]; m++;
-      *m = listids[*m]; m++;
-    }    
-  }
-#else
-  for (i = 0 ; i < ivf->k ; i++) {
-    int nout = crossmatch_he_prealloc2 (ivf->adat[i], 
-                                       ivf_get_nb_elems (ivf, i), ht, 
-                                       idx + 2 * cumnmatches[i], 
-                                       hams + cumnmatches[i]);
+    int nout = crossmatch_he_prealloc (ivf->adat[i], ivf_get_nb_elems (ivf, i), ht, ivf->elem_size,
+                                       idx + 2 * cumnmatches[i], hams + cumnmatches[i]);
     
     long n = cumnmatches[i+1] - cumnmatches[i];
     assert (nout == n);
@@ -709,41 +601,22 @@ void ivf_he_crossmatches_prealloc2 (const ivf_t * ivf, int ht,
 void ivf_he_count_crossmatches (const ivf_t * ivf, int ht, size_t * nmatches)
 {
   long i;
-  assert (ivf->elem_size == BITVECBYTE);
   
 #ifdef _OPENMP
 #pragma omp parallel for private (i)
   for (i = 0 ; i < ivf->k ; i++) {
-    crossmatch_he_count (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
-                         ht, nmatches+i);   
+    crossmatch_he_count (ivf->adat[i], ivf_get_nb_elems (ivf, i),  
+                         ht, ivf->elem_size, nmatches+i);   
   }
 #else
   for (i = 0 ; i < ivf->k ; i++) {
     crossmatch_he_count (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
-                         ht, nmatches+i);   
+                         ht, ivf->elem_size, nmatches+i);   
   }
 #endif
 }
 
 
-void ivf_he_count_crossmatches2 (const ivf_t * ivf, int ht, size_t * nmatches)
-{
-  long i;
-  assert (ivf->elem_size == BITVECBYTE);
-  
-#ifdef _OPENMP
-#pragma omp parallel for private (i)
-  for (i = 0 ; i < ivf->k ; i++) {
-    crossmatch_he_count2 (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
-                         ht, nmatches+i);   
-  }
-#else
-  for (i = 0 ; i < ivf->k ; i++) {
-    crossmatch_he_count2 (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
-                         ht, nmatches+i);   
-  }
-#endif
-}
 
 
 

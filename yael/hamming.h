@@ -19,102 +19,48 @@ typedef struct hammatch_s {
 
 
 /* Define individual Hamming distance for various sizes.
+   ncodes is given in bytes, therefore the actual number of bits is 8*ncodes.
    The generic one is slow while optimization is available for specific sizes */
-
-uint16 hamming_generic (const uint8 *bs1, const uint8 * bs2, int ncodes);
-
-
-/* Define prototype if no SSE4.2 available, otherwise use the specific processor instructions */
-#ifndef __SSE4_2__
-uint16 hamming_32 (const uint32 * bs1, const uint32 * bs2);
-uint16 hamming_64 (const uint64 * bs1, const uint64 * bs2);
-
-#else  /* Use SSE 4.2 */
-#include <nmmintrin.h>
-#ifndef hamming_32
-#define hamming_32(pa,pb) _mm_popcnt_u32((*((const uint32 *) (pa)) ^ *((const uint32 *) (pb))))
-#endif
-#ifndef hamming_64
-#define hamming_64(pa,pb) _mm_popcnt_u64((*((const uint64 *) (pa)) ^ *((const uint64 *) (pb))))
-#endif
-#endif
-
-#ifndef hamming_128
-#define hamming_128(a,b)  (hamming_64((const uint64 *) (a),(const uint64 *) (b))+hamming_64(((const uint64 *) (a)) + 1, ((const uint64 *) (b)) + 1))
-#endif
-
-#ifndef BITVECSIZE
-#warning "# BITVECSIZE UNDEFINED. SET TO 128 BY DEFAULT." 
-#define BITVECSIZE 128
-#elif BITVECSIZE%8 != 0
-#error "Only power of 8 are possible for BITVECSIZE"
-#endif
-
-#define BITVECBYTE (BITVECSIZE/8)
-
-/* Define the Hamming distance by selecting the most appropriate function,
-   using the generic version as a backup */
-#if BITVECSIZE==32
-#define hamming(a,b)  hamming_32((uint32*) (a), (uint32*) (b))
-
-#elif BITVECSIZE==64
-#define hamming(a,b)  hamming_64((uint64*) (a), (uint64*) (b))
-
-#elif BITVECSIZE==128
-#define hamming(a,b)  hamming_128(a,b)
-
-#else
-#define hamming(a,b) hamming_generic((uint8*) (a), (uint8*) (b), BITVECBYTE);
-#endif
+uint16 hamming (const uint8 *bs1, const uint8 * bs2, int ncodes);
 
 
 
 /* Compute a set of Hamming distances between na and nb binary vectors */
-void compute_hamming (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb);
-void compute_hamming_32 (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb);
-void compute_hamming_64 (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb);
-void compute_hamming_128 (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb);
+void compute_hamming (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb, int ncodes);
 
-/* The same but with a generic function */
-void compute_hamming_generic (uint16 * dis, const uint8 * a, const uint8 * b, 
-                              int na, int nb, int ncodes);
 
 /* Threaded versions, when OpenMP is available */
 #ifdef _OPENMP
-void compute_hamming_thread (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb);
+void compute_hamming_thread (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb, int ncodes);
 #endif /* _OPENMP */
 
-/* Compute hamming distance and report those below a given threshold in a structure array */
-void match_hamming_thres (const uint8 * qbs, const uint8 * dbs, int nb, int ht,
-                          size_t bufsize, hammatch_t ** hmptr, size_t * nptr);
 
-void match_hamming_thres_generic (const uint8 * qbs, const uint8 * dbs, 
-                                  int nb, int ht, size_t bufsize, 
-                                  hammatch_t ** hmptr, size_t * nptr, 
-                                  size_t ncodes);
+/* Counting the number of matches or of cross-matches (with actually returning them)
+   Useful to be used with function that assume pre-allocated memory                  */
+void match_he_count (const uint8 * bs1, const uint8 * bs2, int n1, int n2, 
+                     int ht, int ncodes, size_t * nptr);
 
-/* Compute all cross-distances between two sets of binary vectors 
-   crossmatch_he2 is same as crossmatch_he, but includes 
-   - twice the matches: match (i,j,h) also gives the match (j,i,h)
-   - self-matches of the form (i,i,0)
-*/
-void crossmatch_he (const uint8 * dbs, long n, int ht,
-                    long bufsize, hammatch_t ** hmptr, size_t * nptr);
+void crossmatch_he_count (const uint8 * dbs, int n, int ht, int ncodes, size_t * nptr);
 
-void crossmatch_he2 (const uint8 * dbs, long n, int ht,
+
+/* For 1 query signature, compute the hamming distance and report those below a given 
+   threshold in a structure array */
+void match_hamming_thres (const uint8 * bs1, const uint8 * bs2, 
+                          int n1, int n2, int ht, int ncodes, size_t bufsize, 
+                          hammatch_t ** hmptr, size_t * nptr);
+
+
+/* Compute all cross-distances between two sets of binary vectors */
+void crossmatch_he (const uint8 * dbs, long n, int ht, int ncodes, 
                     long bufsize, hammatch_t ** hmptr, size_t * nptr);
 
 /* alternative variant with pre-allocated external memory.
    return number of elements for safety check. 
    Typical usage is to first invoke crossmatch_he_count, allocate memory,
    and then invoke crossmatch_he_prealloc */
-void crossmatch_he_count (const uint8 * dbs, int n, int ht, size_t * nptr);
-void crossmatch_he_count2 (const uint8 * dbs, int n, int ht, size_t * nptr);
 
-int crossmatch_he_prealloc (const uint8 * dbs, long n, int ht,  
+int crossmatch_he_prealloc (const uint8 * dbs, long n, int ht, int ncodes,  
                             int * idx, uint16 * hams);
-int crossmatch_he_prealloc2 (const uint8 * dbs, long n, int ht,  
-                             int * idx, uint16 * hams);
 
 
 #endif /* __hamming_h */
