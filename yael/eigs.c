@@ -231,14 +231,15 @@ struct arpack_eigs_t {
 };
 
 #define NEWA(type,n) (type*)malloc(sizeof(type)*(n))
+#define NEWAC(type,n) (type*)calloc(sizeof(type),(n))
 
 arpack_eigs_t *arpack_eigs_begin(int n,int nev) {
-  arpack_eigs_t *ae=NEWA(arpack_eigs_t,1);
+  arpack_eigs_t *ae=NEWAC(arpack_eigs_t, 1);
+  if(!ae) goto mem_error;
 
   ae->n=n;
   ae->nev=nev;
   
-
   int ncv = nev * 2;  /* should be enough (see remark 4 of ssaupd doc) */
   ae->ncv = ncv;
   /*  printf("nev = %d ncv = %d\n", (int)nev, (int)ncv);  */
@@ -252,6 +253,9 @@ arpack_eigs_t *arpack_eigs_begin(int n,int nev) {
   FINTEGER *iparam=ae->iparam=NEWA(FINTEGER,11);
   ae->ipntr=NEWA(FINTEGER,11);
 
+  if(!(ae->resid && ae->workd && ae->workl && ae->v && ae->iparam && ae->ipntr)) 
+    goto mem_error;
+
   ae->info=0; /* use random initial vector */
   ae->ido=0;
 
@@ -260,6 +264,18 @@ arpack_eigs_t *arpack_eigs_begin(int n,int nev) {
   iparam[6]=1;
 
   return ae;
+ mem_error:
+  fprintf(stderr, "Yael arpack_eigs_begin: out of memory\n"); 
+  if(ae) {
+    free(ae->resid);
+    free(ae->workd);
+    free(ae->workl);
+    free(ae->v);
+    free(ae->iparam);
+    free(ae->ipntr);
+  }
+  free(ae);
+  return NULL; 
 }
 
 
@@ -304,6 +320,12 @@ int arpack_eigs_end(arpack_eigs_t *ae,
   logical *select=NEWA(logical,ncv);
   float *s=NEWA(float,ncv*2);
   int *perm=NEWA(int,nev);
+  
+  if(!(select && s && perm)) {
+    fprintf(stderr, "Yael arpack_eigs_end: out of memory\n");
+    ret = -100;
+    goto error;
+  }
 
   if(ae->info<0) {
     ret=ae->info;

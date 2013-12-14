@@ -776,6 +776,7 @@ void fmat_mul_tv(int mi,int ni,const float*a,int ldai,
   FINTEGER lda=ldai,n=ni,m=mi;
   
   float *ybuf=malloc(sizeof(float)*nt*m);
+  assert(ybuf);
 
   if(nt>n) nt=n;
 #pragma omp parallel num_threads(nt)
@@ -811,6 +812,7 @@ int fmat_svd_partial_full(int n,int m,int nev,const float *a,int a_transposed,
                           float *s,float *vout,float *uout,int nt) {
   
   arpack_eigs_t *ae=arpack_eigs_begin(n,nev);
+  if(!ae) return -100;
   int ret=0;
   
   int j,i;
