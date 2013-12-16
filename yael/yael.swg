@@ -414,6 +414,10 @@ PARALLEL_FUNCTION(knn_full_thread)
 }
 
 #ifdef HAVE_NUMPY
+%ignore ivf_he_count_crossmatches2;
+%ignore ivf_he_crossmatches_prealloc2;
+%ignore ivf_he_collect_crossmatches2;
+
 %include "ivf.h"
 #endif
 
