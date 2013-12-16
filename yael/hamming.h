@@ -50,7 +50,12 @@ void match_hamming_thres (const uint8 * bs1, const uint8 * bs2,
                           hammatch_t ** hmptr, size_t * nptr);
 
 
-/* Compute all cross-distances between two sets of binary vectors */
+/* The same but with pre-allocation (typically used with match_he_count) */
+size_t match_hamming_thres_prealloc (const uint8 * bs1, const uint8 * bs2, 
+                                  int n1, int n2, int ht, int ncodes, 
+                                  int * idx, uint16 * hams);
+
+                                   /* Compute all cross-distances between two sets of binary vectors */
 void crossmatch_he (const uint8 * dbs, long n, int ht, int ncodes, 
                     long bufsize, hammatch_t ** hmptr, size_t * nptr);
 
@@ -59,8 +64,10 @@ void crossmatch_he (const uint8 * dbs, long n, int ht, int ncodes,
    Typical usage is to first invoke crossmatch_he_count, allocate memory,
    and then invoke crossmatch_he_prealloc */
 
-int crossmatch_he_prealloc (const uint8 * dbs, long n, int ht, int ncodes,  
-                            int * idx, uint16 * hams);
+size_t crossmatch_he_prealloc (const uint8 * dbs, long n, int ht, int ncodes,  
+                              int * idx, uint16 * hams);
 
 
 #endif /* __hamming_h */
+
+ 

@@ -4,6 +4,7 @@
 /* abiding by the rules of distribution of free software.               */
 /* See http://www.cecill.info/licences.en.html                          */
 
+#include <assert.h>
 #include "mex.h"
 #include "../yael/hamming.h"
 
@@ -13,8 +14,8 @@ void usage (const char * msg)
   const char * msgusg = 
     "There are two modes, depending on whether a threshold is given or not\n\n"
     "H = yael_hamming (X, Y);\n\n"
-    "       X and Y are set of bit vectors, 1 vector per column\n"
-    "       H is the set of all Hamming distances, in uint16 format"
+    "       X and Y are set of compact bit vectors (uint8), 1 per column\n"
+    "       H is the set of all Hamming distances, in uint16 format\n\n"
     "[ids, hdis] = yael_hamming (X, Y, thres);\n"
     "       ids: matching elements, thres: hamming threshold\n";
   
@@ -31,30 +32,60 @@ void mexFunction (int nlhs, mxArray *plhs[],
   if (nrhs != 2 && nrhs != 3) 
     mexErrMsgTxt ("This function requires either 2 input arguments.");
   
-  if (nlhs > 1)
-    mexErrMsgTxt ("This function output exactly 1 argument");
-
+  if (nrhs == 3) mode_thres = 1; 
+  
   int d = mxGetM (prhs[0]);   /* d is the number of codes, i.e., 8 times the number of bits */
   int na = mxGetN (prhs[0]);
   int nb = mxGetN (prhs[1]);
 
-  if (mxGetM (prhs[1]) != d)
-      mexErrMsgTxt("Dimension of binary vectors are not consistent");
+  if (mxGetM (prhs[1]) != d) 
+      usage ("Dimension of binary vectors are not consistent");
 
   if (mxGetClassID(prhs[0]) != mxUINT8_CLASS)
-    mexErrMsgTxt ("first argument should be uint 8 type"); 
+    	usage ("first argument should be uint 8 type"); 
 
   if (mxGetClassID(prhs[1]) != mxUINT8_CLASS)
-    mexErrMsgTxt ("second argument should be uint8 type"); 
+      usage ("second argument should be uint8 type"); 
 
   uint8 * a = (uint8*) mxGetPr (prhs[0]);
   uint8 * b = (uint8*) mxGetPr (prhs[1]);
 
-  /* ouptut: distances */
-  plhs[0] = mxCreateNumericMatrix (na, nb, mxUINT16_CLASS, mxREAL);
-  uint16 *dis = (uint16*) mxGetPr (plhs[0]);
 
-  compute_hamming (dis, a, b, na, nb, d);
+  /* Just compute all Hamming distances */
+  if (mode_thres == 0) {
+    if (nlhs > 1)
+      usage ("This syntax expects only exactly one output argument");
+
+    /* ouptut: distances */
+    plhs[0] = mxCreateNumericMatrix (na, nb, mxUINT16_CLASS, mxREAL);
+    uint16 *dis = (uint16*) mxGetPr (plhs[0]);
+
+    compute_hamming (dis, a, b, na, nb, d);
+  }
+  
+  /* Return only the Hamming distances below a given threshold */
+  else {
+    if (nlhs != 2)
+      usage ("This syntax expects only exactly two output arguments");
+    int ht = (int) mxGetScalar (prhs[2]);
+    size_t totmatches;
+    
+    match_he_count (a, b, na, nb, ht, d, &totmatches);
+    
+    plhs[0] = mxCreateNumericMatrix (2, totmatches, mxINT32_CLASS, mxREAL);
+    plhs[1] = mxCreateNumericMatrix (1, totmatches, mxUINT16_CLASS, mxREAL);
+    
+    int * keys = (int *) mxGetPr(plhs[0]);
+    uint16 *dis = (uint16*) mxGetPr (plhs[1]);
+    
+    size_t ret = match_hamming_thres_prealloc (a, b, na, nb, ht, d, keys, dis);
+    assert (ret == totmatches);
+
+  long i;
+  for (i = 0 ; i < 2*totmatches ; i++)
+      keys[i] = keys[i] + 1;
+  }
+            
 }
 
 //%-------------------------------------------

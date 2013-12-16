@@ -17,7 +17,6 @@
 #define IVF_FUNCTION_QUERYHEW          10
 #define IVF_FUNCTION_FINDBS  		       12
 #define IVF_FUNCTION_CROSSMATCH        20
-#define IVF_FUNCTION_CROSSMATCH2       21
 #define IVF_FUNCTION_CROSSMATCH_ALT    22
 #define IVF_FUNCTION_CROSSMATCH_COUNT  25
 
@@ -110,8 +109,6 @@ void mexFunction (int nlhs, mxArray *plhs[],
     operation = IVF_FUNCTION_FINDBS;
   else if (!strcmp(varname, "crossmatch")) 
     operation = IVF_FUNCTION_CROSSMATCH;
-  else if (!strcmp(varname, "crossmatch2")) 
-    operation = IVF_FUNCTION_CROSSMATCH2;
   else if (!strcmp(varname, "crossmatchalt")) 
     operation = IVF_FUNCTION_CROSSMATCH_ALT;
   else if (!strcmp(varname, "crossmatchcount")) 
@@ -146,20 +143,10 @@ void mexFunction (int nlhs, mxArray *plhs[],
     if (nrhs == 4)
       segsize = (int) mxGetScalar (prhs[3]);
 
-    /* Check that the number of bits is compatible with the compilation flag */
-#ifdef BITVECBYTE
-    if (elemsize != BITVECBYTE)  {
-      mexPrintf ("Try to create a new inverted file with %d bits, "
-		 "while compilation flags expects %d bits.\n", elemsize*8, BITVECSIZE);
-      mexErrMsgTxt ("Aborting due to inconsistency between compiler flags BITVECSIZE and number of bits.");      
-    }
-
+    /* Produce an inverted file */
 #ifndef __SSE4_2__
     #warning No SSE4 -> code will not be ultimately optimized
 #endif
-#endif
-
-
     ivf = ivf_new (coarsek, elemsize, segsize);
 
     /* Give default value to the size of the voting buffer */
