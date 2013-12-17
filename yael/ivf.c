@@ -517,8 +517,8 @@ hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, size_t * n
 #ifdef _OPENMP
 #pragma omp parallel for private (i)
   for (i = 0 ; i < ivf->k ; i++) {
-    crossmatch_he (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
-                   ht, nbufinit, hmlist+i, nmatches+i);
+    crossmatch_hamming (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                        ht, ivf->elem_size, nbufinit, hmlist+i, nmatches+i);
     
     hammatch_t *m = hmlist[i];
     const int * listids = ivf->ids[i];
@@ -533,8 +533,8 @@ hammatch_t ** ivf_he_collect_crossmatches (const ivf_t * ivf, int ht, size_t * n
   }
 #else
   for (i = 0 ; i < ivf->k ; i++) {
-    crossmatch_he (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
-                   ht, ivf->elem_size, nbufinit, hmlist+i, nmatches+i);
+    crossmatch_hamming (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                        ht, ivf->elem_size, nbufinit, hmlist+i, nmatches+i);
     hammatch_t *m = hmlist[i];
     const int * listids = ivf->ids[i];
     int j;
@@ -559,10 +559,10 @@ void ivf_he_crossmatches_prealloc (const ivf_t * ivf, int ht,
 #ifdef _OPENMP
 #pragma omp parallel for private (i)
   for (i = 0 ; i < ivf->k ; i++) {
-    crossmatch_he_prealloc (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
-                            ht,  ivf->elem_size,
-                            idx + 2 * cumnmatches[i], 
-                            hams + cumnmatches[i]);
+    crossmatch_hamming_prealloc (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                                 ht,  ivf->elem_size,
+                                 idx + 2 * cumnmatches[i], 
+                                 hams + cumnmatches[i]);
     
     long n = cumnmatches[i+1] - cumnmatches[i];
     int * m = idx + 2 * cumnmatches[i];
@@ -577,8 +577,10 @@ void ivf_he_crossmatches_prealloc (const ivf_t * ivf, int ht,
   }
 #else
   for (i = 0 ; i < ivf->k ; i++) {
-    int nout = crossmatch_he_prealloc (ivf->adat[i], ivf_get_nb_elems (ivf, i), ht, ivf->elem_size,
-                                       idx + 2 * cumnmatches[i], hams + cumnmatches[i]);
+    int nout = crossmatch_hamming_prealloc (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                                            ht, ivf->elem_size,
+                                            idx + 2 * cumnmatches[i], 
+                                            hams + cumnmatches[i]);
     
     long n = cumnmatches[i+1] - cumnmatches[i];
     assert (nout == n);
@@ -605,13 +607,13 @@ void ivf_he_count_crossmatches (const ivf_t * ivf, int ht, size_t * nmatches)
 #ifdef _OPENMP
 #pragma omp parallel for private (i)
   for (i = 0 ; i < ivf->k ; i++) {
-    crossmatch_he_count (ivf->adat[i], ivf_get_nb_elems (ivf, i),  
-                         ht, ivf->elem_size, nmatches+i);   
+    crossmatch_hamming_count (ivf->adat[i], ivf_get_nb_elems (ivf, i),  
+                              ht, ivf->elem_size, nmatches+i);   
   }
 #else
   for (i = 0 ; i < ivf->k ; i++) {
-    crossmatch_he_count (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
-                         ht, ivf->elem_size, nmatches+i);   
+    crossmatch_hamming_count (ivf->adat[i], ivf_get_nb_elems (ivf, i), 
+                              ht, ivf->elem_size, nmatches+i);   
   }
 #endif
 }

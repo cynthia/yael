@@ -5,8 +5,15 @@
 /* See http://www.cecill.info/licences.en.html                          */
 
 #include <assert.h>
+#include <string.h>
 #include "mex.h"
 #include "../yael/hamming.h"
+#include "../yael/machinedeps.h"
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 
 void usage (const char * msg) 
 {
@@ -69,56 +76,39 @@ void mexFunction (int nlhs, mxArray *plhs[],
       usage ("This syntax expects only exactly two output arguments");
     int ht = (int) mxGetScalar (prhs[2]);
     size_t totmatches;
+    int * keys;
+    uint16 *dis;
+    size_t i;
     
-    match_he_count (a, b, na, nb, ht, d, &totmatches);
+/* #ifndef _OPENMP */
+    match_hamming_count (a, b, na, nb, ht, d, &totmatches);
     
     plhs[0] = mxCreateNumericMatrix (2, totmatches, mxINT32_CLASS, mxREAL);
     plhs[1] = mxCreateNumericMatrix (1, totmatches, mxUINT16_CLASS, mxREAL);
     
-    int * keys = (int *) mxGetPr(plhs[0]);
-    uint16 *dis = (uint16*) mxGetPr (plhs[1]);
+    keys = (int *) mxGetPr(plhs[0]);
+    dis = (uint16*) mxGetPr (plhs[1]);
     
     size_t ret = match_hamming_thres_prealloc (a, b, na, nb, ht, d, keys, dis);
     assert (ret == totmatches);
 
-  long i;
-  for (i = 0 ; i < 2*totmatches ; i++)
+    /* Fix Matlab identifiers */
+    for (i = 0 ; i < 2 * totmatches ; i++)
       keys[i] = keys[i] + 1;
+/* #else
+    int nt = count_cpu();
+    totmatches = match_hamming_thres_nt (a, b, na, nb, ht, d, nt, &keys, &dis);
+    for (i = 0 ; i < 2 * totmatches ; i++)
+      keys[i]++; 
+    
+    plhs[0] = mxCreateNumericMatrix (2, totmatches, mxINT32_CLASS, mxREAL);
+    plhs[1] = mxCreateNumericMatrix (1, totmatches, mxUINT16_CLASS, mxREAL);
+    
+    memcpy (mxGetPr(plhs[0]), keys, totmatches * 2 * sizeof(*keys));
+    memcpy (mxGetPr(plhs[1]), dis, totmatches * sizeof(*dis));
+#endif */
+
   }
             
 }
 
-//%-------------------------------------------
-///* Count the number of matches */
-//int ht = (int) mxGetScalar (prhs[1]);
-//
-//size_t * nmatches = (size_t *) malloc (sizeof(*nmatches) * ivf->k);
-//ivf_he_count_crossmatches2 (ivf, ht, nmatches);
-//
-///* compute the cumulative number of matches */
-//size_t * cumnmatches = (size_t *) malloc (sizeof (*cumnmatches) * (ivf->k+1));
-//cumnmatches[0] = 0;
-//for (i = 0 ; i < ivf->k ; i++) 
-//cumnmatches[i+1] = nmatches[i] + cumnmatches[i];
-//
-//size_t totmatches = cumnmatches[ivf->k];
-//
-//
-//plhs[0] = mxCreateNumericMatrix (2, totmatches, mxINT32_CLASS, mxREAL);
-//plhs[1] = mxCreateNumericMatrix (1, totmatches, mxUINT16_CLASS, mxREAL);
-//plhs[2] = mxCreateNumericMatrix (1, ivf->k-1, mxINT64_CLASS, mxREAL);
-//
-//ivf_he_crossmatches_prealloc2 (ivf, ht, (int *) mxGetPr(plhs[0]), 
-//                               (uint16 *) mxGetPr(plhs[1]), cumnmatches);
-//
-//memcpy (mxGetPr(plhs[2]), nmatches + off, sizeof (*nmatches) * (ivf->k-1)); 
-//
-//if (nlhs == 4) {
-//  plhs[3] = mxCreateNumericMatrix (1, totmatches, mxINT32_CLASS, mxREAL);
-//  int * key = (int *) mxGetPr(plhs[3]);
-//  long j;
-//  for (i = 0 ; i < ivf->k ; i++)
-//    for (j = cumnmatches[i] ; j < cumnmatches[i+1] ; j++) {
-//      key[j] = i;
-//    }
-//}

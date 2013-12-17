@@ -13,6 +13,8 @@ a = uint8 (randi (256, d, na) - 1);
 b = uint8 (randi (256, d, nb) - 1);
 
 dis = yael_hamming (a, b) ; 
+[ids2, hdis2] = find(dis < ht);
+
 [ids, hdis] = yael_hamming (a, b, ht); 
 
 % Check that both version are identical
@@ -25,17 +27,19 @@ nbits = 64;
 d = nbits / 8;
 na = 1000;
 nb = 100000;
-ht = 15;
+ht = 20;
 
 a = uint8 (randi (256, d, na) - 1);
 b = uint8 (randi (256, d, nb) - 1);
 
 
 tic
-%dis = yael_hamming (a, b) ; toc
+dis = yael_hamming (a, b) ; 
+[ids2, hdis2] = find(dis < ht); 
+toc
 
 tic
 [ids, hdis] = yael_hamming (a, b, ht); toc
-ids = ids + 1;
 
-
+max(ids(:))
+max(hdis(:))

@@ -26,21 +26,19 @@ uint16 hamming (const uint8 *bs1, const uint8 * bs2, int ncodes);
 
 
 /* Compute a set of Hamming distances between na and nb binary vectors */
-void compute_hamming (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb, int ncodes);
+void compute_hamming (uint16 * dis, const uint8 * a, const uint8 * b, 
+                      int na, int nb, int ncodes);
 
 
-/* Threaded versions, when OpenMP is available */
-#ifdef _OPENMP
-void compute_hamming_thread (uint16 * dis, const uint8 * a, const uint8 * b, int na, int nb, int ncodes);
-#endif /* _OPENMP */
 
 
 /* Counting the number of matches or of cross-matches (with actually returning them)
    Useful to be used with function that assume pre-allocated memory                  */
-void match_he_count (const uint8 * bs1, const uint8 * bs2, int n1, int n2, 
-                     int ht, int ncodes, size_t * nptr);
+void match_hamming_count (const uint8 * bs1, const uint8 * bs2, int n1, int n2, 
+                          int ht, int ncodes, size_t * nptr);
 
-void crossmatch_he_count (const uint8 * dbs, int n, int ht, int ncodes, size_t * nptr);
+void crossmatch_hamming_count (const uint8 * dbs, int n, int ht, 
+                               int ncodes, size_t * nptr);
 
 
 /* For 1 query signature, compute the hamming distance and report those below a given 
@@ -50,22 +48,31 @@ void match_hamming_thres (const uint8 * bs1, const uint8 * bs2,
                           hammatch_t ** hmptr, size_t * nptr);
 
 
-/* The same but with pre-allocation (typically used with match_he_count) */
+/* The same but with pre-allocation (typically used with match_hamming_count) */
 size_t match_hamming_thres_prealloc (const uint8 * bs1, const uint8 * bs2, 
-                                  int n1, int n2, int ht, int ncodes, 
-                                  int * idx, uint16 * hams);
+                                     int n1, int n2, int ht, int ncodes, 
+                                     int * idx, uint16 * hams);
 
                                    /* Compute all cross-distances between two sets of binary vectors */
-void crossmatch_he (const uint8 * dbs, long n, int ht, int ncodes, 
-                    long bufsize, hammatch_t ** hmptr, size_t * nptr);
+void crossmatch_hamming (const uint8 * dbs, long n, int ht, int ncodes, 
+                         long bufsize, hammatch_t ** hmptr, size_t * nptr);
 
 /* alternative variant with pre-allocated external memory.
    return number of elements for safety check. 
-   Typical usage is to first invoke crossmatch_he_count, allocate memory,
-   and then invoke crossmatch_he_prealloc */
+   Typical usage is to first invoke crossmatch_hamming_count, allocate memory,
+   and then invoke crossmatch_hamming_prealloc */
 
-size_t crossmatch_he_prealloc (const uint8 * dbs, long n, int ht, int ncodes,  
-                              int * idx, uint16 * hams);
+size_t crossmatch_hamming_prealloc (const uint8 * dbs, long n, int ht, int ncodes,  
+                                    int * idx, uint16 * hams);
+
+/* Threaded versions, when OpenMP is available */
+#ifdef _OPENMP
+void compute_hamming_thread (uint16 * dis, const uint8 * a, const uint8 * b, 
+                             int na, int nb, int ncodes);
+
+size_t match_hamming_thres_nt (const uint8 * bs1, const uint8 * bs2, int n1, int n2, 
+                              int ht, int ncodes, int nt, int ** keys, uint16 ** ham);
+#endif /* _OPENMP */
 
 
 #endif /* __hamming_h */
