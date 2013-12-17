@@ -9,7 +9,7 @@
 % See http://www.cecill.info/licences.en.html
 %
 % This package was written by Herve Jegou
-% Copyright (C) INRIA 2008-2013
+% Copyright (C) INRIA 2008-2014
 
 
 % load the vectors from test/training/query sets, and the groundtruth
@@ -100,32 +100,11 @@ for hti = htlist
          toc, ht, sum(nm));
 
   tic
-  [idx2, sc2, nm2, keys2] = yael_ivf ('crossmatch2', ht);
-  fprintf ('* Cross-matching performed in %.3f seconds - ht=%d -> %ld matches\n', ...
-    toc, ht, sum(nm2));
-  
-  tic
   [idx3, sc, nm3, keys] = yael_ivf ('crossmatchalt', ht);
   fprintf ('* Cross-matching/alt performed in %.3f seconds - ht=%d -> %ld matches\n', ...
     toc, ht, sum(nm3));
 end
 end
 
-if 0
-m = double (m);
-sm = sparse(m(1,:), m(2,:), m(3,:));
 
-
-for hti = htlist
-ht = floor (hti * nbits / 64);
-ivfhe.scoremap = nbits * single (exp(- ((0:nbits)/(nbits/4)).^2));
-
-tic
-matches2 = ivfhe.queryw (ivfhe, int32(1:nquery), vquery, ht);
-fprintf ('* %d Queries performed in %.3f seconds - ht=%d\n', nquery, toc, ht);
-fprintf ('-> found %d matches\n', size (matches2, 2));
-end
-end
-
-
-%yael_ivf ('free');
+yael_ivf ('free');

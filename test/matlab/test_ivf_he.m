@@ -83,7 +83,7 @@ ivfhe.scoremap(floor(nbits/2):nbits+1)=0;
 
 ivfhe.listw = single(ones(1, coarsek));
 
-for hti = [64]%[12:2:24]
+for hti = [12:2:24]
 ht = floor (hti * nbits / 64);
 tic
 [mids, msc] = ivfhe.queryw (ivfhe, int32(1:nquery), vquery, ht);
