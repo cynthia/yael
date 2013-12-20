@@ -536,6 +536,10 @@ PyObject * xvec ## _to_numpy_acquire(ctype *src, int ndim, npy_intp shp[]);
     return NULL;
   }
   
+  if(!PyArray_ISCONTIGUOUS($input)) {
+    PyErr_SetString(PyExc_ValueError, "array is not C-contiguous");
+    return NULL;
+  }
   $1 = PyArray_SIZE($input);
   $2 = PyArray_DATA($input);
 }

@@ -18,7 +18,7 @@ fi
 
 
 # Defaults parameters (includes ones set on cmd line)
-cflags="-fPIC -Wall -g -O3 $CFLAGS -DBITVECSIZE=128"
+cflags="-fPIC -Wall -g -O3 $CFLAGS"
 ldflags="-g -fPIC $LDFLAGS"
 
 yaelprefix=$PWD
@@ -215,6 +215,7 @@ NUMPYSWIGFLAGS=$numpyswigflags
 
 USEOPENMP=$useopenmp
 
+BITVECCFLAGS=-DBITVECSIZE=128
 
 EOF
 

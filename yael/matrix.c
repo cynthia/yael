@@ -331,7 +331,7 @@ float *fmat_new_sum_rows (const float *a, int nrow, int ncol)
 }
 
 int fmat_remove_0_columns(float *a, int d, int n) {
-  int nnz = 0, i; 
+  long nnz = 0, i; 
   for(i = 0; i < n; i++) {
     if(!fvec_all_0(a + d * i, d)) {
       if(nnz != i) 
@@ -359,6 +359,22 @@ void fmat_normalize_columns_l2sqr_pow(float *a, int d, int n, float pw) {
   }
 }
 
+void fmat_normalize_columns_l2sqr_pow_robust(float *a, int d, int n, float pw, float eps) {
+  long i; 
+  if(pw == 0.5) {
+    for(i = 0; i < n; i++) {
+      double l2sqr = fvec_norm2sqr(a + d * i, d); 
+      double norm = sqrt(l2sqr + eps); 
+      fvec_mul_by(a + d * i, d, norm); 
+    }
+  } else {
+    for(i = 0; i < n; i++) {
+      double l2sqr = fvec_norm2sqr(a + d * i, d); 
+      double norm = pow(l2sqr + eps, pw); 
+      fvec_mul_by(a + d * i, d, norm); 
+   }
+  }
+}
 
 
 

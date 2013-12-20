@@ -292,7 +292,7 @@ static int kmeans_core (int d, int n, int k, int niter, int nt, int flags, int v
 
     /* manage empty clusters and update nassign */
     nreassign = kmeans_reassign_empty (d, n, k, centroids, assign, nassign, rand_r(&seed));
-    if (nreassign > 0)
+    if (nreassign > 0 && verbose)
       fprintf (stderr, "# kmeans warning: %d empty clusters -> split\n", nreassign);
 
     tot_nreassign+=nreassign;
