@@ -68,3 +68,4 @@ eigval = diag(eigval);
 [~, eigord] = sort (eigval, 'descend');
 eigval = eigval (eigord);
 eigvec = eigvec (:, eigord);
+X = X(:, eigord);

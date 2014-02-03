@@ -12,12 +12,10 @@ function [vout, vnr] = yael_fvecs_normalize (v, nr)
 
 fprintf ('# Warning: consider using the Mex implementation instead of this pure Matlab one\n');
 
-if nargin < 2
-  nr = 2;
-end
+if nargin < 2, nr = 2; end
 
 % norm of each column
-vnr = (sum (v.^nr)) .^ (1 / nr);
+vnr = (sum (v.^nr)) .^ (-1 / nr);
 
 % sparse multiplication to apply the norm
-vout = single (double (v) * sparse (diag (double (1 ./ vnr))));
+vout = bsxfun (@times, v, vnr);

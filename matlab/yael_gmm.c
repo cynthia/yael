@@ -69,8 +69,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   }
   
   /* default: use 1 processor core */
-  if (nt == 0)
-    nt = 1;
+  nt = 1;
 
   if (verbose > 0)
     printf("Input: %d vectors of dimension %d\nk=%d niter=%d nt=%d "

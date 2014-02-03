@@ -13,7 +13,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray*prhs[])
 
 {
-  if (nrhs < 2 || nrhs > 5) 
+  if (nrhs < 2 || nrhs > 4) 
     mexErrMsgTxt ("Invalid number of input arguments");
   
   if (nlhs != 2)
@@ -22,7 +22,6 @@ void mexFunction (int nlhs, mxArray *plhs[],
   int d = mxGetM (prhs[0]);
   int n = mxGetN (prhs[0]);
   int nq = mxGetN (prhs[1]);
-  int nt = 1;
 
   if (mxGetM (prhs[1]) != d)
       mexErrMsgTxt("Dimension of base and query vectors are not consistent");
@@ -44,10 +43,6 @@ void mexFunction (int nlhs, mxArray *plhs[],
   if (nrhs >= 4)
     distype = (int) mxGetScalar(prhs[3]);
 
-  /* If practice, the following is not used (all threads by default) */
-  if (nrhs >= 5)
-    nt = (int) mxGetScalar(prhs[4]); 
-
   if (n < k) 
     mexErrMsgTxt("fewer vectors than number to be returned");    
 
@@ -62,10 +57,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
 
   /* With Matlab, we have to avoid using threads for the L2 distance, 
      because this one makes a call to MKL, which is no thread-safe */
-  if (distype == 2 || distype == 16)
-    knn_full (distype, nq, n, d, k, b, v, NULL, assign, dis);
-  else
-    knn_full_thread (distype, nq, n, d, k, b, v, NULL, assign, dis, nt);
+  knn_full (distype, nq, n, d, k, b, v, NULL, assign, dis);
 
   /* post-processing: convert to matlab indices, and enforce full sort */
 

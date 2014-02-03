@@ -43,8 +43,6 @@ mex -largeArrayDims -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELL
 
 mex -largeArrayDims -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_nn.c ../yael/vector.c ../yael/machinedeps.c ../yael/binheap.c ../yael/nn.c ../yael/sorting.c
 
-mex -largeArrayDims -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_fvecs_normalize.c ../yael/vector.c
-
 mex -largeArrayDims -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_kmax.c ../yael/vector.c ../yael/machinedeps.c ../yael/binheap.c ../yael/sorting.c
 
 mex -largeArrayDims -g CFLAGS="\$CFLAGS \$YAELCFLAGS" LDFLAGS="\$LDFLAGS \$YAELLDFLAGS" yael_kmin.c ../yael/vector.c ../yael/machinedeps.c ../yael/binheap.c ../yael/sorting.c
