@@ -6,10 +6,6 @@
 #include "ivf.h"
 #include "hamming.h"
 
-#ifndef BITVECSIZE 
-#error
-#endif
-
 
 /* geometric re-allocation add a relative 50% of additional memory */
 #define IVF_REALLOC_NEWSIZE(oldsize) (4+((oldsize * 3) / 2))

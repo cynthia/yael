@@ -2,7 +2,6 @@
 openmp = false;   % De-activated by default since latest MacOS needs hacking to have it working
 sse4 = true;
 arpack = true;
-bitvecsize = 128;
 extraflags = '-Wall';
 
 % Set flags
@@ -24,7 +23,7 @@ if arpack
 end
 
   
-cflags = [cflags extraflags ' -DBITVECSIZE=' num2str(bitvecsize)];
+cflags = [cflags extraflags];
 
   
 fprintf ('cflags = %s\n', cflags);
