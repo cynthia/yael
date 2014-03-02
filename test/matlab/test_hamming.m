@@ -23,20 +23,20 @@ assert (norm(F-double(dis)) == 0)
 
 
 % Now, something serious
-nbits = 64;
+nbits = 128;
 d = nbits / 8;
-na = 1000;
-nb = 100000;
-ht = 20;
+na = 3000;
+nb = 15000;
+ht = 48;
 
 a = uint8 (randi (256, d, na) - 1);
 b = uint8 (randi (256, d, nb) - 1);
 
 
-tic
-dis = yael_hamming (a, b) ; 
-[ids2, hdis2] = find(dis < ht); 
-toc
+% tic
+% dis = yael_hamming (a, b) ; 
+% [ids2, hdis2] = find(dis < ht); 
+% toc
 
 tic
 [ids, hdis] = yael_hamming (a, b, ht); toc

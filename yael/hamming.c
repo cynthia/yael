@@ -785,7 +785,7 @@ size_t match_hamming_thres_nt (const uint8 * bs1, const uint8 * bs2, int n1, int
   size_t * blcount = malloc ((nblock + 1) * sizeof (*blcount));
   blcount[0] = 0;
   
-  #pragma omp parallel for   
+  #pragma omp parallel for private(bl)
   for (bl = 0 ; bl < nblock ; bl++) {
     size_t bl1 = bl / nblock1;
     size_t bl2 = bl % nblock1;
@@ -812,7 +812,7 @@ size_t match_hamming_thres_nt (const uint8 * bs1, const uint8 * bs2, int n1, int
   *keys = malloc (nmatches * 2 * sizeof(**keys));
   *ham = malloc (nmatches * sizeof(**ham));
   
- #pragma omp parallel for 
+ #pragma omp parallel for private(bl)
     for (bl = 0 ; bl < nblock ; bl++) {
       size_t bl1 = bl / nblock1;
       size_t bl2 = bl % nblock1;

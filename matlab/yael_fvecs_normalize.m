@@ -10,7 +10,7 @@
 % Remark: the function return Nan for vectors of null norm
 function [vout, vnr] = yael_fvecs_normalize (v, nr)
 
-fprintf ('# Warning: consider using the Mex implementation instead of this pure Matlab one\n');
+fprintf ('# Warning: Obsolete. Use yael_vecs_normalize instead\n');
 
 if nargin < 2, nr = 2; end
 
