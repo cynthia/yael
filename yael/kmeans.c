@@ -277,8 +277,10 @@ static int kmeans_core (int d, int n, int k, int niter, int nt, int flags, int v
       /* update the centroids */
       fvec_0 (centroids, d * k);
       
-      for (i = 0 ; i < n ; i++)
+      for (i = 0 ; i < n ; i++) {
+        assert(assign[i] >= 0 || !"Something wrong in input. Maybe there are NaNs?");
         fvec_add (centroids + assign[i] * d, v + i * d, d);
+      }
       
       /* normalize */
       for (i = 0 ; i < k ; i++) {          
