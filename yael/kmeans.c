@@ -374,6 +374,7 @@ float kmeans (int di, int n, int k, int niter,
   /* for the initial configuration */
   int * selected = ivec_new (k);
   
+  assert(k <= n || !"better to have fewer clusters than points");
 
   if (seed_in == 0) 
     seed_in = lrand48();

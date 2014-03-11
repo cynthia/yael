@@ -220,6 +220,8 @@ int fmat_remove_0_columns(float *a, int d, int n);
 /*! replaces each column with colmn * (norm2sqr of column) ^ pw */
 void fmat_normalize_columns_l2sqr_pow(float *a, int d, int n, float pw); 
 
+/*! replaces each column with colmn * (norm2sqr of column + eps) ^ pw */
+void fmat_normalize_columns_l2sqr_pow_robust(float *a, int d, int n, float pw, float eps);
 
 /*---------------------------------------------------------------------------*/
 /* Special matrices                                                          */
