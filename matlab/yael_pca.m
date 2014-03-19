@@ -56,7 +56,7 @@ else
     [eigvec, eigval] = eig (Xgram);
   end
   eigvec = single (X * eigvec);
-  eigvec = yael_fvecs_normalize (eigvec);
+  eigvec = yael_vecs_normalize (eigvec);
 end
            
 

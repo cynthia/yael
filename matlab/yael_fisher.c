@@ -43,7 +43,7 @@ void mexFunction (int nlhs, mxArray *plhs[],
   if(mxGetClassID(PARAM_MU)!=mxSINGLE_CLASS)
     mexErrMsgTxt("need single precision array.");
 
-  if(mxGetClassID(PARAM_MU)!=mxSINGLE_CLASS)
+  if(mxGetClassID(PARAM_SIGMA)!=mxSINGLE_CLASS)
     mexErrMsgTxt("need single precision array.");
 
   float *v = (float*) mxGetPr (PARAM_V);
