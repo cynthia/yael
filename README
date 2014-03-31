@@ -52,7 +52,6 @@ saying that Python.h can not be found
 
 3- swig (swig)
 
-
 These two last pre-requisites are required by the python interface 
 and are not strictly mandatory. If you are not interested by this 
 python interface and that you don't have python-dev and swig installed, 
@@ -65,7 +64,7 @@ while the reference manual is generated using sphinx.
 
 
 Installation
-=============
+============
 
 1- ./configure.sh in the yael root directory. 
 For most configurations, nothing has to be done. However you might need 
@@ -92,7 +91,7 @@ the Makefile and octave_mex.sh)
 
 
 Remarks
-=============
+=======
 
 The performance of the kmeans and of the most computationally intensive 
 functions heavily depend on the version of Lapack and Blas. 
@@ -105,6 +104,9 @@ the different version installed on your machine
 
 Troubleshooting
 ===============
+
+LLVM compiler on the Mac
+------------------------
 
 In recent version of MacOS X (Maverick update), there is a compilation 
 issue trouble with the LLVM compiler when multi-threading is activated. 
@@ -130,4 +132,40 @@ CC=gcc-4.9
 
 Alternately, you might consider deactivating multi-threading if you do not it. 
 This can be done in makefile.inc by replacing USEOPENMP=yes by USEOPENMP=no
+
+32- and 64- bit integers in Fortran code
+----------------------------------------
+
+BLAS and Lapack are called with the fortran interface, which is most
+standard. Some implementations are compiled with 32-bit integers
+(eg. Atlas on most Linux distributions) and some with 64-bit integers
+(eg. Matlab's -lmwblas and -lmwlapack libraries). The compilation
+flags -DFINTEGER=long or -DFINTEGER=int switches between the two
+calling conventions. 
+
+For example, if you have a license for Intel's MKL, you can use:
+
+LAPACKLDFLAGS=-L MY_MKL_INSTALL_PATH -Wl,-rpath,MY_MKL_INSTALL_PATH \
+     -lmkl_intel_ilp64 -lmkl_sequential  -lmkl_lapack -lmkl_core -lpthread -lm 
+LAPACKCFLAGS=-DFINTEGER=long
+
+This selects the non-threaded version with 64-bit
+integers. Multithreading is performed by Yael.
+
+The computation of subsets of eigenvectors or singular values depends
+on the ARPACK package, enabled with ./configure.sh --enable-arpack (from
+http://www.caam.rice.edu/software/ARPACK/). Arpack should be compiled
+with the same integer size as the blas/lapack implementation. To
+compile ARPACK with gfortran and 64-bit integers, set
+
+# %-----------------------------------------%
+# | Various compilation programs and flags. |
+# | You need to make sure these are correct |
+# | for your system.                        |
+# %-----------------------------------------%
+#
+FC      = gfortran
+FFLAGS  = -g -O3 -fdefault-integer-8 -fPIC
+
+in ARPACK's ARmake.inc
 
