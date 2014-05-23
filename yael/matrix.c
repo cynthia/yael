@@ -986,8 +986,8 @@ pca_online_t * pca_online_new (int d)
   pca->d = d;
   pca->n = 0;
   pca->mu = fvec_new_0 (d);
-  pca->cov = fvec_new_0 (d*d);
-  pca->eigvec = fvec_new (d*d);
+  pca->cov = fvec_new_0 (d*(long)d);
+  pca->eigvec = fvec_new (d*(long)d);
   pca->eigval = fvec_new (d);
   return pca;
 }
@@ -1007,14 +1007,14 @@ void pca_online_delete (struct pca_online_s * pca)
 void pca_online_accu (struct pca_online_s * pca, const float * v, long n)
 {
   int d = pca->d;
-  float * cov = fvec_new (d*d);
+  float * cov = fvec_new (d*(long)d);
   float * mu = fvec_new (d);
 
   fmat_sum_rows (v, d, n, mu);
   fmat_mul_tr (v, v, d, d, n, cov);
 
   fvec_add (pca->mu, mu, d);
-  fvec_add (pca->cov, cov, d*d);
+  fvec_add (pca->cov, cov, d*(long)d);
 
   pca->n += n;
 
@@ -1030,15 +1030,15 @@ void pca_online_cov (struct pca_online_s * pca)
   int n = pca->n;
 
   fvec_div_by (pca->mu, d, n);
-  fvec_div_by (pca->cov, d * d, n);
+  fvec_div_by (pca->cov, d * (long)d, n);
 
-  float * mumut = fvec_new (d*d);
+  float * mumut = fvec_new (d*(long)d);
   fmat_mul_tr (pca->mu, pca->mu, d, d, 1, mumut);
-  fvec_sub (pca->cov, mumut, d*d);
+  fvec_sub (pca->cov, mumut, d*(long)d);
   free (mumut);
   
-  fvec_mul_by (pca->cov, d * d, n / (double) (n-1));
-  assert(fvec_all_finite(pca->cov,d*d));
+  fvec_mul_by (pca->cov, d * (long)d, n / (double) (n-1));
+  assert(fvec_all_finite(pca->cov,d*(long)d));
   pca->n = -pca->n;
 }
 

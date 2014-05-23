@@ -85,8 +85,6 @@ usage: $0
 
 Examples that work: 
 
-Compile for 64-bit mac, with optimization
-./configure.sh --python-cflags=-I$HOME/local64/include/python2.6
 
 
 EOF

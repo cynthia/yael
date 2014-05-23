@@ -3,15 +3,17 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <yael/machinedeps.h>
 #include <yael/vector.h>
 #include <yael/eigs.h>
 #include <yael/matrix.h>
 
 /* 
-executed on node15
-gcc -o loop_pca_size loop_pca_size.c -O3 -I../.. -L ../../yael -lyael && ./loop_pca_size 
+executed on node40
+export LD_LIBRARY_PATH=../../yael/:/home/clear/lear/intel/mkl/lib/intel64/
 
+gcc -Wall -o loop_pca_size loop_pca_size.c -g -I../.. -L ../../yael -lyael -DFINTEGER=long -L/home/clear/lear/intel/mkl/lib/intel64/ -lmkl_intel_ilp64 && ./loop_pca_size 
 
 */
 
@@ -38,15 +40,10 @@ double sqr(double x) {return x*x; }
 #define real float
 #define integer FINTEGER
 
-int ssytrd_(char *uplo, integer *n, real *a, integer *lda, 
-            real *d__, real *e, real *tau, real *work, integer *lwork, integer *
-            info); 
-
-int sstebz_(char *range, char *order, integer *n, real *vl, 
-            real *vu, integer *il, integer *iu, real *abstol, real *d__, real *e, 
-            integer *m, integer *nsplit, real *w, integer *iblock, integer *
-            isplit, real *work, integer *iwork, integer *info);
-
+int ssyevx_(char *jobz, char *range, char *uplo, integer *n, 
+        real *a, integer *lda, real *vl, real *vu, integer *il, integer *iu, 
+        real *abstol, integer *m, real *w, real *z__, integer *ldz, real *
+            work, integer *lwork, integer *iwork, integer *ifail, integer *info);
 
 #undef real 
 #undef integer
@@ -55,32 +52,54 @@ int sstebz_(char *range, char *order, integer *n, real *vl,
 
 
 int main(int argc, char** argv) {
-
 /*
+  long d = 64 * 64; 
+  long nblock = 40, blocksize = 1000; 
+
   long d = 64 * 256;
   long nblock = 160, blocksize = 1000; 
+
 */
-  long d = 64 * 64; 
-  long nblock = 8, blocksize = 1000; 
-  long n = nblock * blocksize; 
+  long d = 65536;
+  long nblock = 88, blocksize = 1000; 
   
+
+  long n = nblock * blocksize; 
+    
   float *x = fvec_new(n * d); 
 
-  int i; 
-  
+  long i; 
+  setvbuf(stdout, NULL, _IONBF, 0);
 
-  for(i = 0; i < nblock; i++) {
-    char fname[1024]; 
-    //    sprintf(fname, "/scratch2/bigimbaz/dataset/flickr//smalldesc/fisher/ff_k256_%02d.fvecs", i); 
-    sprintf(fname, "/scratch2/bigimbaz/dataset/flickr//smalldesc/fisher/ff_k64_%02d.fvecs", i); 
-    printf("loading block %d %s\n", i, fname); 
-    fvecs_read(fname, d, blocksize, x + i * blocksize * d);     
+  if(d == 65536) {
+    const char *fname = "/tmp/buf_64kD.fvecs"; 
+    fvecs_read(fname, d, n, x);     
     
-    long nnan = fvec_purge_nans(x + i * blocksize * d, blocksize * d, 0); 
+    long nnan = fvec_purge_nans(x, n, 0); 
     printf("  purged %d nans\n", nnan);
+  } else {
+  
+    for(i = 0; i < nblock; i++) {
+      char fname[1024]; 
+      switch(d) {
+      case 16384:
+        sprintf(fname, "/scratch2/bigimbaz/dataset/flickr//smalldesc/fisher/ff_k256_%02d.fvecs", i); 
+        break;
+      case 4096:
+        sprintf(fname, "/scratch2/bigimbaz/dataset/flickr//smalldesc/fisher/ff_k64_%02d.fvecs", i); 
+        break;
+      default: assert(0); 
+      }
+      printf("loading block %d %s\n", i, fname); 
+      fvecs_read(fname, d, blocksize, x + i * blocksize * d);     
+      
+      long nnan = fvec_purge_nans(x + i * blocksize * d, blocksize * d, 0); 
+      printf("  purged %d nans\n", nnan);
+    }
   }
   
   printf("loaded %ld pts in %ld dimensions\n", n, d);
+  
 
   pca_online_t * pca_online = pca_online_new (d); 
   
@@ -106,7 +125,7 @@ int main(int argc, char** argv) {
 
     printf("subtract mean time: %.3f ms\n", getmillisecs() - t0); 
   }
-  
+#if 0
   {
     printf("computing full eigenvals / vecs\n"); 
     
@@ -118,13 +137,13 @@ int main(int argc, char** argv) {
     
     print_some_eigs(d, d, pca_online->eigval, pca_online->eigvec); 
   }
-  
+#endif
   
   {
     int nev; 
 
     for(nev = 1; nev < d / 2; nev *= 2) {
-      
+
       {
         memset(pca_online->eigval, -1, sizeof(*pca_online->eigval) * d); 
         memset(pca_online->eigvec, -1, sizeof(*pca_online->eigvec) * d * d); 
@@ -137,12 +156,12 @@ int main(int argc, char** argv) {
         
         for(i = 0; i < nev; i++) pca_online->eigval[i] = sqr(pca_online->eigval[i]) / (n - 1);           
 
-        printf("time: %.3f ms\n", getmillisecs() - t1); 
+        printf("on-the-fly %d time: %.3f ms\n", nev, getmillisecs() - t1); 
         
         print_some_eigs(d, nev, pca_online->eigval, pca_online->eigvec);        
         
       }
-      
+
       {
         memset(pca_online->eigval, -1, sizeof(*pca_online->eigval) * d); 
         memset(pca_online->eigvec, -1, sizeof(*pca_online->eigvec) * d * d);      
@@ -152,7 +171,7 @@ int main(int argc, char** argv) {
         
         pca_online_complete_part(pca_online, nev); 
         
-        printf("time: %.3f ms\n", getmillisecs() - t1); 
+        printf("cov %d time: %.3f ms\n", nev, getmillisecs() - t1); 
         
         print_some_eigs(d, nev, pca_online->eigval, pca_online->eigvec);       
       }
@@ -160,7 +179,7 @@ int main(int argc, char** argv) {
       {
         memset(pca_online->eigval, -1, sizeof(*pca_online->eigval) * d); 
         memset(pca_online->eigvec, -1, sizeof(*pca_online->eigvec) * d * d);      
-        printf("dstebz partial PCA %d evs (from covariance matrix):\n", nev); 
+        printf("ssyevx partial PCA %d evs (from covariance matrix):\n", nev); 
 
         double t1 = getmillisecs(); 
         
@@ -168,54 +187,48 @@ int main(int argc, char** argv) {
         {
           /* tri-diagonalize cov matrix */
           float *a = fvec_new(d * d); 
-          fvec_cpy(a, pca_online->cov, d * d * sizeof(*a)); 
-          float *tmp = fvec_new(d * 3); 
-          float *dtab = tmp, *etab = tmp + d, tautab = tmp + 2 * d; 
+
+          fvec_cpy(a, pca_online->cov, d * d); 
+          
+          FINTEGER ni = d; 
+          FINTEGER il = d - nev + 1, iu = d, m, nsplit; 
+          float zero = 0; 
           FINTEGER info, lwork = -1; 
           float workq[1];           
+          FINTEGER *iwork = malloc(sizeof(FINTEGER) * d * 5); 
+          FINTEGER *ifail = malloc(sizeof(FINTEGER) * d); 
 
-          FINTEGER ni = d; 
+          ssyevx_("V", "I", "U", &ni, a, &ni, NULL, NULL, &il, &iu, &zero, 
+                  &m, pca_online->eigval, pca_online->eigvec, &ni, 
+                  workq, &lwork, iwork, ifail, &info); 
 
-          ssytrd_("U", &ni, a, &ni, dtab, etab, tautab, workq, &lwork, &info); 
+          assert(info == 0); 
           
           lwork = (long)workq[0]; 
           float *work = fvec_new(lwork); 
                    
-          ssytrd_("U", &ni, a, &ni, dtab, etab, tautab, work, &lwork, &info); 
+          ssyevx_("V", "I", "U", &ni, a, &ni, NULL, NULL, &il, &iu, &zero, 
+                  &m, pca_online->eigval, pca_online->eigvec, &ni, 
+                  work, &lwork, iwork, ifail, &info); 
+
+          /* reverse order of evs */ 
+          fvec_revert(pca_online->eigval, nev); 
+          for(i = 0; 2 * i < nev; i++) {
+            fvec_swap(pca_online->eigvec + i * d, 
+                      pca_online->eigvec + (nev - 1 - i) * d, 
+                      d); 
+          }          
 
           if(info != 0) {
-            printf("  ssytrd info = %d\n", info); 
+            printf("  ssyevx info = %d\n", info); 
             abort();
           }
-          
-          printf("tri-diagonalization time: %.3f ms\n", getmillisecs() - t1); 
-        
 
-          /* call sstebz */
-          float unused = -1; 
-          FINTEGER il = d - nev, iu = nev, m, nsplit; 
-          float abstol = 1e-3; 
-
-          FINTEGER *iblock = malloc(sizeof(FINTEGER) * d); 
-          FINTEGER *isplit = malloc(sizeof(FINTEGER) * d); 
-          FINTEGER *iwork = malloc(sizeof(FINTEGER) * d * 3); 
-          free(work); 
-          work = fvec_new(3 * n); 
-
-          sstebz_("I", "E", &ni, NULL, NULL, &il, &iu, &abstol, dtab, etab, &m, &nsplit, pca_online->eigval, 
-                  iblock, isplit, work, iwork, &info); 
-          
-          if(info != 0) {
-            printf("  sstebz info = %d\n", info); 
-            abort();
-          }
-                            
+          free(ifail); free(iwork); free(a); 
+                                              
         }
 
-
-
-        
-        printf("time: %.3f ms\n", getmillisecs() - t1); 
+        printf("ssyevx %d time: %.3f ms\n", nev, getmillisecs() - t1); 
         
         print_some_eigs(d, nev, pca_online->eigval, pca_online->eigvec);       
       }

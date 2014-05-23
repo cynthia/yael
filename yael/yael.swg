@@ -66,6 +66,8 @@ array_class_plus(double,DoubleArray)
 array_class_plus(float,FloatArray)
 array_class_plus(int,IntArray)
 array_class_plus(unsigned char,bvec)
+array_class_plus(short, int16vec)
+array_class_plus(unsigned short, uint16vec)
 array_class_plus(long long,lvec)
 array_class_plus(unsigned long long,UInt64Array)
 
@@ -575,6 +577,8 @@ ctype *numpy_to_ ## xvec ## _ref(long di, ctype *data);
 NUMPY_EXCHANGE(bvec, unsigned char, NPY_UINT8);
 NUMPY_EXCHANGE(fvec, float, NPY_FLOAT32);
 NUMPY_EXCHANGE(ivec, int, NPY_INT32);
+NUMPY_EXCHANGE(int16vec, short, NPY_INT16);
+NUMPY_EXCHANGE(uint16vec, unsigned short, NPY_UINT16);
 NUMPY_EXCHANGE(dvec, double, NPY_FLOAT64);
 
 

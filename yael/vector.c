@@ -1952,7 +1952,7 @@ void fvec_add_scalar (float * v, long n, float scal) {
 
 
 
-int fvec_purge_nans(float * v, long n, float replace_value) {
+long fvec_purge_nans(float * v, long n, float replace_value) {
   long i, count=0;
   
   for(i=0;i<n;i++) if(isnan(v[i])) {
@@ -1987,6 +1987,27 @@ long fvec_index_nonfinite(float * v, long n) {
   for(i=0;i<n;i++) if(!isfinite(v[i])) return i;
   return -1;  
 }
+
+void fvec_revert(float *v, long n) {
+  long i; 
+  for(i = 0; i * 2 < n; i++) {
+    float tmp = v[i]; 
+    v[i] = v[n - 1 - i];    
+    v[n - 1 - i] = tmp; 
+  }
+}
+
+void fvec_swap(float *v1, float *v2, long n) {
+  long i; 
+  for(i = 0; i < n; i++) {
+    float tmp = v1[i]; 
+    v1[i] = v2[i];    
+    v2[i] = tmp; 
+  }
+}
+  
+
+
 
 /*---------------------------------------------------------------------------*/
 /* Vector measures and statistics                                            */

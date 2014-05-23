@@ -457,7 +457,7 @@ void fvec_add_scalar (float * v, long n, float scal);
 
 
 /*! Replace the "Not a number" values by a given value */
-int fvec_purge_nans(float * v, long n, float replace_value);
+long fvec_purge_nans(float * v, long n, float replace_value);
 int fvec_purge_nonfinite(float * v, long n, float replace_value);
 
 /*!  Shrink the vector, removing "Not a number" and inf values. 
@@ -466,6 +466,13 @@ long fvec_shrink_nonfinite(float * v, long n);
 
 /*!  find 1st occurrence of a non-finite element */
 long fvec_index_nonfinite (float * v, long n);
+
+/*! revert order of vector */
+void fvec_revert(float *v, long n); 
+
+/*! swap two vectors */
+void fvec_swap(float *v1, float *v2, long n); 
+
 
 /*---------------------------------------------------------------------------*/
 /* Vector measures and statistics                                            */

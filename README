@@ -150,7 +150,18 @@ LAPACKLDFLAGS=-L MY_MKL_INSTALL_PATH -Wl,-rpath,MY_MKL_INSTALL_PATH \
 LAPACKCFLAGS=-DFINTEGER=long
 
 This selects the non-threaded version with 64-bit
-integers. Multithreading is performed by Yael.
+integers. Multithreading will usually be performed by Yael.
+
+For the multithreaded version (tested with MKL from composer_xe_2013): 
+
+LAPACKLDFLAGS=\
+-L /home/clear/lear/intel/mkl/lib/intel64 -Wl,-rpath,/home/clear/lear/intel/mkl/lib/intel64  \
+-L /home/clear/lear/intel/lib/intel64 -Wl,-rpath,/home/clear/lear/intel/lib/intel64  \
+-lmkl_intel_ilp64 -lmkl_gnu_thread -lmkl_core -liomp5 -lpthread
+
+NB that the MKL flags are a bit like black magic. A useful starting point 
+
+https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor
 
 The computation of subsets of eigenvectors or singular values depends
 on the ARPACK package, enabled with ./configure.sh --enable-arpack (from
