@@ -90,24 +90,12 @@ void mexFunction (int nlhs, mxArray *plhs[],
     dis = (uint16*) mxGetPr (plhs[1]);
     
     size_t ret = match_hamming_thres_prealloc (a, b, na, nb, ht, d, keys, dis);
+ 
     assert (ret == totmatches);
 
     /* Fix Matlab identifiers */
     for (i = 0 ; i < 2 * totmatches ; i++)
       keys[i] = keys[i] + 1;
-/* #else
-    int nt = count_cpu();
-    totmatches = match_hamming_thres_nt (a, b, na, nb, ht, d, nt, &keys, &dis);
-    for (i = 0 ; i < 2 * totmatches ; i++)
-      keys[i]++; 
-    
-    plhs[0] = mxCreateNumericMatrix (2, totmatches, mxINT32_CLASS, mxREAL);
-    plhs[1] = mxCreateNumericMatrix (1, totmatches, mxUINT16_CLASS, mxREAL);
-    
-    memcpy (mxGetPr(plhs[0]), keys, totmatches * 2 * sizeof(*keys));
-    memcpy (mxGetPr(plhs[1]), dis, totmatches * sizeof(*dis));
-#endif */
-
   }
             
 }

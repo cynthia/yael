@@ -5,7 +5,7 @@ arpack = true;
 extraflags = '-Wall';
 
 % Set flags
-cflags = '-I/usr/include -I.. -DFINTEGER=long ';
+cflags = '-O3 -I/usr/include -I.. -DFINTEGER=long ';
 ldflags = '-lmwblas -lmwlapack -lmwarpack ';
 
 if openmp

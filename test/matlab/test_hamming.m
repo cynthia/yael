@@ -26,8 +26,8 @@ assert (norm(F-double(dis)) == 0)
 nbits = 64;
 d = nbits / 8;
 na = 100000;
-nb = 3000;
-ht = 18;
+nb = 1000;
+ht = 20;
 
 a = uint8 (randi (256, d, na) - 1);
 b = uint8 (randi (256, d, nb) - 1);
@@ -41,5 +41,8 @@ b = uint8 (randi (256, d, nb) - 1);
 tic
 [ids, hdis] = yael_hamming (a, b, ht); toc
 
-max(ids(:))
-max(hdis(:))
+
+fprintf ('nb neighbors=%d (avg=%.2f)\nmin distance=%d\n', ...
+         numel(ids(:)), numel(ids(:))/nb, min(hdis(:)));
+%max(ids(:))
+%max(hdis(:))

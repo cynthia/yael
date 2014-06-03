@@ -1,10 +1,6 @@
 
 
-all: reference sphinx_html sphinx_latexpdf
-
-reference: 
-	doxygen Doxyfile
-
+all: sphinx_html sphinx_latexpdf
 
 
 
