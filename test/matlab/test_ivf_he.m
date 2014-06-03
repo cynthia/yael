@@ -30,13 +30,13 @@ anndata_load_vectors;
 %---[ Search parameters ]---
 
 ht = 64;              % Hamming threshold
-nbits = 128;           % number of subquantizers to be used (m in the paper)
+nbits = 128;          % number of subquantizers to be used (m in the paper)
 coarsek = 256;        % number of centroids for the coarse quantizer
 w = 4;                % number of cell visited per query
 
 tic;
 
-% Provide the quantizer
+% Provide the quantizer: yael exact assignment
 quantizer = @yael_nn;
 qparams = yael_kmeans (vtrain, coarsek, 'niter', 20, 'verbose', 0);
 

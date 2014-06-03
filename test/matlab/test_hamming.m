@@ -23,11 +23,11 @@ assert (norm(F-double(dis)) == 0)
 
 
 % Now, something serious
-nbits = 128;
+nbits = 64;
 d = nbits / 8;
-na = 3000;
-nb = 15000;
-ht = 48;
+na = 100000;
+nb = 3000;
+ht = 18;
 
 a = uint8 (randi (256, d, na) - 1);
 b = uint8 (randi (256, d, nb) - 1);

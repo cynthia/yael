@@ -11,7 +11,7 @@ TARGET=matlab
 # TARGET=octave
 
 
-CFLAGS=-O3 -fPIC -m64 -g -I.. -fopenmp -DHAVE_ARPACK
+CFLAGS=-O3 -fPIC -m64 -g -I.. -DHAVE_ARPACK
 
 ifeq "$(TARGET)" "matlab"
 
@@ -31,7 +31,7 @@ ifeq "$(TARGET)" "matlab"
 
     YAELAR=yael4matlab.a
 
-    LDFLAGS=-g $(YAELAR) LDFLAGS="\$$LDFLAGS -lmwblas -lmwlapack -lmwarpack -fopenmp"
+    LDFLAGS=-g $(YAELAR) LDFLAGS="\$$LDFLAGS -lmwblas -lmwlapack -lmwarpack"
     MEX=mex -g
 
 else
@@ -43,7 +43,7 @@ else
 endif
 
 
-all: $(YAELAR) yael_kmeans yael_gmm yael_fisher yael_nn yael_kmin yael_kmax yael_fvecs_normalize \
+all: $(YAELAR) yael_kmeans yael_gmm yael_fisher yael_nn yael_kmin yael_kmax \
                yael_L2sqr yael_cross_distances yael_eigs yael_svds yael_hamming
 
 
@@ -132,9 +132,6 @@ yael_kmin: yael_kmin.c $(YAELAR)
 
 yael_kmax: yael_kmax.c $(YAELAR)
 	$(MEX) yael_kmax.c -I..  $(LDFLAGS)
-
-yael_fvecs_normalize: yael_fvecs_normalize.c $(YAELAR)
-	$(MEX) yael_fvecs_normalize.c -I.. $(LDFLAGS)
 
 yael_L2sqr: yael_L2sqr.c $(YAELAR)
 	$(MEX) yael_L2sqr.c -I.. $(LDFLAGS)

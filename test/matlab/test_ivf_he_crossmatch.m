@@ -1,15 +1,9 @@
-% This sample program shows how to use the Hamming embedding technique
-% described in "Improving bag-of-features for large scale image search"
-%
-% Thisimplementation is not as efficient as the C/python one used in our paper.
-% However it provides same accuracy and same memory usage for this parameter. 
-%
 % This software is governed by the CeCILL license under French law and
 % abiding by the rules of distribution of free software. 
 % See http://www.cecill.info/licences.en.html
 %
 % This package was written by Herve Jegou
-% Copyright (C) INRIA 2008-2014
+% Copyright (C) INRIA 2013-2014
 
 
 % load the vectors from test/training/query sets, and the groundtruth
@@ -28,9 +22,9 @@ anndata_load_vectors;
 %---[ Search parameters ]---
 
 nbits = 128;          % number of projection bits
-coarsek = 512;       % number of centroids for the coarse quantizer
+coarsek = 2048;       % number of centroids for the coarse quantizer
 w = 1;                % number of cell visited per query
-htlist = [18 24];        % list of test hamming thresholds (assuming nbits=64)
+htlist = [18 24];     % list of test hamming thresholds (assuming nbits=64)
 
 tic;
 
