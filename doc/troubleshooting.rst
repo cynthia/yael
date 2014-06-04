@@ -2,12 +2,13 @@ Troubleshooting
 ===============
 
 Before reporting any trouble in installing the library, please ensure
-that the following points are correctly configured Most of the
-problems should be related to an incorrect configuration
+that the following points are correctly configured. 
+Most of the problems for the compilation of the core C library should be related to an incorrect configuration
 in ``makefile.inc``.
 
+
 * **Problems when linking**. The environment variable associated with
-  dynamic library should be set to \tc{\yroot/yael}.
+  dynamic library should be set to ``YAELROOT/yael``.
 
 +--------------+--------------------+------------------------+-------------------------------+
 | Architecture | \yael library name | environment variable   | command to check missing libs |
@@ -27,4 +28,9 @@ in ``makefile.inc``.
 * Segfault in Mexfile: MacOS 32/64 bits. If you have a 32 bits Matlab
   version with MacOS, then you should check that you have used the
   flag ``--mac32`` when configuring Yael. 
+
+
+* In Matlab, some issues come from the regular changes in releases of Matlab. We do our best to find some solutions (because we need this ourselves). 
+
+* On MacOS, the use by default of the LLVM compiler also cause some (solvable) issues to use multi-threading in some of the functions. By default, multi-threading is disabled. Yet it is still available in some functions involving matrix multiplication, such as yael_nn. 
 

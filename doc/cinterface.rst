@@ -1,5 +1,5 @@
-C interface and basic programs
-==============================
+C interface
+===========
 
 The C API is object-oriented whenever applicable, with constructors
 and destructors for each structure.

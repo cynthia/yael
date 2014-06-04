@@ -1,6 +1,6 @@
 
 
-all: sphinx_html sphinx_latexpdf
+all: sphinx_html 
 
 
 
@@ -37,3 +37,7 @@ sphinx_latexpdf:
 	make -C $(BUILDDIR)/latex all-pdf
 	mv $(BUILDDIR)/latex/Yael.pdf .
 	@echo "pdflatex finished; the output file is Yael.pdf."
+
+
+publish: 
+	scp -r ./_build/html/* scm.gforge.inria.fr:/home/groups/yael/htdocs

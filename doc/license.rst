@@ -1,10 +1,10 @@
 License
 =======
 
-Copyright @ INRIA 2010-2011. 
+Copyright @ INRIA 2010-2014. 
 
 Authors: Matthijs Douze \& Hervé Jégou 
-Contact: matthijs.douze@inria.fr  herve.jegou@inria.fr 
+Contact: matthijs.douze@inria.fr  herve.jegou@inria.fr  (better: Yael's forum)
  
 
 This software is a computer program whose purpose is to provide 

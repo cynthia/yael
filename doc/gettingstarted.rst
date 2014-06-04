@@ -17,12 +17,8 @@ For registered users, it can be retrieved from the SVN as follows::
 
 This performs the installation of the regular Yael branch of the project into the directory Yael. 
 This installation directory is referred to as YAELROOT in the following. 
-There is also an anonymous access, which is provided by using one of the following commands::
+There is also an SVN access for privileged users. 
 
-  svn checkout --username anonsvn https://scm.gforge.inria.fr/svn/yael
-
-
-The password for anonymous login is 'anonsvn'. 
 
 The library is organized as follows::
 
@@ -109,25 +105,18 @@ At this point, only the core C and python library are compiled.
 If you need the Matlab interface, you have to compile the mex files [#]_ ::
 
   cd matlab
-  make
+  matlab -nojvm
+  >> Make
+
+
+.. warning:: The former compilation of the Matlab interface on command line is not available anymore, following many request for help of users who were unable to correctly set up their linking path in ``makefile.inc``. Only the compilation from Matlab remains. If this one does not work, please ensure that you Mex compilation works properly (i.e., on a simple example in Matlab doc) before contacting us. 
 
 
 
-
-In order to generate the reference manual and this tutorial, you should go into the 
-doc subdirectory and execute the following command line:: 
-
-  cd doc
-  make
-
-
-**Remark:** In order to use the 32 bit mode on MacOS (not recommanded), 
+**Remark:** In order to use the 32 bit mode on MacOS (not recommended), 
 use the special flag ``--mac32``::
 
   ./configure.sh --mac32
 
 
-.. [#] The mex executable should be in the PATH. 
-   This is a typical error. Another one occurs when the ``mex`` 
-   utility of Octave has a higher priority than 
-   the Matlab command with the same name. 
+.. [#] The previous command line compilation is not available anymore, due to multiple help requests of users facing difficulties to properly set up the linking

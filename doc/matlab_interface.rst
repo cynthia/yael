@@ -8,7 +8,7 @@ Content of the Matlab interface
 -------------------------------
 
 The Matlab interface of Yael is limited to functions that are not
-available in Matlab, ie. most basic matrix manipulation functions are
+available in Matlab, i.e., the most basic matrix manipulation functions are
 readily available in Matlab or can be implemented trivially.
 
 The functions currently provided are:
@@ -23,6 +23,10 @@ The functions currently provided are:
   which is very inefficient when :math:`k` is small compared to the number
   of vectors.
 
+* ``yael_hamming`` is used to compute the Hamming distances between binary vectors
+  represented in a compact form. The function also allows one to get only the Hamming 
+  distances below a threshold (range search). 
+
 * ``yael_L2sqr`` computes all the square distances between two sets of
   vectors. Therefore, it computes :math:`n_1\times n_2` distances.
 
@@ -30,14 +34,16 @@ The functions currently provided are:
   largest) values of a set of scalar. It is more efficient than sorting
   the data.
 
-* ``yael_fvecs_normalize`` normalizes a set of vectors. 
+* ``yael_vecs_normalize`` normalizes a set of vectors. 
 
 * ``yael_gmm`` learns a Gaussian mixture model (diagonal form).
 
 * ``yael_fisher`` computes the Fisher Kernel representation of a set
   of features.
 
-There are also several I/O functions, see below
+* ``yael_ivf`` is used for creating an inverted file system. 
+
+
 
 Using the Yael interface
 ------------------------

@@ -16,7 +16,7 @@ the dimension and the components require 4 bytes each. For byte
 vectors, it is similarly equal to ``4+d``.
 
 By convention we will call a file containing several vectors of the
-same kind ``fvecfile'', ``ivecfile'' and 'bvecfile'.
+same kind 'fvecfile', 'ivecfile' and 'bvecfile'.
 
 Matrices are stored as a concatenation of vectors, again without a
 header. A float matrix is therefore a fvecfile where all vectors are
