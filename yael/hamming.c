@@ -23,6 +23,7 @@
 
 #define hamming_128(a,b)  (hamming_64((const uint64 *) (a),(const uint64 *) (b))+hamming_64(((const uint64 *) (a)) + 1, ((const uint64 *) (b)) + 1))
 
+#define MIN(a,b) ((a)>(b) ? (b) : (a))
 
 /* Define the Hamming distance by selecting the most appropriate function,
  using the generic version as a backup */
@@ -30,6 +31,9 @@
 
 /* the slice size is set to avoid testing the buffer size too often */
 #define HAMMATCH_SLICESIZE 16
+
+/* For functions that compute distances by blocks */
+#define HAM_BLOCKSIZE  128
 
 /* geometric re-allocation: add a constant size plus a relative 50% of additional memory */
 #define HAMMATCH_REALLOC_NEWSIZE(oldsize) (HAMMATCH_SLICESIZE+((oldsize * 5) / 4))
@@ -570,7 +574,7 @@ static size_t match_hamming_thres_prealloc_32 (const uint32 * bs1,
 
 static size_t match_hamming_thres_prealloc_64 (const uint64 * bs1, 
                                                const uint64 * bs2, 
-                                               int n1, int n2, int ht, 
+                                               int n1, int n2, const int ht, 
                                                int * idx, uint16 * hams)
 {
   size_t i, j, posm = 0;
@@ -584,7 +588,7 @@ static size_t match_hamming_thres_prealloc_64 (const uint64 * bs1,
     for (j = 0 ; j < n2 ; j++) {
       /* Here perform the real work of computing the distance */
       h = hamming_64 (bs1, bs2);
-    
+      
       /* collect the match only if this satisfies the threshold */
       if (h <= ht) {
         /* Enough space to store another match ? */
@@ -597,10 +601,54 @@ static size_t match_hamming_thres_prealloc_64 (const uint64 * bs1,
       }
       bs2++;  /* next signature */
     }
-    bs1++;
   }
   return posm;
 }
+
+#ifdef NOTDEFINED
+/* Blocked version -> not faster, not used */
+ static size_t match_hamming_thres_prealloc_64 (const uint64 * bs1, 
+                                               const uint64 * bs2, 
+                                               const int n1, const int n2, const int ht, 
+                                               int * idx, uint16 * hams)
+{
+  size_t i, j, posm = 0, bli, blj;
+  uint16 h;
+  const uint64 * bs1_ = bs1;
+  const uint64 * bs2_ = bs2;
+  
+  for (bli = 0 ; bli < n1 ; bli += HAM_BLOCKSIZE) {
+    const size_t bli_end = MIN(bli+HAM_BLOCKSIZE, n1);
+    
+    for (blj = 0 ; blj < n2 ; blj += HAM_BLOCKSIZE) {
+      const size_t blj_end = MIN(blj+HAM_BLOCKSIZE, n2);
+      
+      for (i = bli ; i < bli_end ; i++) {
+        bs1 = bs1_ + i;
+        bs2 = bs2_ + blj;
+        for (j = blj ; j < blj_end ; j++) {
+          /* Here perform the real work of computing the distance */
+          h = hamming_64 (bs1, bs2);
+          
+          /* collect the match only if this satisfies the threshold */
+          if (h <= ht) {
+            /* Enough space to store another match ? */
+            *idx = i; idx++;
+            *idx = j; idx++;
+            
+            *hams = h;
+            hams++;
+            posm++;
+          }
+          bs2++;  /* next signature */
+        }
+        bs1++;
+      }
+    }
+  }
+  return posm;
+}
+#endif
 
 
 static size_t match_hamming_thres_prealloc_128 (const uint64 * bs1, 
@@ -834,4 +882,4 @@ size_t match_hamming_thres_nt (const uint8 * bs1, const uint8 * bs2, int n1, int
 
 #endif /* _OPENMP */
 
-
+#undef HAM_BLOCKSIZE
