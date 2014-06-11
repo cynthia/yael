@@ -1,7 +1,5 @@
 #include "mex.h"
 
-#define SIFTGEO_SIZE      168
-#define SIFTGEO_DIM_DES   128
 #define SIFTGEO_DIM_META  9
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
@@ -17,7 +15,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   char *fsiftgeo_name;
   FILE * fsiftgeo;
   long n;
-  int i, j, ret;
+  int i, j, ret, dv = 128, siftgeo_size;
     
   /* SIFT descriptors and associated meta-data */
   float * v;
@@ -26,7 +24,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
   /* check for proper number of arguments */
   if(nrhs<1 || nrhs>3) 
-    mexErrMsgTxt("Usage: [v,g]=siftgeo_read(filename, nmax).");
+    mexErrMsgTxt("Usage: [v,g]=siftgeo_read(filename, num. dimensions).");
   else if(nlhs > 2) 
     mexErrMsgTxt("Too many output arguments.");
 
@@ -38,6 +36,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   if (mxGetM(prhs[0])!=1)
     mexErrMsgTxt("Input must be a row vector.");
   
+    /* optionally read another argument to read a dimensions of input */
+  if (nrhs == 2)
+    dv = (int) mxGetScalar (prhs[1]);
+  siftgeo_size = dv+40;
+
+
   /* get the length of the input string */
   buflen = (mxGetM(prhs[0]) * mxGetN(prhs[0])) + 1;
   
@@ -56,13 +60,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   mxFree(fsiftgeo_name);
   
   fseek (fsiftgeo, 0, SEEK_END);
-  n = ftell (fsiftgeo) / SIFTGEO_SIZE;
+  n = ftell (fsiftgeo) / siftgeo_size;
   fseek (fsiftgeo, 0, SEEK_SET);
 
 
-  /* optionally read another argument to read a maximum number of input */
-  if (nrhs == 2) 
-    n = (int) mxGetScalar (prhs[1]);
   
   /* or directly specify the start and the end */
   if (nrhs == 3) {
@@ -71,17 +72,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     if (posend < posstart || posstart < 0 || posend < 0) 
       mexErrMsgTxt("Invalid boundaries");
     n = posend - posstart + 1;
-    fseek (fsiftgeo, posstart * SIFTGEO_SIZE, SEEK_SET);
+    fseek (fsiftgeo, posstart * siftgeo_size, SEEK_SET);
   }
 
    /* Read all the data using a single read function, and close the file */
-  fbuffer = malloc (n * SIFTGEO_SIZE);
-  ret = fread (fbuffer, sizeof (*fbuffer), n * SIFTGEO_SIZE, fsiftgeo);
-  if (ret != n * SIFTGEO_SIZE)
+  fbuffer = malloc (n * siftgeo_size);
+  ret = fread (fbuffer, sizeof (*fbuffer), n * siftgeo_size, fsiftgeo);
+  if (ret != n * siftgeo_size)
     mexErrMsgTxt("Unable to read correctly from the input file");
   fclose (fsiftgeo);
 
-  const mwSize dimv[2] = {SIFTGEO_DIM_DES, n};
+  const mwSize dimv[2] = {dv, n};
   const mwSize dimmeta[2] = {SIFTGEO_DIM_META, n};
 
   /* Allocate the output matrices */
@@ -96,12 +97,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   /* Copy the data from the buffer into these variables */
   for (i = 0 ; i < n ; i++) {
     
-    for (j = 0 ; j < SIFTGEO_DIM_DES ; j++)
-      v[j + SIFTGEO_DIM_DES * i] = fbuffer[i * SIFTGEO_SIZE + j
+    for (j = 0 ; j < dv ; j++)
+      v[j + dv * i] = fbuffer[i * siftgeo_size + j
 	      + SIFTGEO_DIM_META * sizeof (float) + sizeof (int)];
 
     if (nlhs > 1) {
-      float * fbuf = (float *) (fbuffer + i * SIFTGEO_SIZE);
+      float * fbuf = (float *) (fbuffer + i * siftgeo_size);
       for (j = 0 ; j < SIFTGEO_DIM_META ; j++)
         meta[j + SIFTGEO_DIM_META * i] = fbuf[j];
     }
