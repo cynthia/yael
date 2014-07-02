@@ -21,10 +21,8 @@ void mexFunction (int nlhs, mxArray *plhs[],
   else if (nlhs != 2) 
     mexErrMsgTxt("need 2 outputs.");
 
-  int flags = 0;
   int d = mxGetM (prhs[0]);
   int n = mxGetN (prhs[0]);
-  long seed = 0L;
   
   if(mxGetClassID(prhs[0])!=mxSINGLE_CLASS || n != d)
     mexErrMsgTxt("need square single precision array.");
