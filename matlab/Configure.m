@@ -47,12 +47,12 @@ if arpack
    'yael_svds.c ../yael/eigs.c ../yael/vector.c ../yael/matrix.c ../yael/machinedeps.c ../yael/sorting.c ../yael/binheap.c'];
 end
 
-cmd = 'mex -g -largeArrayDims -DFINTEGER=long -lmwblas -lmwlapack CFLAGS="\\$CFLAGS %s" LDFLAGS="\\$LDFLAGS %s" %s \n'
+cmd = 'mex -g -largeArrayDims -DFINTEGER=long -lmwblas -lmwlapack CFLAGS="\\$CFLAGS %s" LDFLAGS="\\$LDFLAGS %s" %s ;\n'
 
 % Open a file for writing
 fid = fopen ('Make.m', 'w');
 
-fprintf (fid, 'mex siftgeo_read.c\n');
+fprintf (fid, 'mex siftgeo_read.c ;\n');
 for a = list 
   fprintf (fid, cmd, cflags, ldflags, a{1});
 end
