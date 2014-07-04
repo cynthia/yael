@@ -82,7 +82,7 @@ in particular for better performance with Hamming distance computation:
 At this point, only the core C and python library are compiled. 
 If you need the matlab interface, you have to compile the mex files:
 
-4- cd matlab ; make
+4- cd matlab ; matlab -r Make -nodisplay -nojvm
 
 The mex executable should be in the PATH. 
 
@@ -132,6 +132,10 @@ CC=gcc-4.9
 
 Alternately, you might consider deactivating multi-threading if you do not it. 
 This can be done in makefile.inc by replacing USEOPENMP=yes by USEOPENMP=no
+
+This remark does not apply to Matlab, which is only compatible with LLVM, 
+at least for the common user. 
+
 
 32- and 64- bit integers in Fortran code
 ----------------------------------------
