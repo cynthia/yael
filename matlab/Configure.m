@@ -1,5 +1,5 @@
 % Compilation parameters
-openmp = true;   % De-activated by default since latest MacOS needs hacking to have it working
+openmp = false;   % De-activated by default since latest MacOS needs hacking to have it working
 sse4 = true;
 arpack = true;
 
