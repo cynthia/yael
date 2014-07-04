@@ -166,11 +166,13 @@ void compute_distances_1 (int d, int nb,
 
 
 
-#ifdef __SSE2__
+#ifndef __SSE2__
+
+#warning "SSE optimized distance computations not set"
+
+#else
 
 #include <emmintrin.h>
-
-#warning "SSE optimized distance computations"
 
 /* compute chi2 distance between two vectors */
 static float vec_chi2 (const float *a, const float *b, int n) 

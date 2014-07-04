@@ -79,7 +79,7 @@ uint16 hamming (const uint8 *bs1, const uint8 * bs2, int ncodes)
 
 
 #ifndef __SSE4_2__
-#warning "SSE4.2 NOT USED FOR HAMMING DISTANCE COMPUTATION. Consider adding -msse4 in makefile.inc!"
+#warning "SSE4.2 NOT USED FOR HAMMING DISTANCE COMPUTATION. Consider adding -msse4!"
 
 static uint16 hamming_32 (const uint32 * bs1, const uint32 * bs2)
 {
