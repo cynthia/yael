@@ -540,17 +540,23 @@ void gmm_fisher_from_posteriors(int n, const float *v, const gmm_t * g, int flag
 
   if(flags & GMM_FLAGS_W) {
 
-    for(j=1;j<k;j++) {
-      double accu=0;
-      
-      for(i=0;i<n;i++) 
-        accu+= P(j,i)/g->w[j] - P(0,i)/g->w[0];
+
+    float *accus = fvec_new_0(k); 
+    
+    for(i=0;i<n;i++) 
+      for(j=1;j<k;j++) 
+        accus[j] += P(j,i)/g->w[j] - P(0,i)/g->w[0];
+    
+    for(j=1;j<k;j++) {        
+      double accu=accus[j];
       
       /* normalization */
       double f=n*(1/g->w[j]+1/g->w[0]);
       
       dp_dlambda[ii++]=accu/sqrt(f);
     }
+    free(accus);
+    
   } 
 
   if(flags & GMM_FLAGS_MU) {
@@ -577,12 +583,10 @@ void gmm_fisher_from_posteriors(int n, const float *v, const gmm_t * g, int flag
       vp = fvec_new(k * d);
       fmat_mul_tr(v,p,d,k,n,vp);
 
-      sum_pj = fvec_new(k);
-      for(j=0;j<k;j++) {        
-        double sum=0;        
-        for(i=0;i<n;i++) sum += P(j,i);        
-        sum_pj[j] = sum;
-      }
+      sum_pj = fvec_new_0(k);
+      for(i=0;i<n;i++) 
+        for(j=0;j<k;j++) 
+          sum_pj[j] += P(j,i);        
 
       for(j=0;j<k;j++) {
         for(l=0;l<d;l++)
@@ -744,17 +748,7 @@ void gmm_fisher_spatial(int N, int K, int D,
     long i;
     for(i = 0; i < D * N; i++) 
       ll2[i] = ll[i] * ll[i]; 
-/*    
-    {
-      printf("ll=\n"); 
-      long i, j;
-      for(i = 0; i < 10; i++) {
-        for(j = 0; j < 3; j++) 
-          printf("%10g ", ll[i + j * N]); 
-        printf("\n"); 
-      }      
-    }
-*/    
+
     /* compute Q.T * ll_ll2 */
 
     FINTEGER mi = K, ni = 2 * D, ki = N; 
@@ -767,23 +761,7 @@ void gmm_fisher_spatial(int N, int K, int D,
            &zero, Q_ll, &mi); 
     free(ll_ll2);   
   }
-/*   
-  {
-    printf("Q_ll=\n"); 
-    long i, j;
-    for(i = 0; i < 10; i++) {
-      for(j = 0; j < 3; j++) 
-        printf("%10g ", Q_ll[i + j * K]); 
-      printf("\n"); 
-    }
-    printf("Q_ll_2=\n"); 
-    for(i = 0; i < 10; i++) {
-      for(j = 0; j < 3; j++) 
-        printf("%10g ", Q_ll_2[i + j * K]); 
-      printf("\n"); 
-    }
-  }
-*/  
+
   {
     const float *mm = sgmm; 
     float *d_mm = sdesc; 
