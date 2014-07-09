@@ -509,16 +509,28 @@ size_t gmm_fisher_sizeof(const gmm_t * g,int flags) {
 }
 
 
+
 void gmm_fisher(int n, const float *v, const gmm_t * g, int flags, float *dp_dlambda) {
+  
+  float *p = fvec_new(n * g->k);
+  gmm_compute_p(n,v,g,p,flags | GMM_FLAGS_W);
+  
+  gmm_fisher_from_posteriors(n, v, g, flags, p, dp_dlambda); 
+
+  free(p); 
+
+}
+  
+void gmm_fisher_from_posteriors(int n, const float *v, const gmm_t * g, int flags, const float *p, 
+                                float *dp_dlambda) {
+  
   long d=g->d, k=g->k;
-  float *p = fvec_new(n * k);
   long i,j,l;
   long ii=0;
 
   float * vp = NULL; /* v*p */
   float * sum_pj = NULL; /* sum of p's for a given j */  
 
-  gmm_compute_p(n,v,g,p,flags | GMM_FLAGS_W);
 
 #define P(j,i) p[(i)*k+(j)]
 #define V(l,i) v[(i)*d+(l)]
@@ -688,11 +700,114 @@ void gmm_fisher(int n, const float *v, const gmm_t * g, int flags, float *dp_dla
 #undef V
 #undef MU
 #undef SIGMA
-  free(p);
   free(sum_pj);
   free(vp);
 }
 
+
+/*  Translation of Python
+
+        Q_sum = np.sum(Q, 0) / N                    
+        Q_ll = np.dot(Q.T, ll) / N
+        Q_ll_2 = np.dot(Q.T, ll ** 2) / N
+                        
+
+        d_mm = Q_ll - Q_sum.reshape(-1, 1) * mm.ravel()
+        d_S = -Q_ll_2 + 2 * Q_ll * mm + Q_sum.reshape(-1, 1) * (S - mm ** 2)          
+  
+
+*/
+
+void gmm_fisher_spatial(int N, int K, int D, 
+                        const float *Q, 
+                        const float *sgmm, 
+                        const float *ll, 
+                        float *sdesc) {
+  float *Q_sum = fvec_new_0(K); 
+  
+  {
+    long k, n;
+    for(n = 0; n < N; n++) 
+      for(k = 0; k < K; k++) 
+        Q_sum[k] += Q[n * K + k];     
+    for(k = 0; k < K; k++) Q_sum[k] /= N;
+  }
+
+  float *Q_ll, *Q_ll_2; 
+  
+  {
+    /* prepare a matrix containing both ll and ll**2 */
+    
+    float *ll_ll2 = fvec_new(D * 2 * N); 
+    fvec_cpy(ll_ll2, ll, D * N); 
+    float *ll2 = ll_ll2 + D * N; 
+    long i;
+    for(i = 0; i < D * N; i++) 
+      ll2[i] = ll[i] * ll[i]; 
+/*    
+    {
+      printf("ll=\n"); 
+      long i, j;
+      for(i = 0; i < 10; i++) {
+        for(j = 0; j < 3; j++) 
+          printf("%10g ", ll[i + j * N]); 
+        printf("\n"); 
+      }      
+    }
+*/    
+    /* compute Q.T * ll_ll2 */
+
+    FINTEGER mi = K, ni = 2 * D, ki = N; 
+    float one_over_N = 1.0 / N, zero = 0; 
+    Q_ll = fvec_new(K * 2 * D);
+    Q_ll_2 = Q_ll + K * D; 
+    sgemm_("N", "N", &mi, &ni, &ki, 
+           &one_over_N, Q, &mi, 
+           ll_ll2, &ki, 
+           &zero, Q_ll, &mi); 
+    free(ll_ll2);   
+  }
+/*   
+  {
+    printf("Q_ll=\n"); 
+    long i, j;
+    for(i = 0; i < 10; i++) {
+      for(j = 0; j < 3; j++) 
+        printf("%10g ", Q_ll[i + j * K]); 
+      printf("\n"); 
+    }
+    printf("Q_ll_2=\n"); 
+    for(i = 0; i < 10; i++) {
+      for(j = 0; j < 3; j++) 
+        printf("%10g ", Q_ll_2[i + j * K]); 
+      printf("\n"); 
+    }
+  }
+*/  
+  {
+    const float *mm = sgmm; 
+    float *d_mm = sdesc; 
+    long k, d; 
+    for(d = 0; d < D; d++) 
+      for(k = 0; k < K; k++) 
+        d_mm[d + k * D] = Q_ll[K * d + k] - Q_sum[k] * mm[d]; 
+    
+    float *d_S = sdesc + K * D; 
+    const float *S = sgmm + D;
+    for(d = 0; d < D; d++) {
+      float dfact = S[d] - mm[d] * mm[d]; 
+      for(k = 0; k < K; k++) 
+        d_S[d + k * D] = -Q_ll_2[K * d + k] + 2 * Q_ll[K * d + k] * mm[d] + Q_sum[k] * dfact; 
+    }
+
+
+  }
+
+
+  free(Q_ll); 
+  free(Q_sum);  
+}
+                 
 
 
 void gmm_print(const gmm_t *g) {
