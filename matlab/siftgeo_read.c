@@ -69,7 +69,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   if (nrhs == 3) {
     int posstart = 1; /*(int) mxGetScalar (prhs[1]) TO BE CHANGED */;
     int posend = (int) mxGetScalar (prhs[2]);
-    if (posend < posstart || posstart < 0 || posend < 0)
+    if (posend < posstart || posstart < 1 || posend < 1)
       mexErrMsgTxt("Invalid boundaries");
     n = posend - posstart + 1;
     fseek (fsiftgeo, (posstart - 1) * siftgeo_size, SEEK_SET);
