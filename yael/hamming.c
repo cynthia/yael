@@ -174,7 +174,7 @@ static void compute_hamming_128 (uint16 * dis, const uint64 * a, const uint64 * 
 }
 
 
-void compute_hamming (uint16 * dis, const uint8 * a, const uint8 * b, 
+void compute_hamming (uint16 * dis, const uint8 * a, const uint8 * b,
                       int na, int nb, int ncodes)
 {
   switch (ncodes) {
@@ -182,8 +182,8 @@ void compute_hamming (uint16 * dis, const uint8 * a, const uint8 * b,
     case 8:  compute_hamming_64 (dis, (const uint64 *) a, (const uint64 *) b, na, nb);  return;
     case 16: compute_hamming_128 (dis, (const uint64 *) a, (const uint64 *) b, na, nb); return;
     default: fprintf (stderr, "# Warning: non-optimized version of compute_hamming\n");
-  }      
-     
+  }
+
   int i, j;
   const uint8 * pb = b;
   for (j = 0 ; j < nb ; j++) {
@@ -209,12 +209,12 @@ static void match_hamming_count_32 (const uint32 * bs1, const uint32 * bs2, int 
     bs2 = bs2_;
     for (j = 0 ; j < n2 ; j++) {
       /* collect the match only if this satisfies the threshold */
-      if (hamming_32 (bs1, bs2) <= ht) 
+      if (hamming_32 (bs1, bs2) <= ht)
         posm++;
-      bs2++; 
+      bs2++;
     }
     bs1++;
-  }  
+  }
   *nptr = posm;
 }
 
@@ -224,13 +224,13 @@ static void match_hamming_count_64 (const uint64 * bs1, const uint64 * bs2, int 
   size_t i, j, posm = 0;
   const uint64 * bs1_ = bs1;
   const uint64 * bs2_ = bs2;
-  
+
   for (i = 0 ; i < n1 ; i++) {
     bs1 = bs1_ + i;
     bs2 = bs2_;
     for (j = 0 ; j < n2 ; j++) {
       /* collect the match only if this satisfies the threshold */
-      if (hamming_64 (bs1, bs2) <= ht) 
+      if (hamming_64 (bs1, bs2) <= ht)
         posm++;
       bs2 += 1;
     }
@@ -244,17 +244,17 @@ static void match_hamming_count_128 (const uint64 * bs1, const uint64 * bs2, int
 {
   size_t i, j, posm = 0;
   const uint64 * bs2_ = bs2;
-  
+
   for (i = 0 ; i < n1 ; i++) {
     bs2 = bs2_;
     for (j = 0 ; j < n2 ; j++) {
       /* collect the match only if this satisfies the threshold */
-      if (hamming_128 (bs1, bs2) <= ht) 
+      if (hamming_128 (bs1, bs2) <= ht)
         posm++;
       bs2 += 2;
     }
     bs1  += 2;  /* next signature */
-  }  
+  }
   *nptr = posm;
 }
 
@@ -262,25 +262,25 @@ static void match_hamming_count_128 (const uint64 * bs1, const uint64 * bs2, int
 void match_hamming_count (const uint8 * bs1, const uint8 * bs2, int n1, int n2, int ht, int ncodes, size_t * nptr)
 {
   size_t i, j, posm = 0;
-  
+
   switch (ncodes) {
     case 4:  match_hamming_count_32 ((const uint32 *) bs1, (const uint32 *) bs2, n1, n2, ht, nptr);  return;
     case 8:  match_hamming_count_64 ((const uint64 *) bs1, (const uint64 *) bs2, n1, n2, ht, nptr);  return;
     case 16: match_hamming_count_128 ((const uint64 *) bs1, (const uint64 *) bs2, n1, n2, ht, nptr); return;
     default: fprintf (stderr, "# Warning: non-optimized version of match_hamming_count\n");
   }
-  
+
   const uint8 * bs2_ = bs2;
   for (i = 0 ; i < n1 ; i++) {
     bs2 = bs2_;
     for (j = 0 ; j < n2 ; j++) {
       /* collect the match only if this satisfies the threshold */
-      if (hamming (bs1, bs2, ncodes) <= ht) 
+      if (hamming (bs1, bs2, ncodes) <= ht)
         posm++;
       bs2 += ncodes;
     }
     bs1  += ncodes;  /* next signature */
-  }  
+  }
   *nptr = posm;
 }
 
@@ -290,17 +290,17 @@ static void crossmatch_hamming_count_32 (const uint32 * dbs, int n, int ht, size
 {
   size_t i, j, posm = 0;
   const uint32 * bs1 = dbs;
-  
+
   for (i = 0 ; i < n ; i++) {
     const uint32 * bs2 = bs1 + 1;
     for (j = i + 1 ; j < n ; j++) {
       /* collect the match only if this satisfies the threshold */
-      if (hamming_32 (bs1, bs2) <= ht) 
+      if (hamming_32 (bs1, bs2) <= ht)
         posm++;
-      bs2++; 
+      bs2++;
     }
     bs1++;
-  }  
+  }
   *nptr = posm;
 }
 
@@ -309,14 +309,14 @@ static void crossmatch_hamming_count_64 (const uint64 * dbs, int n, int ht, size
 {
   size_t i, j, posm = 0;
   const uint64 * bs1 = dbs;
-  
+
   for (i = 0 ; i < n ; i++) {
     const uint64 * bs2 = bs1 + 1;
     for (j = i + 1 ; j < n ; j++) {
       /* collect the match only if this satisfies the threshold */
-      if (hamming_64 (bs1, bs2) <= ht) 
+      if (hamming_64 (bs1, bs2) <= ht)
         posm++;
-      bs2++; 
+      bs2++;
     }
     bs1++;
   }
@@ -328,18 +328,18 @@ static void crossmatch_hamming_count_128 (const uint64 * dbs, int n, int ht, siz
 {
   size_t i, j, posm = 0;
   const uint64 * bs1 = dbs;
-  
+
   for (i = 0 ; i < n ; i++) {
     const uint64 * bs2 = bs1 + 2;
-    
+
     for (j = i + 1 ; j < n ; j++) {
       /* collect the match only if this satisfies the threshold */
-      if (hamming_128 (bs1, bs2) <= ht) 
+      if (hamming_128 (bs1, bs2) <= ht)
         posm++;
-      bs2 += 2; 
+      bs2 += 2;
     }
     bs1 += 2;
-  }  
+  }
   *nptr = posm;
 }
 
@@ -352,21 +352,21 @@ void crossmatch_hamming_count (const uint8 * dbs, int n, int ht, int ncodes, siz
     case 16: crossmatch_hamming_count_128 ((const uint64 *) dbs, n, ht, nptr); return;
     default: fprintf (stderr, "# Warning: non-optimized version of crossmatch_hamming_count\n");
   }
-  
+
   size_t i, j, posm = 0;
   const uint8 * bs1 = dbs;
   for (i = 0 ; i < n ; i++) {
     const uint8 * bs2 = bs1 + ncodes;
-    
+
     for (j = i + 1 ; j < n ; j++) {
       /* collect the match only if this satisfies the threshold */
-      if (hamming (bs1, bs2, ncodes) <= ht) 
+      if (hamming (bs1, bs2, ncodes) <= ht)
         posm++;
       bs2 += ncodes;
     }
     bs1  += ncodes;  /* next signature */
   }
-  
+
   *nptr = posm;
 }
 
@@ -395,12 +395,12 @@ static void match_hamming_thres_32 (const uint32 * bs1, const uint32 * bs2, int 
   *hmptr = hammatch_new (bufsize);
   hammatch_t * hm = *hmptr;
   const uint32 * bs2_ = bs2;
-  
+
   for (i = 0 ; i < n1 ; i++) {
     bs2 = bs2_;
     for (j = 0 ; j < n2 ; j++) {
       h = hamming_32 (bs1, bs2);
-            
+
       if (h <= ht) {    /* Enough space to store another match ? */
         if (posm >= bufsize) {
           bufsize = HAMMATCH_REALLOC_NEWSIZE (bufsize);
@@ -416,7 +416,7 @@ static void match_hamming_thres_32 (const uint32 * bs1, const uint32 * bs2, int 
       }
       bs2++;  /* next signature */
     }
-    bs1++; 
+    bs1++;
   }
   *nptr = posm;
 }
@@ -430,12 +430,12 @@ static void match_hamming_thres_64 (const uint64 * bs1, const uint64 * bs2, int 
   *hmptr = hammatch_new (bufsize);
   hammatch_t * hm = *hmptr;
   const uint64 * bs2_ = bs2;
-  
+
   for (i = 0 ; i < n1 ; i++) {
     bs2 = bs2_;
     for (j = 0 ; j < n2 ; j++) {
       h = hamming_64 (bs1, bs2);
-      
+
       if (h <= ht) {    /* Enough space to store another match ? */
         if (posm >= bufsize) {
           bufsize = HAMMATCH_REALLOC_NEWSIZE (bufsize);
@@ -451,7 +451,7 @@ static void match_hamming_thres_64 (const uint64 * bs1, const uint64 * bs2, int 
       }
       bs2++;  /* next signature */
     }
-    bs1++; 
+    bs1++;
   }
   *nptr = posm;
 }
@@ -465,12 +465,12 @@ static void match_hamming_thres_128 (const uint64 * bs1, const uint64 * bs2, int
   *hmptr = hammatch_new (bufsize);
   hammatch_t * hm = *hmptr;
   const uint64 * bs2_ = bs2;
-  
+
   for (i = 0 ; i < n1 ; i++) {
     bs2 = bs2_;
     for (j = 0 ; j < n2 ; j++) {
       h = hamming_128 (bs1, bs2);
-      
+
       if (h <= ht) {    /* Enough space to store another match ? */
         if (posm >= bufsize) {
           bufsize = HAMMATCH_REALLOC_NEWSIZE (bufsize);
@@ -486,14 +486,14 @@ static void match_hamming_thres_128 (const uint64 * bs1, const uint64 * bs2, int
       }
       bs2 += 2;  /* next signature */
     }
-    bs1 += 2; 
+    bs1 += 2;
   }
   *nptr = posm;
 }
 
 
-void match_hamming_thres (const uint8 * bs1, const uint8 * bs2, 
-                          int n1, int n2, int ht, int ncodes, size_t bufsize, 
+void match_hamming_thres (const uint8 * bs1, const uint8 * bs2,
+                          int n1, int n2, int ht, int ncodes, size_t bufsize,
                           hammatch_t ** hmptr, size_t * nptr)
 {
   switch (ncodes) {
@@ -502,19 +502,19 @@ void match_hamming_thres (const uint8 * bs1, const uint8 * bs2,
     case 16: match_hamming_thres_128 ((const uint64 *) bs1, (const uint64 *) bs2, n1, n2, ht, bufsize, hmptr, nptr); return;
     default: fprintf (stderr, "# Warning: non-optimized version of match_hamming_thres\n");
   }
-  
+
   size_t i, j, posm = 0;
   uint16 h;
   *hmptr = hammatch_new (bufsize);
   hammatch_t * hm = *hmptr;
   const uint8 * bs2_ = bs2;
-  
+
   for (i = 0 ; i < n1 ; i++) {
     bs2 = bs2_;
     for (j = 0 ; j < n2 ; j++) {
       /* Here perform the real work of computing the distance */
       h = hamming (bs1, bs2, ncodes);
-    
+
       /* collect the match only if this satisfies the threshold */
       if (h <= ht) {
         /* Enough space to store another match ? */
@@ -534,32 +534,32 @@ void match_hamming_thres (const uint8 * bs1, const uint8 * bs2,
     }
     bs1 += ncodes;
   }
-  
+
   *nptr = posm;
 }
 
 
-static size_t match_hamming_thres_prealloc_32 (const uint32 * bs1, 
-                                               const uint32 * bs2, 
-                                               int n1, int n2, int ht, 
+static size_t match_hamming_thres_prealloc_32 (const uint32 * bs1,
+                                               const uint32 * bs2,
+                                               int n1, int n2, int ht,
                                                int * idx, uint16 * hams)
 {
   size_t i, j, posm = 0;
   uint16 h;
   const uint32 * bs2_ = bs2;
-  
+
   for (i = 0 ; i < n1 ; i++) {
     bs2 = bs2_;
     for (j = 0 ; j < n2 ; j++) {
       /* Here perform the real work of computing the distance */
       h = hamming_32 (bs1, bs2);
-    
+
       /* collect the match only if this satisfies the threshold */
       if (h <= ht) {
         /* Enough space to store another match ? */
         *idx = i; idx++;
         *idx = j; idx++;
-        
+
         *hams = h;
         hams++;
         posm++;
@@ -572,29 +572,29 @@ static size_t match_hamming_thres_prealloc_32 (const uint32 * bs1,
 }
 
 
-static size_t match_hamming_thres_prealloc_64 (const uint64 * bs1, 
-                                               const uint64 * bs2, 
-                                               int n1, int n2, const int ht, 
+static size_t match_hamming_thres_prealloc_64 (const uint64 * bs1,
+                                               const uint64 * bs2,
+                                               int n1, int n2, const int ht,
                                                int * idx, uint16 * hams)
 {
   size_t i, j, posm = 0;
   uint16 h;
   const uint64 * bs1_ = bs1;
   const uint64 * bs2_ = bs2;
-  
+
   for (i = 0 ; i < n1 ; i++) {
     bs1 = bs1_ + i;
     bs2 = bs2_;
     for (j = 0 ; j < n2 ; j++) {
       /* Here perform the real work of computing the distance */
       h = hamming_64 (bs1, bs2);
-      
+
       /* collect the match only if this satisfies the threshold */
       if (h <= ht) {
         /* Enough space to store another match ? */
         *idx = i; idx++;
         *idx = j; idx++;
-        
+
         *hams = h;
         hams++;
         posm++;
@@ -607,35 +607,35 @@ static size_t match_hamming_thres_prealloc_64 (const uint64 * bs1,
 
 #ifdef NOTDEFINED
 /* Blocked version -> not faster, not used */
- static size_t match_hamming_thres_prealloc_64 (const uint64 * bs1, 
-                                               const uint64 * bs2, 
-                                               const int n1, const int n2, const int ht, 
+ static size_t match_hamming_thres_prealloc_64 (const uint64 * bs1,
+                                               const uint64 * bs2,
+                                               const int n1, const int n2, const int ht,
                                                int * idx, uint16 * hams)
 {
   size_t i, j, posm = 0, bli, blj;
   uint16 h;
   const uint64 * bs1_ = bs1;
   const uint64 * bs2_ = bs2;
-  
+
   for (bli = 0 ; bli < n1 ; bli += HAM_BLOCKSIZE) {
     const size_t bli_end = MIN(bli+HAM_BLOCKSIZE, n1);
-    
+
     for (blj = 0 ; blj < n2 ; blj += HAM_BLOCKSIZE) {
       const size_t blj_end = MIN(blj+HAM_BLOCKSIZE, n2);
-      
+
       for (i = bli ; i < bli_end ; i++) {
         bs1 = bs1_ + i;
         bs2 = bs2_ + blj;
         for (j = blj ; j < blj_end ; j++) {
           /* Here perform the real work of computing the distance */
           h = hamming_64 (bs1, bs2);
-          
+
           /* collect the match only if this satisfies the threshold */
           if (h <= ht) {
             /* Enough space to store another match ? */
             *idx = i; idx++;
             *idx = j; idx++;
-            
+
             *hams = h;
             hams++;
             posm++;
@@ -651,27 +651,27 @@ static size_t match_hamming_thres_prealloc_64 (const uint64 * bs1,
 #endif
 
 
-static size_t match_hamming_thres_prealloc_128 (const uint64 * bs1, 
-                                                const uint64 * bs2, 
-                                                int n1, int n2, int ht, 
+static size_t match_hamming_thres_prealloc_128 (const uint64 * bs1,
+                                                const uint64 * bs2,
+                                                int n1, int n2, int ht,
                                                 int * idx, uint16 * hams)
 {
   size_t i, j, posm = 0;
   uint16 h;
   const uint64 * bs2_ = bs2;
-  
+
   for (i = 0 ; i < n1 ; i++) {
     bs2 = bs2_;
     for (j = 0 ; j < n2 ; j++) {
       /* Here perform the real work of computing the distance */
       h = hamming_128 (bs1, bs2);
-    
+
       /* collect the match only if this satisfies the threshold */
       if (h <= ht) {
         /* Enough space to store another match ? */
         *idx = i; idx++;
         *idx = j; idx++;
-        
+
         *hams = h;
         hams++;
         posm++;
@@ -684,36 +684,36 @@ static size_t match_hamming_thres_prealloc_128 (const uint64 * bs1,
 }
 
 
-size_t match_hamming_thres_prealloc (const uint8 * bs1, const uint8 * bs2, 
-                                     int n1, int n2, int ht, int ncodes, 
+size_t match_hamming_thres_prealloc (const uint8 * bs1, const uint8 * bs2,
+                                     int n1, int n2, int ht, int ncodes,
                                      int * idx, uint16 * hams)
 {
   switch (ncodes) {
-    case 4:  return match_hamming_thres_prealloc_32 ((const uint32 *) bs1, 
-              (const uint32 *) bs2, n1, n2, ht, idx, hams); 
-    case 8:  return match_hamming_thres_prealloc_64 ((const uint64 *) bs1, 
-              (const uint64 *) bs2, n1, n2, ht, idx, hams); 
-    case 16: return match_hamming_thres_prealloc_128 ((const uint64 *) bs1, 
-              (const uint64 *) bs2, n1, n2, ht, idx, hams); 
+    case 4:  return match_hamming_thres_prealloc_32 ((const uint32 *) bs1,
+              (const uint32 *) bs2, n1, n2, ht, idx, hams);
+    case 8:  return match_hamming_thres_prealloc_64 ((const uint64 *) bs1,
+              (const uint64 *) bs2, n1, n2, ht, idx, hams);
+    case 16: return match_hamming_thres_prealloc_128 ((const uint64 *) bs1,
+              (const uint64 *) bs2, n1, n2, ht, idx, hams);
     default: fprintf (stderr, "# Warning: non-optimized version of match_hamming_thres\n");
   }
-  
+
   size_t i, j, posm = 0;
   uint16 h;
   const uint8 * bs2_ = bs2;
-  
+
   for (i = 0 ; i < n1 ; i++) {
     bs2 = bs2_;
     for (j = 0 ; j < n2 ; j++) {
       /* Here perform the real work of computing the distance */
       h = hamming (bs1, bs2, ncodes);
-    
+
       /* collect the match only if this satisfies the threshold */
       if (h <= ht) {
         /* Enough space to store another match ? */
         *idx = i; idx++;
         *idx = j; idx++;
-        
+
         *hams = h;
         hams++;
         posm++;
@@ -722,12 +722,12 @@ size_t match_hamming_thres_prealloc (const uint8 * bs1, const uint8 * bs2,
     }
     bs1 += ncodes;
   }
-  
+
   return posm;
 }
 
 
-void crossmatch_hamming (const uint8 * dbs, long n, int ht, int ncodes, 
+void crossmatch_hamming (const uint8 * dbs, long n, int ht, int ncodes,
                     long bufsize, hammatch_t ** hmptr, size_t * nptr)
 {
   size_t i, j, posm = 0;
@@ -735,15 +735,15 @@ void crossmatch_hamming (const uint8 * dbs, long n, int ht, int ncodes,
   *hmptr = hammatch_new (bufsize);
   hammatch_t * hm = *hmptr;
   const uint8 * bs1 = dbs;
-  
+
   for (i = 0 ; i < n ; i++) {
     const uint8 * bs2 = bs1 + ncodes;
-    
+
     for (j = i + 1 ; j < n ; j++) {
-      
+
       /* Here perform the real work of computing the distance */
       h = hamming (bs1, bs2, ncodes);
-      
+
       /* collect the match only if this satisfies the threshold */
       if (h <= ht) {
         /* Enough space to store another match ? */
@@ -753,7 +753,7 @@ void crossmatch_hamming (const uint8 * dbs, long n, int ht, int ncodes,
           assert (*hmptr != NULL);
           hm = (*hmptr) + posm;
         }
-        
+
         hm->qid = i;
         hm->bid = j;
         hm->score = h;
@@ -764,31 +764,31 @@ void crossmatch_hamming (const uint8 * dbs, long n, int ht, int ncodes,
     }
     bs1  += ncodes;  /* next signature */
   }
-  
+
   *nptr = posm;
 }
 
 
-size_t crossmatch_hamming_prealloc (const uint8 * dbs, long n, int ht, 
+size_t crossmatch_hamming_prealloc (const uint8 * dbs, long n, int ht,
                                int ncodes, int * idx, uint16 * hams)
 {
   size_t i, j, posm = 0;
   uint16 h;
   const uint8 * bs1 = dbs;
-  
+
   for (i = 0 ; i < n ; i++) {
     const uint8 * bs2 = bs1 + ncodes;
-    
+
     for (j = i + 1 ; j < n ; j++) {
       /* Here perform the real work of computing the distance */
       h = hamming (bs1, bs2, ncodes);
-      
+
       /* collect the match only if this satisfies the threshold */
       if (h <= ht) {
         /* Enough space to store another match ? */
         *idx = i; idx++;
         *idx = j; idx++;
-        
+
         *hams = h;
         hams++;
         posm++;
@@ -808,13 +808,13 @@ size_t crossmatch_hamming_prealloc (const uint8 * dbs, long n, int ht,
 #define HAMBLOCK 128
 #define MIN(a,b) ((a)<(b) ? (a) : (b))
 
-void compute_hamming_thread (uint16 * dis, const uint8 * a, const uint8 * b, 
+void compute_hamming_thread (uint16 * dis, const uint8 * a, const uint8 * b,
                              int na, int nb, int ncodes)
 {
   size_t i, j;
 #pragma omp parallel shared (dis, a, b, na, nb) private (i, j)
     {
-#pragma omp for 
+#pragma omp for
       for (j = 0 ; j < nb ; j++)
 	      for (i = 0 ; i < na ; i++)
 	        dis[j * na + i] = hamming (a + i * ncodes, b + j * ncodes, ncodes);
@@ -822,7 +822,7 @@ void compute_hamming_thread (uint16 * dis, const uint8 * a, const uint8 * b,
 }
 
 
-size_t match_hamming_thres_nt (const uint8 * bs1, const uint8 * bs2, int n1, int n2, 
+size_t match_hamming_thres_nt (const uint8 * bs1, const uint8 * bs2, int n1, int n2,
                               int ht, int ncodes, int nt, int ** keys, uint16 ** ham)
 {
   size_t bl, nmatches;
@@ -832,50 +832,50 @@ size_t match_hamming_thres_nt (const uint8 * bs1, const uint8 * bs2, int n1, int
 
   size_t * blcount = malloc ((nblock + 1) * sizeof (*blcount));
   blcount[0] = 0;
-  
+
   #pragma omp parallel for private(bl)
   for (bl = 0 ; bl < nblock ; bl++) {
     size_t bl1 = bl / nblock1;
     size_t bl2 = bl % nblock1;
-    
+
     size_t s1 = bl1 * HAMBLOCK;
     size_t s2 = bl2 * HAMBLOCK;
     size_t nb1 = MIN(n1 - s1, HAMBLOCK);
     size_t nb2 = MIN(n2 - s2, HAMBLOCK);
-    
-    match_hamming_count (bs1 + s1 * ncodes, bs2 + s2 * ncodes, 
+
+    match_hamming_count (bs1 + s1 * ncodes, bs2 + s2 * ncodes,
                          nb1, nb2, ht, ncodes, blcount + bl + 1);
-  }  
-  
+  }
+
   /* accumulate count to determine offset */
   nmatches = 0;
   for (bl = 1 ; bl <= nblock ; bl++) {
     if (blcount[bl] > 500)
-      fprintf (stderr, "bl %ld -> %ld matches  (bl-1/cum = %ld)\n", bl-1, blcount[bl], blcount[bl-1]); 
-    blcount[bl] = blcount[bl-1] + blcount[bl]; 
+      fprintf (stderr, "bl %ld -> %ld matches  (bl-1/cum = %ld)\n", bl-1, blcount[bl], blcount[bl-1]);
+    blcount[bl] = blcount[bl-1] + blcount[bl];
   }
   nmatches = blcount[nblock];
   fprintf (stderr, "nmatches = %d\n", nmatches);
 
   *keys = malloc (nmatches * 2 * sizeof(**keys));
   *ham = malloc (nmatches * sizeof(**ham));
-  
+
  #pragma omp parallel for private(bl)
     for (bl = 0 ; bl < nblock ; bl++) {
       size_t bl1 = bl / nblock1;
       size_t bl2 = bl % nblock1;
-      
+
       size_t s1 = bl1 * HAMBLOCK;
       size_t s2 = bl2 * HAMBLOCK;
       size_t nb1 = MIN(n1 - s1, HAMBLOCK);
       size_t nb2 = MIN(n2 - s2, HAMBLOCK);
-      
-      match_hamming_thres_prealloc (bs1 + s1 * ncodes, bs2 + s2 * ncodes,  
-                                    nb1, nb2, ht, ncodes, 
-                                    (int*) (*keys) + blcount[bl] * 2, 
+
+      match_hamming_thres_prealloc (bs1 + s1 * ncodes, bs2 + s2 * ncodes,
+                                    nb1, nb2, ht, ncodes,
+                                    (int*) (*keys) + blcount[bl] * 2,
                                     (uint16*) (*ham) + blcount[bl]);
     }
-  
+
   free (blcount);
   return nmatches;
 }
