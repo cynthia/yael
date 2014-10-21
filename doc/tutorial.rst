@@ -117,20 +117,20 @@ Matlab interface
 
 .. code-block:: matlab
 
-  % The subdirectory 'matlab' of yael should be in yael path
+  % The subdirectory 'matlab' of yael should be in the Matlab path
   % This can be done with the command addpath('MY_YAEL_MATLAB_PATH')
   
   k = 50;                    % number of cluster to create
   d = 20;                    % dimensionality of the vectors
   n = 1000;                  % number of vectors
   v = single(rand (d, n));   % random set of vectors 
-  niter = 30;                % maximum number of iterations
+  niter = 0;                 % typically use no more than 50 in practice
   redo = 1;                  % number of redo
   seed = 3;                  % 0: no seeding, values > 0 are used as seed
 
   tic
   % Only the two first arguments are mandatory
-  centroids = yael_kmeans (v, k, 'niter', niter, 'redo', 1, 'seed', seed);
+  [centroids, dis, assign, nassign] = yael_kmeans (v, k, 'niter', niter, 'redo', 1, 'seed', seed);
   toc
 
   
