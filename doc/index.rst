@@ -11,6 +11,7 @@ Welcome to Yael's documentation!
    file_format
    troubleshooting
    license
+   tutorial
 
 .. These images will have to be included
   .. image:: figs/logoinria.png

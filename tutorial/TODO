@@ -1,5 +1,4 @@
 
-
 # seul exemple en C 
 # mettre test_kmeans.c sur site
 
@@ -18,7 +17,7 @@ test/matlab/test_ivf_he.m
 # beautify code
 test_hamming.m
 
-# 
+yael_pca.m
 
 
 ############  Python examples
@@ -27,5 +26,8 @@ test_hamming.m
 
 test_kmeans -> passer en ynumpy (merge w/ ynumpy)
 
+###### data: same package as above but retrieval with VLAD. 
+test_vlad_retrieval.py
 
-###### 
+
+

@@ -17,7 +17,7 @@ vector is done as::
 
 
 In order to shorten the call, one could also import the function 
-in the current namespace, as
+in the current namespace, as::
 
   from yael.yael import *
   a = fvec_new_0(5)
@@ -87,7 +87,7 @@ self-explanatory names::
   numpy_to_fvec 
   numpy_to_ivec 
 
-Arrays corresponding to Yael's ``fvec``are of Numpy's
+Arrays corresponding to Yael's ``fvec`` are of Numpy's
 ``dtype='float32'``. Moving from yael to numpy produces line vectors,
 that can be reshaped to matrices if needed.
 
