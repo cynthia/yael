@@ -10,9 +10,11 @@ The tutorial assumes Yael is compiled correctly (numpy should be
 enabled for the Python examples). There is no separate compile and
 install stage for Yael.
 
+A simple example: k-means
+-------------------------
 
-C interface 
------------
+C version 
++++++++++
 
 Yael was originally designed as a lightweihgt library for vector
 manipulation in C. Functions in ``yael/vector.h`` do exactly
@@ -79,8 +81,8 @@ matrix results in arrays allocated by the caller.
 
 
 
-Python interface 
-----------------
+Python version
+++++++++++++++
 
 The equivalent call to kmeans is
 
@@ -111,9 +113,16 @@ The equivalent call to kmeans is
 
   print nassign
   
+To run this, the PYTHONPATH should point to ``my_yael_dir``. Since the
+import statement is ``from yael import ...`` Python will know it has to
+look in the subdirectory ``yael``.
 
-Matlab interface 
-----------------
+The kmeans call is very similar to the C version. Only the arguments
+``v`` and ``k`` are mandatory. For the other ones, it will use
+reasonable defaults.
+
+Matlab version
+++++++++++++++ 
 
 .. code-block:: matlab
 
@@ -133,4 +142,43 @@ Matlab interface
   [centroids, dis, assign, nassign] = yael_kmeans (v, k, 'niter', niter, 'redo', 1, 'seed', seed);
   toc
 
-  
+
+Image indexing example
+----------------------
+
+Here we work out an image indexing engine and apply it to a tiny image
+dataset. 
+
+We are going to work on the 100 first query images of the 
+`Holidays <http://lear.inrialpes.fr/~jegou/data.php#holidays>`_ dataset, 
+and their associated database examples. Download
+the images and the SIFT descriptors from here:
+
+http://pascal.inrialpes.fr/www2/douze/holidays_subset/images.tgz
+http://pascal.inrialpes.fr/www2/douze/holidays_subset/sifts.tgz
+
+Unzip them to a ``holidays_100`` subdirectory.
+
+TODO generate fewer descriptors per image. 
+
+Image indexing in Python with Fisher vectors
+++++++++++++++++++++++++++++++++++++++++++++
+
+Load + subsample SIFTs
+
+compute PCA on SIFT (numpy)
+
+compute GMM
+
+Fishers for the whole dataset. Power-law and L2-normalization
+
+NN search 
+
+display results
+
+compute mAP
+
+
+Image indexing in Matlab with inverted files
+++++++++++++++++++++++++++++++++++++++++++++
+
