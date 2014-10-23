@@ -220,3 +220,18 @@ result, because it is included in the dataset.
 
 Image indexing in Matlab with inverted files
 ++++++++++++++++++++++++++++++++++++++++++++
+
+In the example below, we show how to use an inverted file of Yael from Matlab.
+More specifically, the inverted file we consider supports the use of binary
+signatures, as proposed in theamming Embedding approach described in
+`this paper <http://dx.doi.org/10.1007/978-3-540-88682-2_24>`_.
+
+
+This example is simplified for the sake of exposure. It does not implements
+some ingredients of the original approach, as multiple assignment, IDF terms
+and image normalization terms. The user interested in a more complete system
+should instead download the `dedicated package
+<https://gforge.inria.fr/frs/download.php/33244/selective_match_kernel_v289.tar.gz>`_,
+which implements the AMSK state-of-the art approach described in the paper:
+`To aggregate or not to aggregate: selective match kernels for image search
+<http://dx.doi.org/10.1109/ICCV.2013.177>`_.
