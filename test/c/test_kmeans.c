@@ -27,7 +27,7 @@ int main (int argc, char ** argv)
 
   printf ("kmeans performed in %.3fs\n", (t2 - t1)  / 1000);
   
-  ivec_print (nassign, k);
+  ivec_print (nassign, k);              /* print the assignment to clusters */
 
   return 0;
 }
