@@ -1,8 +1,10 @@
 Image indexing example
 ----------------------
 
-Here we work out an image indexing engine and apply it to a tiny image
-dataset.
+Here we work out two simple image indexing engine and apply it to a tiny image
+dataset. The first is done in python and implements a description based
+on Fisher vectors, while the second is in Matlab and shows how to use an
+inverted file with binary signatures.
 
 We are going to work on the 100 first query images of the
 `Holidays <http://lear.inrialpes.fr/~jegou/data.php#holidays>`_ dataset,
@@ -13,6 +15,7 @@ http://pascal.inrialpes.fr/data2/douze/holidays_subset/images.tgz
 http://pascal.inrialpes.fr/data2/douze/holidays_subset/sifts.tgz
 
 Unzip them to a ``holidays_100`` subdirectory.
+
 
 Image indexing in Python with Fisher vectors
 ++++++++++++++++++++++++++++++++++++++++++++
@@ -424,24 +427,24 @@ The matches are displayed in yellow (and the non-matching descriptors in red).
 It is also possible to save an inverted file, in order to load it later.
 The following piece of code saves and cleans the inverted file structure, then re-load it.
 
-  .. code-block:: matlab
+.. code-block:: matlab
 
-    %---------------------------------------------------------------
-    % I/O for the inverted files
-    %---------------------------------------------------------------
+  %---------------------------------------------------------------
+  % I/O for the inverted files
+  %---------------------------------------------------------------
 
-    % Save inverted file filename on disk
-    fivf_name = 'holidays100.ivf';
-    fprintf ('* Save the inverted file to %s\n', fivf_name);
-    ivfhe.save (ivfhe, ivfname);
+  % Save inverted file filename on disk
+  fivf_name = 'holidays100.ivf';
+  fprintf ('* Save the inverted file to %s\n', fivf_name);
+  ivfhe.save (ivfhe, ivfname);
 
-    % Free the variables associated with the inverted file
-    fprintf ('* Free the inverted file\n');
-    yael_ivf ('free');
-    clear ivfhe;
+  % Free the variables associated with the inverted file
+  fprintf ('* Free the inverted file\n');
+  yael_ivf ('free');
+  clear ivfhe;
 
-  .. code-block:: c
+.. code-block:: c
 
-      % Load ivf
-    fprintf ('* Load the inverted file from %s\n', fivf_name);
-    ivfhe = yael_ivf_he (fivf_name);
+  % Load ivf
+  fprintf ('* Load the inverted file from %s\n', fivf_name);
+  ivfhe = yael_ivf_he (fivf_name);
