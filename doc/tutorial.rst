@@ -4,7 +4,7 @@ Yael tutorial
 
 This tutorial presents some fully functional examples of how to use
 Yael for basic operation and for image retrieval.
-They are implemented supported by Yael, namely C, Python and Matlab.
+They are implemented in the three languages supported by Yael, namely C, Python and Matlab.
 
 The tutorial assumes Yael is compiled correctly (numpy should be
 enabled for the Python examples). There is no separate compile and
