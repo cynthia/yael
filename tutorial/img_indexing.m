@@ -1,15 +1,16 @@
 addpath ('~/src/yael/matlab/');
 
-k = 2048;                    % In practice, we would rather choose k=100k
-nbits = 128;                 % Typical values are 32, 64 or 128 bits
-ht = floor(nbits*28/64);     % Hamming Embedding threshold
-
+% Vocabulary size. In practice, we would rather choose k=100k
+k = 1024;                    
 
 % Images and descriptors are assumed stored in the following directory
 dir_data = './holidays_100/';
 
-% inverted file filename on disk
-ivfname = 'holidays100.ivf'; 
+% Parameters For Hamming Embedding
+nbits = 128;                 % Typical values are 32, 64 or 128 bits
+ht = floor(nbits*28/64);     % Hamming Embedding threshold
+scoremap = zeros (1, nbits+1);
+scoremap(1:ht+1) = (1-(0:ht)/ht).^3;
 
 
 %---------------------------------------------------------------
@@ -75,8 +76,12 @@ end
 fprintf ('* Quantization, bitvectors computed and added to IVF in %.3fs\n',  cputime-t0);
 
 
-% Save ivf
-fivf_name = ivfname;
+%---------------------------------------------------------------
+% I/O for the inverted files
+%---------------------------------------------------------------
+
+% Save inverted file filename on disk
+fivf_name = 'holidays100.ivf'; 
 fprintf ('* Save the inverted file to %s\n', fivf_name);
 ivfhe.save (ivfhe, ivfname);
 
@@ -84,11 +89,6 @@ ivfhe.save (ivfhe, ivfname);
 fprintf ('* Free the inverted file\n');
 yael_ivf ('free');
 clear ivfhe;
-
-
-%---------------------------------------------------------------
-% Load the IVF, and perform some queries
-%---------------------------------------------------------------
 
 % Load ivf
 fprintf ('* Load the inverted file from %s\n', fivf_name);
@@ -98,9 +98,8 @@ ivfhe = yael_ivf_he (fivf_name);
 %---------------------------------------------------------------
 % Compute the scores and show images
 %---------------------------------------------------------------
-Queries = [1 13 23 42 63 83]
-nshow = 4;
-
+Queries = [1 13 23 42 63 83];
+nshow = 6;
 
 
 for qimg = Queries
@@ -109,34 +108,33 @@ for qimg = Queries
 
   tic
   matches = ivfhe.query (ivfhe, int32(1:nsifts), sifts{qimg}, ht);
-  fprintf ('* %d Queries performed in %.3f seconds - ht=%d\n', nsifts, toc, ht);
-  fprintf ('-> found %d matches\n', size (matches, 2));
+  fprintf ('* %d Queries performed in %.3f seconds -> %d matches\n', nsifts, toc,  size (matches, 2));
 
   % Translate to image identifiers and count number of matches per image, 
   m_imids = descid_to_imgid(matches(2,:));
   n_immatches = hist (m_imids, 1:nimg);
 
   % Now, take into account the strength of the matches
-  scoremap = zeros (1, nbits+1);
-  scoremap(1:ht+1) = (1-(0:ht)/ht).^3;
-
   n_imscores = accumarray (m_imids, scoremap (matches(3,:)+1)', [nimg 1]) ./ (imnorms+0.00001);
 
   % Images are ordered by descreasing score
   [~, idx] = sort (n_imscores, 'descend');
-
-  idx(1:10)
-  figure(1);
   
   % We assume that the first image is the query itself (warning!)
+  figure(1); 
   subplot(2,nshow/2,1), imagesc(imgs{idx(1)}); 
   s = sprintf('Query -> %d descriptors', size(sifts{idx(1)}, 2));
   title (s); axis off image
   
   for s = 2:nshow
-    subplot(2,nshow/2,s), imagesc(imgs{idx(s)}); axis off image
-    s = sprintf ('%d inliers -> score %.3f\n', n_immatches(idx(s)), 100*n_imscores(idx(s)));
-    title (s);
+    subplot(2,nshow/2,s), imagesc(imgs{idx(s)}); axis off image; hold on;
+    str = sprintf ('%d inliers -> score %.3f\n', n_immatches(idx(s)), 100*n_imscores(idx(s)));
+    title (str); 
+
+    % Display the matches
+    
+    plot(meta{idx(s)}(1,:),meta{idx(s)}(2,:),'.'); 
+    hold off;
   end
   pause
 end
