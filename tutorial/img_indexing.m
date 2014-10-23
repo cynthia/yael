@@ -27,11 +27,14 @@ fprintf ('* Loaded %d images in %.3f seconds\n', numel(imgs), toc); tic
 
 [sifts, meta] = arrayfun (@(x) (siftgeo_read([dir_data strrep(x.name, '.jpg', '.siftgeo')])), ...
                                 img_list, 'UniformOutput', false) ; 
-totsifts = size ([sifts{:}], 2);
+nsifts = cellfun(@(x)(size(x,2)),sifts);
+totsifs = sum(nsifts);
+
 fprintf ('* Loaded %d descriptors in %.3f seconds\n', totsifts, toc); tic
 
 sifts = cellfun (@(x) (yael_vecs_normalize(sign(x).*sqrt(abs(x)))), ...
                         sifts, 'UniformOutput', false) ;
+
 fprintf ('* Convert to RootSIFT in %.3f seconds\n', toc); tic
 
 
@@ -60,17 +63,20 @@ fprintf ('* Learned the Hamming Embedding structure in %.3f seconds\n', toc); ti
 % We also compute a normalization factor
 imnorms = zeros (nimg, 1);
 lastid = 0;
-descid_to_imgid = zeros (totsifts, 1);  
+descid_to_imgid = zeros (totsifts, 1);  % desc to image conversion
+imgid_to_descid = zeros (nimg, 1);      % for finding desc id 
 t0 = cputime;
 for i = 1:nimg
   
-  % Add the descriptors to the inverted. 
-  ndes = size(sifts{i}, 2);  % number of descriptors
+  ndes = nsifts(i);  % number of descriptors
   
-  % The function returns the visual words and binary signatures
+  % Add the descriptors to the inverted file. 
+  % The function returns the visual words (and binary signatures), 
+  % from which we can compute the normalization factor of the image
   [vw,bits] = ivfhe.add (ivfhe, lastid+(1:ndes), sifts{i});
   imnorms(i) = norm(hist(vw,1:k));
   descid_to_imgid(lastid+(1:ndes)) = i; 
+  imgid_to_descid(i) = lastid;
   lastid = lastid + ndes;
 end
 fprintf ('* Quantization, bitvectors computed and added to IVF in %.3fs\n',  cputime-t0);
@@ -132,8 +138,10 @@ for qimg = Queries
     title (str); 
 
     % Display the matches
-    
-    plot(meta{idx(s)}(1,:),meta{idx(s)}(2,:),'.'); 
+    mids = matches (2, find (m_imids == idx(s))) - imgid_to_descid(idx(s));
+
+    plot(meta{idx(s)}(1,:),meta{idx(s)}(2,:),'r.');
+    plot(meta{idx(s)}(1,mids),meta{idx(s)}(2,mids),'y.'); 
     hold off;
   end
   pause
