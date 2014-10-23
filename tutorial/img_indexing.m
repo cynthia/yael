@@ -1,36 +1,49 @@
 addpath ('~/src/yael/matlab/');
 
-k = 2048;                 % In practice, we would rather choose k=100k
-nbits = 128;              % Typical values are 32, 64 or 128 bits
+k = 2048;                    % In practice, we would rather choose k=100k
+nbits = 128;                 % Typical values are 32, 64 or 128 bits
+ht = floor(nbits*28/64);     % Hamming Embedding threshold
+
 
 % Images and descriptors are assumed stored in the following directory
 dir_data = './holidays_100/';
 
+% inverted file filename on disk
+ivfname = 'holidays100.ivf'; 
+
+
+%---------------------------------------------------------------
 % Retrieve the image list and load the images and SIFT
+%---------------------------------------------------------------
+
 img_list = dir ([dir_data '/*.jpg']);
 nimg = numel(img_list);
 
 
 tic 
 imgs = arrayfun (@(x) (imread([dir_data x.name])), img_list, 'UniformOutput', false) ;
-fprintf ('* Loaded images in %.3f seconds\n', toc); tic
+fprintf ('* Loaded %d images in %.3f seconds\n', numel(imgs), toc); tic
 
-sifts = arrayfun (@(x) (siftgeo_read([dir_data strrep(x.name, '.jpg', '.siftgeo')])), ...
-                        img_list, 'UniformOutput', false) ; 
-fprintf ('* Loaded descriptors in %.3f seconds\n', toc); tic
+[sifts, meta] = arrayfun (@(x) (siftgeo_read([dir_data strrep(x.name, '.jpg', '.siftgeo')])), ...
+                                img_list, 'UniformOutput', false) ; 
+totsifts = size ([sifts{:}], 2);
+fprintf ('* Loaded %d descriptors in %.3f seconds\n', totsifts, toc); tic
 
 sifts = cellfun (@(x) (yael_vecs_normalize(sign(x).*sqrt(abs(x)))), ...
                         sifts, 'UniformOutput', false) ;
 fprintf ('* Convert to RootSIFT in %.3f seconds\n', toc); tic
 
 
-% Here we learn it on Holidays itself to avoid 
-% requiring another dataset. but note
-% that this is generally considered as bad practice and should be avoided.
+%---------------------------------------------------------------
+% Learn and build the image indexing structure
+%---------------------------------------------------------------
+
+% Here we learn it on Holidays itself to avoid requiring another dataset. 
+% Note: this is bad practice and should be avoide. A proper evaluation 
+%       should employ an external dataset for dictionary learning.
 
 vtrain = [sifts{:}];
 vtrain = vtrain (:, 1:2:end);
-
 
 C = yael_kmeans (vtrain, k, 'niter', 10); 
 fprintf ('* Learned a visual vocabulary C in %.3f seconds\n', toc); tic
@@ -41,57 +54,94 @@ fprintf ('* Learned a visual vocabulary C in %.3f seconds\n', toc); tic
 ivfhe = yael_ivf_he (k, nbits, vtrain, @yael_nn, C);
 fprintf ('* Learned the Hamming Embedding structure in %.3f seconds\n', toc); tic
 
-% Construct a query 
-
+% Add all the descriptors to the inverted file. Each descriptor receive 
+% an identifier, which can be translated to an image by the next variable.
+% We also compute a normalization factor
+imnorms = zeros (nimg, 1);
+lastid = 0;
+descid_to_imgid = zeros (totsifts, 1);  
+t0 = cputime;
+for i = 1:nimg
+  
+  % Add the descriptors to the inverted. 
+  ndes = size(sifts{i}, 2);  % number of descriptors
+  
+  % The function returns the visual words and binary signatures
+  [vw,bits] = ivfhe.add (ivfhe, lastid+(1:ndes), sifts{i});
+  imnorms(i) = norm(hist(vw,1:k));
+  descid_to_imgid(lastid+(1:ndes)) = i; 
+  lastid = lastid + ndes;
+end
+fprintf ('* Quantization, bitvectors computed and added to IVF in %.3fs\n',  cputime-t0);
 
 
 % Save ivf
-fivf_name = cfg.ivf_fname;
+fivf_name = ivfname;
 fprintf ('* Save the inverted file to %s\n', fivf_name);
-ivfhe.save (ivfhe, fivf_name);
+ivfhe.save (ivfhe, ivfname);
 
-fprintf ('* Free the inverted file\n');
 % Free the variables associated with the inverted file
+fprintf ('* Free the inverted file\n');
 yael_ivf ('free');
 clear ivfhe;
 
 
-figure(1);
+%---------------------------------------------------------------
+% Load the IVF, and perform some queries
+%---------------------------------------------------------------
 
-hax = axes('Position', [.35, .35, .3, .3]);
-imagesc(imgs{42}); axis off image
-
-
-subplot(2,5,[1 2]), imagesc(imgs{1}); title ('Query'); axis off image
-
-subplot(2,5,7), imagesc(imgs{2}); axis off image
-subplot(2,5,3), imagesc(imgs{3}); axis off image
-subplot(2,5,4), imagesc(imgs{5}); axis off image
-subplot(2,5,5), imagesc(imgs{5}); axis off image
+% Load ivf
+fprintf ('* Load the inverted file from %s\n', fivf_name);
+ivfhe = yael_ivf_he (fivf_name);
 
 
-subplot(2,5,6), imagesc(imgs{10}); axis off image
+%---------------------------------------------------------------
+% Compute the scores and show images
+%---------------------------------------------------------------
+Queries = [1 13 23 42 63 83]
+nshow = 4;
 
-figure(2)
 
-wh = 0.18;
-whi = 0.19;
 
-axes('Position', [0, 0, wh, wh]);
- imagesc(imgs{1}); axis off image
- 
-axes('Position', [1-wi*4, 0, wh, wh]);
- imagesc(imgs{2}); axis off image
- 
-axes('Position', [1-wi*3, 0, wh, wh]);
- imagesc(imgs{3}); axis off image
+for qimg = Queries
 
- axes('Position', [1-wi*2, 0, wh, wh]);
- imagesc(imgs{2}); axis off image
- 
-axes('Position', [1-wi, 0, wh, wh]);
- imagesc(imgs{3}); axis off image
- 
+  nsifts = size (sifts{qimg}, 2);
+
+  tic
+  matches = ivfhe.query (ivfhe, int32(1:nsifts), sifts{qimg}, ht);
+  fprintf ('* %d Queries performed in %.3f seconds - ht=%d\n', nsifts, toc, ht);
+  fprintf ('-> found %d matches\n', size (matches, 2));
+
+  % Translate to image identifiers and count number of matches per image, 
+  m_imids = descid_to_imgid(matches(2,:));
+  n_immatches = hist (m_imids, 1:nimg);
+
+  % Now, take into account the strength of the matches
+  scoremap = zeros (1, nbits+1);
+  scoremap(1:ht+1) = (1-(0:ht)/ht).^3;
+
+  n_imscores = accumarray (m_imids, scoremap (matches(3,:)+1)', [nimg 1]) ./ (imnorms+0.00001);
+
+  % Images are ordered by descreasing score
+  [~, idx] = sort (n_imscores, 'descend');
+
+  idx(1:10)
+  figure(1);
+  
+  % We assume that the first image is the query itself (warning!)
+  subplot(2,nshow/2,1), imagesc(imgs{idx(1)}); 
+  s = sprintf('Query -> %d descriptors', size(sifts{idx(1)}, 2));
+  title (s); axis off image
+  
+  for s = 2:nshow
+    subplot(2,nshow/2,s), imagesc(imgs{idx(s)}); axis off image
+    s = sprintf ('%d inliers -> score %.3f\n', n_immatches(idx(s)), 100*n_imscores(idx(s)));
+    title (s);
+  end
+  pause
+end
+
+
 
 
 
