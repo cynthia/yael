@@ -83,7 +83,7 @@ need about 1000*k training descriptors
    perm = eigvals.argsort()                   # sort by increasing eigenvalue
    pca_transform = eigvecs[:, perm[64:128]]   # eigenvectors for the 64 last eigenvalues
 
-   # transform sample with PCA (note that numpy imposes line-vectors, 
+   # transform sample with PCA (note that numpy imposes line-vectors,
    # so we right-multiply the vectors)
    sample = np.dot(sample, pca_transform)
 
@@ -113,7 +113,7 @@ mu in the FV, which results in a FV of size k * 64.
    image_fvs = np.vstack(image_fvs)
 
    # normalizations are done on all descriptors at once
-   
+
    # power-normalization
    image_fvs = np.sign(image_fvs) * np.abs(image_fvs) ** 0.5
 
@@ -138,8 +138,8 @@ query image the nearest images in the ``image_fvs`` matrix.
    # get the 8 NNs for all query images in the image_fvs array
    results, distances = ynumpy.knn(query_fvs, image_fvs, nnn = 8)
 
-The mAP performance for this search can be computed as: 
-    
+The mAP performance for this search can be computed as:
+
 .. code-block:: python
 
    aps = []
@@ -176,14 +176,14 @@ negative ones a red rectangle. Most code is just matplotlib commands
 to adjust the image layout.
 
 .. code-block:: python
-   
+
    from matplotlib import pyplot
    from matplotlib.image import imread
-   
+
    nrow = 6   # number of query images to show
    nres = 8   # number of results per query
 
-   def show_image(imno, frame_color): 
+   def show_image(imno, frame_color):
        im = imread("holidays_100/%s.jpg" % image_names[imno])
        pyplot.imshow(im)
        h, w = im.shape[:2]
@@ -191,22 +191,22 @@ to adjust the image layout.
        pyplot.axis('off')
 
    # reduce the margins
-   pyplot.subplots_adjust(wspace = 0, hspace = 0, 
+   pyplot.subplots_adjust(wspace = 0, hspace = 0,
                           top = 0.99, bottom = 0.01, left = 0.01, right = 0.99)
 
    no = 1  # index current of subfigure
-   for qno in range(nrow):        
+   for qno in range(nrow):
        pyplot.subplot(nrow, nres + 1, no); no += 1
        # show query image with white outline
        qimno = query_imnos[qno]
        show_image(qimno, 'w')
-       for qres in results[qno, :nres]: 
+       for qres in results[qno, :nres]:
            pyplot.subplot(nrow, nres + 1, no); no += 1
            # use image name to determine if it is a TP or FP result
 	   is_ok = image_names[qres][:4] == image_names[qimno][:4]
-    	   show_image(qres, 'g' if is_ok else 'r')   	  
+    	   show_image(qres, 'g' if is_ok else 'r')
 
-   pyplot.show()    
+   pyplot.show()
 
 This part requires matplotlib to be installed, which can be done via
 macports on the Mac and your usual package installation tool on
@@ -215,7 +215,7 @@ Linux. The output looks like:
 .. image:: search_results.png
 
 Note that the query image always appears as the first retrieval
-result, because it is included in the dataset. 
+result, because it is included in the dataset.
 
 
 Image indexing in Matlab with inverted files
@@ -223,15 +223,225 @@ Image indexing in Matlab with inverted files
 
 In the example below, we show how to use an inverted file of Yael from Matlab.
 More specifically, the inverted file we consider supports the use of binary
-signatures, as proposed in theamming Embedding approach described in
+signatures, as proposed in the Hamming Embedding approach described in
 `this paper <http://dx.doi.org/10.1007/978-3-540-88682-2_24>`_.
 
 
 This example is simplified for the sake of exposure. It does not implements
-some ingredients of the original approach, as multiple assignment, IDF terms
-and image normalization terms. The user interested in a more complete system
-should instead download the `dedicated package
+some ingredients of the original approach, as multiple assignment, IDF terms.
+The user interested in a more complete system should instead download the `dedicated package
 <https://gforge.inria.fr/frs/download.php/33244/selective_match_kernel_v289.tar.gz>`_,
 which implements the AMSK state-of-the art approach described in the paper:
 `To aggregate or not to aggregate: selective match kernels for image search
 <http://dx.doi.org/10.1109/ICCV.2013.177>`_.
+
+Before launching the code, please ensure that
+
+- You have a working and compiled version of Yael's matlab interface
+- The corresponding directory ('YAELDIR/matlab') in your matlab Path.
+  If not, you can use the addpath('YAELDIR/matlab') to add it
+
+To start with, we define the parameters of the indexing method. Here, we
+choose a vocabulary of size k=1024. This is less than what you should use in
+practice (e.g., k=100k). We also set some parameters specific to Hamming embedding.
+
+.. code-block:: matlab
+
+  k = 1024;                            % Vocabulary size
+  dir_data = './holidays_100/';        % data directory
+
+  % Parameters For Hamming Embedding
+  nbits = 128;                         % Typical values are 32, 64 or 128 bits
+  ht = floor(nbits*24/64);             % Hamming Embedding threshold
+  scoremap = zeros (1, nbits+1);       % How we map Hamming distances to scores
+  scoremap(1:ht+1) = (1-(0:ht)/ht).^3;
+
+
+Hereafter, we show how we typically load a set of images and descriptors
+stored in separate files. We use the standard matlab functions ``arrayfun`` and ``cellfun``
+to perform operations in batch. The descriptors are assumed stored
+in the siftgeo format, therefore we read them with the yael 'siftgeo_read' function.
+
+.. code-block:: matlab
+
+  %---------------------------------------------------------------
+  % Retrieve the image list and load the images and SIFT
+  %---------------------------------------------------------------
+
+  img_list = dir ([dir_data '/*.jpg']);
+  nimg = numel(img_list); tic
+
+  imgs = arrayfun (@(x) (imread([dir_data x.name])), img_list, 'UniformOutput', false) ;
+  fprintf ('* Loaded %d images in %.3f seconds\n', numel(imgs), toc); tic
+
+  [sifts, meta] = arrayfun (@(x) (siftgeo_read([dir_data strrep(x.name, '.jpg', '.siftgeo')])), ...
+                                  img_list, 'UniformOutput', false) ;
+  nsifts = cellfun(@(x)(size(x,2)),sifts);
+  totsifs = sum(nsifts);
+
+  fprintf ('* Loaded %d descriptors in %.3f seconds\n', totsifts, toc); tic
+
+  sifts = cellfun (@(x) (yael_vecs_normalize(sign(x).*sqrt(abs(x)))), ...
+                          sifts, 'UniformOutput', false) ;
+
+  fprintf ('* Convert to RootSIFT in %.3f seconds\n', toc);
+
+
+This should produce an output like this::
+
+  * Loaded 274 images in 2.408 seconds
+  * Loaded 286421 descriptors in 0.126 seconds
+  * Convert to RootSIFT in 0.311 seconds
+
+
+Now, we are going to learn the visual vocabulary with k-means and subsequently
+construct the inverted file structure for Hamming Embedding.
+We learn it on Holidays itself to avoid requiring another dataset.
+But note that this should be avoided for a true system,
+and a proper evaluation should employ an external dataset for dictionary learning.
+
+.. code-block:: matlab
+
+  %---------------------------------------------------------------
+  % Learn and build the image indexing structure
+  %---------------------------------------------------------------
+
+  vtrain = [sifts{:}];
+  vtrain = vtrain (:, 1:2:end); tic
+
+  C = yael_kmeans (vtrain, k, 'niter', 10);
+  fprintf ('* Learned a visual vocabulary C in %.3f seconds\n', toc); tic
+
+  % We provide the codebook and the function that performs the assignment,
+  % here it is the exact nearest neighbor function yael_nn
+
+  ivfhe = yael_ivf_he (k, nbits, vtrain, @yael_nn, C);
+  fprintf ('* Learned the Hamming Embedding structure in %.3f seconds\n', toc); tic
+
+The output should resemble what follows::
+
+  Input: 143211 vectors of dimension 128
+  k=1024 niter=10 redo=1 verbose=1 seed=0 v1=[0.0672166 0.0672166 ...], v2=[0.0473059 0.0473059... ]
+  * Learned a visual vocabulary C in 7.771 seconds
+  * Learned the Hamming Embedding structure in 1.440 seconds
+
+We can now add the descriptors of all the database images to the inverted file.
+Here, Each local descriptor receives an identifier. This is not a requirement:
+another possible choice would be to use directly the id of the image. But in this
+case we can not use this output for spatial verification. In our case, the
+descriptor id will be used to display the matches.
+
+We also compute a normalization factor and store it in ``imnorms``. It corresponds
+to the L2-norm of the corresponding bag-of-words vector.
+
+.. code-block:: matlab
+
+  imnorms = zeros (nimg, 1);              % Score normalization per image
+  descid_to_imgid = zeros (totsifts, 1);  % desc to image conversion
+  imgid_to_descid = zeros (nimg, 1);      % for finding desc id
+  t0 = cputime;
+  lastid = 0;
+
+  for i = 1:nimg
+    ndes = nsifts(i);  % number of descriptors
+
+    % Add the descriptors to the inverted file.
+    % The function returns the visual words (and binary signatures),
+    [vw,bits] = ivfhe.add (ivfhe, lastid+(1:ndes), sifts{i});
+    imnorms(i) = norm(hist(vw,1:k));
+
+    descid_to_imgid(lastid+(1:ndes)) = i;
+    imgid_to_descid(i) = lastid;
+    lastid = lastid + ndes;
+  end
+  fprintf ('* Quantization, bitvectors computed and added to IVF in %.3fs\n',  cputime-t0);
+
+Typical output::
+
+  * Quantization, bitvectors computed and added to IVF in 9.660s
+
+Finally, we make some queries. We compute two measures::
+
+- the number of matches ``n_immatches`` between query and database images
+- a normalized score ``n_imscores`` that takes into account the strength of the matches
+
+For the second, we invoke the standard Matlab function ``accumarray``, which in
+essence compute here a histogram weighted by the match weights.
+
+.. code-block:: matlab
+
+  %---------------------------------------------------------------
+  % Compute the scores and show images
+  %---------------------------------------------------------------
+  Queries = [1 13 23 42 63 83]; nshow = 6;
+
+  for qimg = Queries
+
+    tic
+    matches = ivfhe.query (ivfhe, int32(1:nsifts(qimg)), sifts{qimg}, ht);
+    fprintf ('* %d Queries performed in %.3f seconds -> %d matches\n', nsifts(qimg), toc,  size (matches, 2));
+
+    % Translate to image identifiers and count number of matches per image,
+    m_imids = descid_to_imgid(matches(2,:));
+    n_immatches = hist (m_imids, 1:nimg);
+
+    % Now, take into account the strength of the matches
+    n_imscores = accumarray (m_imids, scoremap (matches(3,:)+1)', [nimg 1]) ./ (imnorms+0.00001);
+
+    % Images are ordered by descreasing score
+    [~, idx] = sort (n_imscores, 'descend');
+
+    % We assume that the first image is the query itself (warning!)
+    figure(1);
+    subplot(2,nshow/2,1), imagesc(imgs{idx(1)});
+    s = sprintf('Query -> %d descriptors', size(sifts{idx(1)}, 2));
+    title (s); axis off image
+
+    for s = 2:nshow
+      subplot(2,nshow/2,s), imagesc(imgs{idx(s)}); axis off image; hold on;
+      str = sprintf ('%d matches -> score %.3f\n', n_immatches(idx(s)), 100*n_imscores(idx(s)));
+      title (str);
+
+      % Display the non-matching (red) and matching descriptors (yellow)
+      mids = matches (2, find (m_imids == idx(s))) - imgid_to_descid(idx(s));
+
+      plot(meta{idx(s)}(1,:),meta{idx(s)}(2,:),'r.');
+      plot(meta{idx(s)}(1,mids),meta{idx(s)}(2,mids),'y.');
+      hold off;
+    end
+    pause
+  end
+  close;
+
+The output looks as follows. The query is the top-left images, and then
+the queries are displayed. The title gives the number of matches and the
+normalized score used to rank the images.
+The matches are displayed in yellow (and the non-matching descriptors in red).
+
+.. image:: search_results_matlab.png
+
+
+It is also possible to save an inverted file, in order to load it later.
+The following piece of code saves and cleans the inverted file structure, then re-load it.
+
+  .. code-block:: matlab
+
+    %---------------------------------------------------------------
+    % I/O for the inverted files
+    %---------------------------------------------------------------
+
+    % Save inverted file filename on disk
+    fivf_name = 'holidays100.ivf';
+    fprintf ('* Save the inverted file to %s\n', fivf_name);
+    ivfhe.save (ivfhe, ivfname);
+
+    % Free the variables associated with the inverted file
+    fprintf ('* Free the inverted file\n');
+    yael_ivf ('free');
+    clear ivfhe;
+
+  .. code-block:: c
+
+      % Load ivf
+    fprintf ('* Load the inverted file from %s\n', fivf_name);
+    ivfhe = yael_ivf_he (fivf_name);
