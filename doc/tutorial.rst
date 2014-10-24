@@ -14,4 +14,5 @@ install stage for Yael.
    :maxdepth: 2
 
    Using k-means <tutorial/tuto_kmeans>
+   Hamming distances <tutorial/tuto_hamming>
    Image indexing <tutorial/tuto_imgindexing>
