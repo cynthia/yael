@@ -1,3 +1,9 @@
+%-------------------------------------------------------------------------
+% Simple image indexing system in Matlab, as part of Yael's tutorial
+%
+% Hervé Jégou - % Copyright (c) Inria 2014. 
+%-------------------------------------------------------------------------
+
 addpath ('~/src/yael/matlab/');
 
 % Vocabulary size. In practice, we would rather choose k=100k
@@ -8,14 +14,14 @@ dir_data = './holidays_100/';
 
 % Parameters For Hamming Embedding
 nbits = 128;                 % Typical values are 32, 64 or 128 bits
-ht = floor(nbits*28/64);     % Hamming Embedding threshold
+ht = floor(nbits*24/64);     % Hamming Embedding threshold
 scoremap = zeros (1, nbits+1);
 scoremap(1:ht+1) = (1-(0:ht)/ht).^3;
 
 
-%---------------------------------------------------------------
+%-------------------------------------------------------------------------
 % Retrieve the image list and load the images and SIFT
-%---------------------------------------------------------------
+%-------------------------------------------------------------------------
 
 img_list = dir ([dir_data '/*.jpg']);
 nimg = numel(img_list);
@@ -38,9 +44,9 @@ sifts = cellfun (@(x) (yael_vecs_normalize(sign(x).*sqrt(abs(x)))), ...
 fprintf ('* Convert to RootSIFT in %.3f seconds\n', toc); tic
 
 
-%---------------------------------------------------------------
+%-------------------------------------------------------------------------
 % Learn and build the image indexing structure
-%---------------------------------------------------------------
+%-------------------------------------------------------------------------
 
 % Here we learn it on Holidays itself to avoid requiring another dataset. 
 % Note: this is bad practice and should be avoide. A proper evaluation 
@@ -82,9 +88,9 @@ end
 fprintf ('* Quantization, bitvectors computed and added to IVF in %.3fs\n',  cputime-t0);
 
 
-%---------------------------------------------------------------
+%-------------------------------------------------------------------------
 % I/O for the inverted files
-%---------------------------------------------------------------
+%-------------------------------------------------------------------------
 
 % Save inverted file filename on disk
 fivf_name = 'holidays100.ivf'; 
@@ -101,20 +107,29 @@ fprintf ('* Load the inverted file from %s\n', fivf_name);
 ivfhe = yael_ivf_he (fivf_name);
 
 
-%---------------------------------------------------------------
+%-------------------------------------------------------------------------
 % Compute the scores and show images
-%---------------------------------------------------------------
+%-------------------------------------------------------------------------
 Queries = [1 13 23 42 63 83];
+nq = numel (Queries);
 nshow = 6;
 
 
-for qimg = Queries
+% Configure the drawing zone
+phandler = zeros (nshow, 1);  
+figure('Position', [sz(3)/8 sz(4)/2 sz(3)*3/4 sz(4)/3]); 
+for q = 1:nq
+  for pl = 1:nshow
+    phandler(q, pl) = subplot('Position', [(pl-1)/nshow 0 0.99/nshow 1]); 
+  end
+end
 
-  nsifts = size (sifts{qimg}, 2);
 
-  tic
-  matches = ivfhe.query (ivfhe, int32(1:nsifts), sifts{qimg}, ht);
-  fprintf ('* %d Queries performed in %.3f seconds -> %d matches\n', nsifts, toc,  size (matches, 2));
+for q = 1:nq
+  qimg = Queries(q)
+
+  matches = ivfhe.query (ivfhe, int32(1:nsifts(qimg)), sifts{qimg}, ht);
+  fprintf ('* %d Queries performed in %.3f seconds -> %d matches\n', nsifts(qimg), toc,  size (matches, 2));
 
   % Translate to image identifiers and count number of matches per image, 
   m_imids = descid_to_imgid(matches(2,:));
@@ -127,14 +142,14 @@ for qimg = Queries
   [~, idx] = sort (n_imscores, 'descend');
   
   % We assume that the first image is the query itself (warning!)
-  figure(1); 
-  subplot(2,nshow/2,1), imagesc(imgs{idx(1)}); 
+  sz = get (0, 'ScreenSize');
+  subplot(phandler(1,1)), imagesc(imgs{idx(1)}); 
   s = sprintf('Query -> %d descriptors', size(sifts{idx(1)}, 2));
   title (s); axis off image
   
   for s = 2:nshow
-    subplot(2,nshow/2,s), imagesc(imgs{idx(s)}); axis off image; hold on;
-    str = sprintf ('%d inliers -> score %.3f\n', n_immatches(idx(s)), 100*n_imscores(idx(s)));
+    subplot(phandler(1,s)), imagesc(imgs{idx(s)}); axis off image; hold on;
+    str = sprintf ('%d matches \n score %.3f', n_immatches(idx(s)), 100*n_imscores(idx(s)));
     title (str); 
 
     % Display the matches
@@ -146,7 +161,7 @@ for qimg = Queries
   end
   pause
 end
-
+close;
 
 
 

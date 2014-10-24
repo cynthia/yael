@@ -63,7 +63,7 @@ We first load all the descriptors
        # we drop the meta-information (point coordinates, orientation, etc.)
        image_descs.append(desc)
 
-Now we can sample the descriptors to reduce their dimensionality by
+Next we sample the descriptors to reduce their dimensionality by
 PCA and computing a GMM. For a GMM of size k (let's set it to 64), we
 need about 1000*k training descriptors
 
@@ -247,8 +247,8 @@ which implements the AMSK state-of-the art approach described in the paper:
 Before launching the code, please ensure that
 
 - You have a working and compiled version of Yael's matlab interface
-- The corresponding directory ('YAELDIR/matlab') in your matlab Path.
-  If not, you can use the addpath('YAELDIR/matlab') to add it
+- The corresponding directory ('YAELDIR/matlab') is in your matlab Path.
+  If not, use the addpath('YAELDIR/matlab') to add it.
 
 To start with, we define the parameters of the indexing method. Here, we
 choose a vocabulary of size k=1024. This is less than what you should use in
@@ -290,8 +290,7 @@ in the siftgeo format, therefore we read them with the yael 'siftgeo_read' funct
 
   fprintf ('* Loaded %d descriptors in %.3f seconds\n', totsifts, toc); tic
 
-  sifts = cellfun (@(x) (yael_vecs_normalize(sign(x).*sqrt(abs(x)))), ...
-                          sifts, 'UniformOutput', false) ;
+  sifts = cellfun (@(x) (yael_vecs_normalize(sign(x).*sqrt(abs(x)))), sifts, 'UniformOutput', false) ;
 
   fprintf ('* Convert to RootSIFT in %.3f seconds\n', toc);
 
@@ -334,10 +333,10 @@ The output should resemble what follows::
   * Learned a visual vocabulary C in 7.771 seconds
   * Learned the Hamming Embedding structure in 1.440 seconds
 
-We can now add the descriptors of all the database images to the inverted file.
+We can add the descriptors of all the database images to the inverted file.
 Here, Each local descriptor receives an identifier. This is not a requirement:
 another possible choice would be to use directly the id of the image. But in this
-case we can not use this output for spatial verification. In our case, the
+case we could not use this output for spatial verification. In our case, the
 descriptor id will be used to display the matches.
 
 We also compute a normalization factor and store it in ``imnorms``. It corresponds
@@ -369,7 +368,7 @@ Typical output::
 
   * Quantization, bitvectors computed and added to IVF in 9.660s
 
-Finally, we make some queries. We compute two measures:
+Finally, we make some queries. We compute two measures
 
 - the number of matches ``n_immatches`` between query and database images
 - a normalized score ``n_imscores`` that takes into account the strength of the matches
@@ -379,14 +378,26 @@ essence compute here a histogram weighted by the match weights.
 
 .. code-block:: matlab
 
-  %---------------------------------------------------------------
+  %-------------------------------------------------------------------------
   % Compute the scores and show images
-  %---------------------------------------------------------------
-  Queries = [1 13 23 42 63 83]; nshow = 6;
+  %-------------------------------------------------------------------------
+  Queries = [1 13 23 42 63 83];
+  nq = numel (Queries);
 
-  for qimg = Queries
+  % Configure the drawing zone
+  nshow = 6;
+  phandler = zeros (nshow, 1);
+  figure('Position', [sz(3)/8 sz(4)/2 sz(3)*3/4 sz(4)/4]);
+  for q = 1:nq
+    for pl = 1:nshow
+      phandler(q, pl) = subplot('Position', [(pl-1)/nshow 0 0.99/nshow 1]);
+    end
+  end
 
-    tic
+
+  for q = 1:nq
+    qimg = Queries(q)
+
     matches = ivfhe.query (ivfhe, int32(1:nsifts(qimg)), sifts{qimg}, ht);
     fprintf ('* %d Queries performed in %.3f seconds -> %d matches\n', nsifts(qimg), toc,  size (matches, 2));
 
@@ -401,17 +412,17 @@ essence compute here a histogram weighted by the match weights.
     [~, idx] = sort (n_imscores, 'descend');
 
     % We assume that the first image is the query itself (warning!)
-    figure(1);
-    subplot(2,nshow/2,1), imagesc(imgs{idx(1)});
+    sz = get (0, 'ScreenSize');
+    subplot(phandler(1,1)), imagesc(imgs{idx(1)});
     s = sprintf('Query -> %d descriptors', size(sifts{idx(1)}, 2));
     title (s); axis off image
 
     for s = 2:nshow
-      subplot(2,nshow/2,s), imagesc(imgs{idx(s)}); axis off image; hold on;
-      str = sprintf ('%d matches -> score %.3f\n', n_immatches(idx(s)), 100*n_imscores(idx(s)));
+      subplot(phandler(1,s)), imagesc(imgs{idx(s)}); axis off image; hold on;
+      str = sprintf ('%d matches \n score %.3f', n_immatches(idx(s)), 100*n_imscores(idx(s)));
       title (str);
 
-      % Display the non-matching (red) and matching descriptors (yellow)
+      % Display the matches
       mids = matches (2, find (m_imids == idx(s))) - imgid_to_descid(idx(s));
 
       plot(meta{idx(s)}(1,:),meta{idx(s)}(2,:),'r.');
@@ -422,6 +433,7 @@ essence compute here a histogram weighted by the match weights.
   end
   close;
 
+
 The output looks as follows. The query is the top-left images, and then
 the queries are displayed. The title gives the number of matches and the
 normalized score used to rank the images.
@@ -430,7 +442,7 @@ The matches are displayed in yellow (and the non-matching descriptors in red).
 .. image:: search_results_matlab.png
 
 
-It is also possible to save an inverted file, in order to load it later.
+It is possible to save an inverted file.
 The following piece of code saves and cleans the inverted file structure, then re-load it.
 
 .. code-block:: matlab
