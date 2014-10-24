@@ -1,7 +1,7 @@
 Image indexing example
 ----------------------
 
-Here we work out two simple image indexing engine and apply it to a tiny image
+Here we work out two simple image indexing engines use them to processe a tiny image
 dataset. The first is done in python and implements a description based
 on Fisher vectors, while the second is in Matlab and shows how to use an
 inverted file with binary signatures.
@@ -12,10 +12,16 @@ and their associated database examples. Download
 the images and the SIFT descriptors from here:
 
 http://pascal.inrialpes.fr/data2/douze/holidays_subset/images.tgz
+
 http://pascal.inrialpes.fr/data2/douze/holidays_subset/sifts.tgz
 
-Unzip them to a ``holidays_100`` subdirectory.
+Unzip them to a ``holidays_100`` subdirectory. Note that the images
+were resized and the number of extracted SIFT descriptors per image
+was limited to make a quick demo.
 
+The indexing methods are fully functional. You can reproduce them on
+your images, see the "Descriptor Extraction" section in the Holidays
+homepage to process them.
 
 Image indexing in Python with Fisher vectors
 ++++++++++++++++++++++++++++++++++++++++++++
@@ -34,7 +40,7 @@ index.
 
 In the following, you can just copy/paste the code to the Python
 interpreter (or put it in a script). You can inspect the variables,
-which are plain numpy arrays.
+which are plain numpy arrays, load/save them to files, etc.
 
 We first load all the descriptors
 
@@ -153,7 +159,7 @@ The mAP performance for this search can be computed as:
        positive_results = set([i for i, name in enumerate(image_names)
                                if name != qname and name[:4] == qname[:4]])
        #
-       # ranks of positives. We skip the result #0, which is the query image
+       # ranks of positives. We skip the result #0, assumed to be the query image
        ranks = [i for i, res in enumerate(qres[1:]) if res in positive_results]
        #
        # accumulate trapezoids with this basis
@@ -363,7 +369,7 @@ Typical output::
 
   * Quantization, bitvectors computed and added to IVF in 9.660s
 
-Finally, we make some queries. We compute two measures::
+Finally, we make some queries. We compute two measures:
 
 - the number of matches ``n_immatches`` between query and database images
 - a normalized score ``n_imscores`` that takes into account the strength of the matches
