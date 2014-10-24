@@ -31,7 +31,9 @@ Fisher vector (FV) for each image, using the local SIFTs from these
 images. The L2 distance between FVs is a good approximation of
 the similarity of the contents of the images. See
 `Aggregating local image descriptors into compact codes <https://hal.inria.fr/inria-00633013>`_
-for more details.
+for more details. You may also be interested in 
+`INRIA's Fisher vector implementation <http://lear.inrialpes.fr/src/inria_fisher/>`_ 
+which is a Matlab version of this example, on the complete Holidays dataset.
 
 The FV computation relies on a training where a Gaussian Mixture Model
 (GMM) is fitted to a set of representative local descriptors. For
@@ -286,7 +288,7 @@ in the siftgeo format, therefore we read them with the yael 'siftgeo_read' funct
   [sifts, meta] = arrayfun (@(x) (siftgeo_read([dir_data strrep(x.name, '.jpg', '.siftgeo')])), ...
                                   img_list, 'UniformOutput', false) ;
   nsifts = cellfun(@(x)(size(x,2)),sifts);
-  totsifs = sum(nsifts);
+  totsifts = sum(nsifts);
 
   fprintf ('* Loaded %d descriptors in %.3f seconds\n', totsifts, toc); tic
 
