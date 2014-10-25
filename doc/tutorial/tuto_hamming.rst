@@ -20,7 +20,7 @@ In the following lines, we randomly generate bitvectors for the sake of exposure
 .. code-block:: matlab
 
   nbits = 64;            % size of the bit vector, in bits
-  d = nbits / 8;         % corresponding size in terms of Matlab uint8 lenght
+  d = nbits / 8;         % corresponding size in terms of Matlab uint8 length
   na = 100000;
   nb = 1000;
 
@@ -114,7 +114,7 @@ while `hdis` gives the corresponding distances. The output is:
 
   Found 1285 distances below 16 in 0.185s
 
-This is at least 3 times faster. Most importantly, the function never allocate
+This is at least 3 times faster. Most importantly, the function never allocates
 a big matrix. It is therefore possible to compute much more distances, as
 shown in the example below (only on a machine with enough RAM and good cache size):
 

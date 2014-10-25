@@ -31,8 +31,8 @@ Fisher vector (FV) for each image, using the local SIFTs from these
 images. The L2 distance between FVs is a good approximation of
 the similarity of the contents of the images. See
 `Aggregating local image descriptors into compact codes <https://hal.inria.fr/inria-00633013>`_
-for more details. You may also be interested in 
-`INRIA's Fisher vector implementation <http://lear.inrialpes.fr/src/inria_fisher/>`_ 
+for more details. You may also be interested in
+`INRIA's Fisher vector implementation <http://lear.inrialpes.fr/src/inria_fisher/>`_
 which is a Matlab version of this example, on the complete Holidays dataset.
 
 The FV computation relies on a training where a Gaussian Mixture Model
@@ -436,7 +436,7 @@ essence compute here a histogram weighted by the match weights.
   close;
 
 
-The output looks as follows. The query is the top-left images, and then
+The output looks as follows. The query is the top-left image, and then
 the queries are displayed. The title gives the number of matches and the
 normalized score used to rank the images.
 The matches are displayed in yellow (and the non-matching descriptors in red).
