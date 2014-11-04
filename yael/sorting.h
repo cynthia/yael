@@ -24,6 +24,21 @@ void fvec_k_max(const float *v, int n, int *maxes, int k);
  */
 void fvec_k_min(const float *v, int n, int *mins, int k);
 
+/*! Find max value of a set of n arrays 
+ * 
+ * @param val(m, n)   n vectors of size m
+ * @param idx(k, n)   n shortlists of size k 
+ */
+void fvecs_k_max(const float *val, long m, long n, int *idx, int k);
+
+
+/*! Find min value of a set of n arrays 
+ * 
+ * @param val(m, n)   n vectors of size m
+ * @param idx(k, n)   n shortlists of size k 
+ */
+void fvecs_k_min(const float *val, long m, long n, int *idx, int k);
+
 
 /*! finds the ranks of a few values in a large set.
  *

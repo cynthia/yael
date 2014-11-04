@@ -166,7 +166,7 @@ void fvec_k_max (const float *val, int n, int *idx, int k)
     return;
 
   /* TODO: find out where the limit really is */
-  if (n > 4 * k)
+  if (n > 20 * k)
     fvec_k_max_maxheap (val, n, idx, k);
   else
     fvec_k_max_hoare (val, n, idx, k);
@@ -181,7 +181,19 @@ void fvec_k_max (const float *val, int n, int *idx, int k)
    */
 }
 
+void fvecs_k_max(const float *val, long m, long n, int *idx, int k)
+{
+  int i; 
+  for(i = 0; i < n; i++) 
+    fvec_k_max(val + m * i, m, idx + k * i, k); 
+}
 
+void fvecs_k_min(const float *val, long m, long n, int *idx, int k)
+{
+  int i; 
+  for(i = 0; i < n; i++) 
+    fvec_k_min(val + m * i, m, idx + k * i, k); 
+}
 
 
 /*--- Idem for smallest ---*/
@@ -236,8 +248,7 @@ void fvec_k_min (const float *val, int n, int *idx, int k)
     return; 
   }
 
-  /* TODO: find out where the limit really is */
-  if (n > 3 * k)
+  if (n > 20 * k)
     fvec_k_min_maxheap (val, n, idx, k); 
   else
     fvec_k_min_hoare (val, n, idx, k);

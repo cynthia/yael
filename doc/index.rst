@@ -21,7 +21,6 @@ Welcome to Yael's documentation!
      :height: 100px
      :align: right
 
-
 Yael
 ====
 Yael is a library implementing computationally intensive functions used in large scale image retrieval, such as neighbor search, clustering and inverted files. The library offers interfaces for C, Python and Matlab.
@@ -46,7 +45,7 @@ It offers three interfaces:
 The library has been tested under different architectures, in particular
 
 * Linux 32 bits: Fedora Core 11
-* Linux 64 bits: Fedora Core 10, Fedora Core 11, Ubuntu Karmic, Debian 4.1.2-25
+* Linux 64 bits: Fedora 10-18, Debian, Ubunty
 * Mac OS X.
 
 The library has not been packaged nor tested for Microsoft Windows.

@@ -35,6 +35,10 @@ def _check_row_int32(a):
     if not a.flags.c_contiguous:
         raise TypeError('expected C order matrix')
 
+fvec_ref = yael.numpy_to_fvec_ref 
+ivec_ref = yael.numpy_to_ivec_ref
+
+
 ####################################################
 # NN function & related
 
@@ -54,11 +58,11 @@ def knn(queries, base,
 
     yael.knn_full_thread(distance_type, 
                          nq, n, d, nnn,
-                         yael.numpy_to_fvec_ref(base),
-                         yael.numpy_to_fvec_ref(queries), 
+                         fvec_ref(base),
+                         fvec_ref(queries), 
                          None, 
-                         yael.numpy_to_ivec_ref(idx), 
-                         yael.numpy_to_fvec_ref(dis), 
+                         ivec_ref(idx), 
+                         fvec_ref(dis), 
                          nt)
     return idx, dis
     
@@ -73,9 +77,9 @@ def cross_distances(a, b, distance_type = 12):
     dis = numpy.empty((nb, na), dtype = numpy.float32)
 
     yael.compute_cross_distances_alt_nonpacked(distance_type, d, na, nb,
-                                               yael.numpy_to_fvec_ref(a), d,
-                                               yael.numpy_to_fvec_ref(b), d,
-                                               yael.numpy_to_fvec_ref(dis), na)
+                                               fvec_ref(a), d,
+                                               fvec_ref(b), d,
+                                               fvec_ref(dis), na)
     
     return dis                                 
 
@@ -111,11 +115,11 @@ def kmeans(v, k,
     if normalize:            flags |= yael.KMEANS_NORMALIZE_CENTS
 
     qerr = yael.kmeans(d, n, k, niter, 
-                       yael.numpy_to_fvec_ref(v), flags, seed, redo, 
-                       yael.numpy_to_fvec_ref(centroids), 
-                       yael.numpy_to_fvec_ref(dis), 
-                       yael.numpy_to_ivec_ref(assign), 
-                       yael.numpy_to_ivec_ref(nassign))
+                       fvec_ref(v), flags, seed, redo, 
+                       fvec_ref(centroids), 
+                       fvec_ref(dis), 
+                       ivec_ref(assign), 
+                       ivec_ref(nassign))
 
     if qerr < 0: 
         raise RuntimeError("kmeans: clustering failed. Is dataset diverse enough?")
@@ -137,8 +141,8 @@ def partial_pca(mat, nev = 6, nt = 1):
     # pdb.set_trace()
 
     pcamat = yael.fmat_new_pca_part(d, n, nev,
-                                    yael.numpy_to_fvec_ref(mat),
-                                    yael.numpy_to_fvec_ref(singvals))
+                                    fvec_ref(mat),
+                                    fvec_ref(singvals))
     assert pcamat != None
     
     #print "SVs", singvals
@@ -196,7 +200,7 @@ def ivecs_read(filename):
 def fvecs_write(filename, matrix): 
     _check_row_float32(matrix)
     n, d = matrix.shape
-    ret = yael.fvecs_write(filename, d, n, yael.numpy_to_fvec_ref(matrix))
+    ret = yael.fvecs_write(filename, d, n, fvec_ref(matrix))
     if ret != n:
         raise IOError("write error" + filename)
 
@@ -204,7 +208,7 @@ def fvecs_write(filename, matrix):
 def fvecs_fwrite(fd, matrix): 
     _check_row_float32(matrix)
     n, d = matrix.shape
-    ret = yael.fvecs_fwrite(fd, d, n, yael.numpy_to_fvec_ref(matrix))
+    ret = yael.fvecs_fwrite(fd, d, n, fvec_ref(matrix))
     if ret != n:
         raise IOError("write error")
 
@@ -215,6 +219,7 @@ def bvecs_write(filename, matrix):
     ret = yael.bvecs_write(filename, d, n, yael.numpy_to_bvec_ref(matrix))
     if ret != n:
         raise IOError("write error" + filename)
+
     
 
 def ivecs_write(filename, matrix): 
@@ -288,9 +293,9 @@ def _numpy_to_gmm((w, mu, sigma)):
     gmm = yael.gmm_t()
     gmm.d = d
     gmm.k = k
-    gmm.w = yael.numpy_to_fvec_ref(w)
-    gmm.mu = yael.numpy_to_fvec_ref(mu)
-    gmm.sigma = yael.numpy_to_fvec_ref(sigma)
+    gmm.w = fvec_ref(w)
+    gmm.mu = fvec_ref(mu)
+    gmm.sigma = fvec_ref(sigma)
     gmm.__del__ = _gmm_del
     return gmm
 
@@ -308,7 +313,7 @@ def gmm_learn(v, k,
     if use_weights: flags |= yael.GMM_FLAGS_W
 
     gmm = yael.gmm_learn(d, n, k, niter, 
-                         yael.numpy_to_fvec_ref(v), nt, seed, redo, flags)
+                         fvec_ref(v), nt, seed, redo, flags)
     
     gmm_npy = _gmm_to_numpy(gmm) 
 
@@ -343,9 +348,30 @@ def fisher(gmm_npy, v,
 
     fisher_out = numpy.zeros(d_fisher, dtype = numpy.float32)    
 
-    yael.gmm_fisher(n, yael.numpy_to_fvec_ref(v), gmm, flags, yael.numpy_to_fvec_ref(fisher_out))
+    yael.gmm_fisher(n, fvec_ref(v), gmm, flags, fvec_ref(fisher_out))
 
     return fisher_out
+
+def kmin(v, k): 
+    """ return indices of the k smallest values of each line of an array"""
+    _check_row_float32(v)
+    n, d = v.shape
+    assert k <= d
+
+    idx = numpy.empty((n, k), dtype = 'int32')
+    yael.fvecs_k_min(fvec_ref(v), d, n, ivec_ref(idx), k)
+    return idx
+
+def kmax(v, k): 
+    """ return indices of the k smallest values of each line of an array"""
+    _check_row_float32(v)
+    n, d = v.shape
+    assert k <= d
+
+    idx = numpy.empty((n, k), dtype = 'int32')
+    yael.fvecs_k_max(fvec_ref(v), d, n, ivec_ref(idx), k)
+    return idx
+
 
 ####################################################
 # Fast versions of slow Numpy operations
@@ -358,10 +384,10 @@ def extract_lines(a, indices):
     n, d = a.shape
     assert indices.size == 0 or indices.min() >= 0 and indices.max() < n
     out = numpy.empty((indices.size, d), dtype = numpy.float32)
-    yael.fmat_get_columns(yael.numpy_to_fvec_ref(a),
+    yael.fmat_get_columns(fvec_ref(a),
                           d, indices.size,
-                          yael.numpy_to_ivec_ref(indices),
-                          yael.numpy_to_fvec_ref(out))
+                          ivec_ref(indices),
+                          fvec_ref(out))
 
     return out
     
@@ -375,11 +401,11 @@ def extract_rows_cols(K, subset_rows, subset_cols):
     assert subset_rows.min() >= 0 and subset_rows.max() < K.shape[0]
     assert subset_cols.min() >= 0 and subset_cols.max() < K.shape[1]    
     Ksub = numpy.empty((nr, nc), dtype = numpy.float32)
-    yael.fmat_get_rows_cols(yael.numpy_to_fvec_ref(K),
+    yael.fmat_get_rows_cols(fvec_ref(K),
                             K.shape[0],
-                            nc, yael.numpy_to_ivec_ref(subset_cols),
-                            nr, yael.numpy_to_ivec_ref(subset_rows),
-                            yael.numpy_to_fvec_ref(Ksub))
+                            nc, ivec_ref(subset_cols),
+                            nr, ivec_ref(subset_rows),
+                            fvec_ref(Ksub))
     return Ksub
 
 

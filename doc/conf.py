@@ -11,7 +11,9 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+
 import sys, os
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -220,3 +222,9 @@ man_pages = [
              ('index', 'yael', u'Yael Documentation',
               [u'Herve Jegou & Matthijs Douze'], 1)
              ]
+
+# breathe_projects = { "yael": "/Users/matthijs/src/yael/doc/xml" }
+
+# breathe_default_project = "yael"
+
+
