@@ -1,8 +1,8 @@
 mex siftgeo_read.c ;
-mex -g -largeArrayDims -DFINTEGER=long CFLAGS="\$CFLAGS -msse4 -I.. -Wall -O3 " LDFLAGS="\$LDFLAGS " yael_kmax.c ../yael/vector.c ../yael/machinedeps.c ../yael/binheap.c ../yael/sorting.c ;
-mex -g -largeArrayDims -DFINTEGER=long CFLAGS="\$CFLAGS -msse4 -I.. -Wall -O3 " LDFLAGS="\$LDFLAGS " yael_kmin.c ../yael/vector.c ../yael/machinedeps.c ../yael/binheap.c ../yael/sorting.c ;
+mex -g -largeArrayDims -DFINTEGER=long CFLAGS="\$CFLAGS -I.. -Wall -O3 " LDFLAGS="\$LDFLAGS " yael_kmax.c ../yael/vector.c ../yael/machinedeps.c ../yael/binheap.c ../yael/sorting.c ;
+mex -g -largeArrayDims -DFINTEGER=long CFLAGS="\$CFLAGS -I.. -Wall -O3 " LDFLAGS="\$LDFLAGS " yael_kmin.c ../yael/vector.c ../yael/machinedeps.c ../yael/binheap.c ../yael/sorting.c ;
+mex -g -largeArrayDims -DFINTEGER=long CFLAGS="\$CFLAGS -I.. -Wall -O3 " LDFLAGS="\$LDFLAGS " yael_modulate.c ../yael/embedding.c  ;
 mex -g -largeArrayDims -DFINTEGER=long CFLAGS="\$CFLAGS -msse4 -I.. -Wall -O3 " LDFLAGS="\$LDFLAGS " yael_hamming.c ../yael/hamming.c ../yael/machinedeps.c  ;
-mex -g -largeArrayDims -DFINTEGER=long CFLAGS="\$CFLAGS -msse4 -I.. -Wall -O3 " LDFLAGS="\$LDFLAGS " yael_modulate.c ../yael/embedding.c  ;
 
 mex -g -largeArrayDims -DFINTEGER=long -lmwblas -lmwlapack CFLAGS="\$CFLAGS -msse4 -I.. -Wall -O3 " LDFLAGS="\$LDFLAGS " yael_kmeans.c ../yael/kmeans.c ../yael/vector.c ../yael/machinedeps.c ../yael/binheap.c ../yael/nn.c ../yael/sorting.c ;
 mex -g -largeArrayDims -DFINTEGER=long -lmwblas -lmwlapack CFLAGS="\$CFLAGS -msse4 -I.. -Wall -O3 " LDFLAGS="\$LDFLAGS " yael_nn.c ../yael/vector.c ../yael/machinedeps.c ../yael/binheap.c ../yael/nn.c ../yael/sorting.c ;

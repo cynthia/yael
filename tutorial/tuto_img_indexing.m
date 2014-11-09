@@ -34,7 +34,7 @@ fprintf ('* Loaded %d images in %.3f seconds\n', numel(imgs), toc); tic
 [sifts, meta] = arrayfun (@(x) (siftgeo_read([dir_data strrep(x.name, '.jpg', '.siftgeo')])), ...
                                 img_list, 'UniformOutput', false) ; 
 nsifts = cellfun(@(x)(size(x,2)),sifts);
-totsifs = sum(nsifts);
+totsifts = sum(nsifts);
 
 fprintf ('* Loaded %d descriptors in %.3f seconds\n', totsifts, toc); tic
 
@@ -95,7 +95,7 @@ fprintf ('* Quantization, bitvectors computed and added to IVF in %.3fs\n',  cpu
 % Save inverted file filename on disk
 fivf_name = 'holidays100.ivf'; 
 fprintf ('* Save the inverted file to %s\n', fivf_name);
-ivfhe.save (ivfhe, ivfname);
+ivfhe.save (ivfhe, fivf_name);
 
 % Free the variables associated with the inverted file
 fprintf ('* Free the inverted file\n');
@@ -112,15 +112,16 @@ ivfhe = yael_ivf_he (fivf_name);
 %-------------------------------------------------------------------------
 Queries = [1 13 23 42 63 83];
 nq = numel (Queries);
-nshow = 6;
-
 
 % Configure the drawing zone
-phandler = zeros (nshow, 1);  
-figure('Position', [sz(3)/8 sz(4)/2 sz(3)*3/4 sz(4)/3]); 
+nshow = 6;
+phandler = zeros (nshow, 1);
+sz = get (0, 'ScreenSize');
+
+figure('Position', [sz(3)/8 sz(4)/2 sz(3)*3/4 sz(4)/4]);
 for q = 1:nq
   for pl = 1:nshow
-    phandler(q, pl) = subplot('Position', [(pl-1)/nshow 0 0.99/nshow 1]); 
+    phandler(q, pl) = subplot('Position', [(pl-1)/nshow 0 0.99/nshow 1]);
   end
 end
 
@@ -131,7 +132,7 @@ for q = 1:nq
   matches = ivfhe.query (ivfhe, int32(1:nsifts(qimg)), sifts{qimg}, ht);
   fprintf ('* %d Queries performed in %.3f seconds -> %d matches\n', nsifts(qimg), toc,  size (matches, 2));
 
-  % Translate to image identifiers and count number of matches per image, 
+  % Translate to image identifiers and count number of matches per image,
   m_imids = descid_to_imgid(matches(2,:));
   n_immatches = hist (m_imids, 1:nimg);
 
@@ -140,29 +141,23 @@ for q = 1:nq
 
   % Images are ordered by descreasing score
   [~, idx] = sort (n_imscores, 'descend');
-  
+
   % We assume that the first image is the query itself (warning!)
-  sz = get (0, 'ScreenSize');
-  subplot(phandler(1,1)), imagesc(imgs{idx(1)}); 
+  subplot(phandler(1,1)), imagesc(imgs{idx(1)});
   s = sprintf('Query -> %d descriptors', size(sifts{idx(1)}, 2));
   title (s); axis off image
-  
+
   for s = 2:nshow
     subplot(phandler(1,s)), imagesc(imgs{idx(s)}); axis off image; hold on;
     str = sprintf ('%d matches \n score %.3f', n_immatches(idx(s)), 100*n_imscores(idx(s)));
-    title (str); 
+    title (str);
 
     % Display the matches
     mids = matches (2, find (m_imids == idx(s))) - imgid_to_descid(idx(s));
 
     plot(meta{idx(s)}(1,:),meta{idx(s)}(2,:),'r.');
-    plot(meta{idx(s)}(1,mids),meta{idx(s)}(2,mids),'y.'); 
+    plot(meta{idx(s)}(1,mids),meta{idx(s)}(2,mids),'y.');
     hold off;
   end
   pause
 end
-close;
-
-
-
-

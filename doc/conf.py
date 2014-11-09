@@ -50,7 +50,7 @@ copyright = u'2010-2014, Hervé Jégou & Matthijs Douze'
 # built documents.
 #
 # The short X.Y version.
-version = '4'
+version = '4.38'
 # The full version, including alpha/beta/rc tags.
 release = 'VVV'
 

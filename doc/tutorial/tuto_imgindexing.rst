@@ -389,6 +389,7 @@ essence compute here a histogram weighted by the match weights.
   % Configure the drawing zone
   nshow = 6;
   phandler = zeros (nshow, 1);
+  sz = get (0, 'ScreenSize');
   figure('Position', [sz(3)/8 sz(4)/2 sz(3)*3/4 sz(4)/4]);
   for q = 1:nq
     for pl = 1:nshow
@@ -414,7 +415,6 @@ essence compute here a histogram weighted by the match weights.
     [~, idx] = sort (n_imscores, 'descend');
 
     % We assume that the first image is the query itself (warning!)
-    sz = get (0, 'ScreenSize');
     subplot(phandler(1,1)), imagesc(imgs{idx(1)});
     s = sprintf('Query -> %d descriptors', size(sifts{idx(1)}, 2));
     title (s); axis off image
