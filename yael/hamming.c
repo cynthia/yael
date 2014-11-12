@@ -186,6 +186,27 @@ void compute_hamming (uint16 * dis, const uint8 * a, const uint8 * b,
 
   int i, j;
   const uint8 * pb = b;
+
+  /* case with number of bits being a power of 64 */
+  if (ncodes % 8 == 0) {
+    int l;
+    
+    for (j = 0 ; j < nb ; j++) {
+      const uint8 * pa = a;
+      for (i = 0 ; i < na ; i++) {
+        *dis = 0;
+        for (l = 0 ; l < ncodes ; l += 8) {
+          (*dis) += hamming_64 (pa+l, pb+l);
+        }
+        pa += ncodes; 
+        dis++;
+      }
+      pb += ncodes;
+    }
+    return;
+  }
+
+  /* Default, slow version */
   for (j = 0 ; j < nb ; j++) {
     const uint8 * pa = a;
     for (i = 0 ; i < na ; i++) {
