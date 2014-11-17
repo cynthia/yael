@@ -24,7 +24,9 @@ void mexFunction (int nlhs, mxArray *plhs[],
 
 {
   if (nrhs != 4) 
-    mexErrMsgTxt ("Invalid number of input arguments: either 2 for initialization or 4 for feeding the heap");
+    mexErrMsgTxt ("Invalid number of input arguments. \n"
+                  "[bhv,bhidx] = yael_minheap (bhv, bhidx, val, idx);\n"
+                  "  where the vectors should be: single (for value) or uint32 (for indices)" );
   
   if (nlhs != 2)
     mexErrMsgTxt ("2 output arguments are expected");
@@ -65,9 +67,20 @@ void mexFunction (int nlhs, mxArray *plhs[],
   memcpy (bh_ids, mxGetPr (ARGIN_IDSH), k * nh * sizeof (*bh_ids));
   
   int i, j;
-  for (j = 0 ; j < nh ; j++)
+  /*
+  for (j = 0 ; j < nh ; j++) 
     fbinheap_add (k, bh_val + j * k, bh_ids + j * k, n, val + j * n, ids);
+  */
+   
+  for (j = 0 ; j < nh ; j++) {
+    fbinheap_add (k, bh_val, bh_ids, n, val, ids);
+    bh_val += k;
+    bh_ids += k;
+    val += n;
+  }
+            
 } 
+
 
 /*--------------------------------*/
 /* Simple binary heap             */
