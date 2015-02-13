@@ -153,7 +153,7 @@ static void gmm_compute_params (int n, const float * v, const float * p,
 
   } else {
     /* fast and complicated */
-
+    
     if(n_thread<=1) 
       compute_sum_dcov(n,k,d,v,mu_old,p,g->mu,g->sigma,g->w);
     else
@@ -271,7 +271,7 @@ static void softmax_ref(int k, int n, const float *f, float *p, float *coeffs) {
 
     /* find max */
     float maxval = -1e30;
-    for(l = 0; l < k; l++) /* loop over examples */
+    for(l = 0; l < k; l++) 
       if(F(l, i) > maxval) maxval = F(l, i);
 
     float s = 0.0;
@@ -286,10 +286,12 @@ static void softmax_ref(int k, int n, const float *f, float *p, float *coeffs) {
 
     if(coeffs) 
       coeffs[i] = log(s) + maxval;
-    
-    float is = 1.0 / s;
-    for(l = 0; l < k; l++) 
-      P(l, i) *= is;
+
+    if(s != 0) {
+      float is = 1.0 / s;
+      for(l = 0; l < k; l++) 
+	P(l, i) *= is;
+    }
   }
 
 #undef F
@@ -352,6 +354,7 @@ void gmm_compute_p (int n, const float * v,
       p[i * k + j] = logdetnr[j] - 0.5 * p[i * k + j] + lg[j];
     }
   }
+
   free(lg);
   softmax_ref(k, n, p, p, NULL);
 
