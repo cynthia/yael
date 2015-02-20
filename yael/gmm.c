@@ -277,7 +277,7 @@ static void softmax_ref(int k, int n, const float *f, float *p, float *coeffs) {
     float s = 0.0;
     for(l = 0; l < k; l++) {
       /* P(l, i) = exp(F(l, i) - maxval); */
-      if(F(l, i) > maxval - norm_to_0) {
+      if(F(l, i) >= maxval - norm_to_0) {
         P(l, i) = exp(F(l, i) - maxval);
         s += P(l, i); 
       } else 
