@@ -29,7 +29,11 @@ lapackldflags='-lblas -llapack'
 # -llapack on Ubuntu and Fedora Core Linux. Warn: on FC14, -lblas is
 # available but very slow. 
 
-if [ -e /usr/lib/libblas.so.3gf ]; then
+if [ -e /usr/lib64/atlas/libtatlas.so ]; then
+   # blas and lapack lib on Fedora Core 21, libTatlas is for the multi-threaded version
+   # libSatas is for single-threaded
+   lapackldflags="/usr/lib64/atlas/libtatlas.so"
+elif [ -e /usr/lib/libblas.so.3gf ]; then
    # special names for libs on ubuntu
    lapackldflags="/usr/lib/libblas.so.3gf /usr/lib/liblapack.so.3gf"
 elif [ -e /usr/lib64/atlas/libblas.so.3 ]; then 
