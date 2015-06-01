@@ -17,6 +17,11 @@ ifeq "$(USEOPENMP)" "yes"
   EXTRAYAELLDFLAG+=-fopenmp
 endif
 
+ifneq "$(SWIG)" "no"
+  PYTHONWRAP = yael_wrap.o
+  NUMPYCFLAGS =
+  PYTHONLDFLAGS = 
+endif
 
 #############################
 # Various  
@@ -68,7 +73,7 @@ yael_wrap.c : yael.swg common.swg nn.h kmeans.h gmm.h eigs.h hkm.h \
        ivf.h hamming.h
 	$(SWIG) -I.. $(NUMPYSWIGFLAGS) $< 
 
-_yael.so: yael_wrap.o libyael.$(SHAREDEXT)
+_yael.so: $(PYTHONWRAP) libyael.$(SHAREDEXT)
 	$(CC) $(LDFLAGS) -o $@ $(WRAPLDFLAGS) $^ $(PYTHONLDFLAGS) $(LAPACKLDFLAGS) $(THREADLDFLAGS) $(YAELLDFLAGS)
 
 __init__.py: 

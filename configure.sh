@@ -126,12 +126,13 @@ while [ $# -gt 0 ] ; do
 	--debug)    cflags="${cflags/ -O3/}" ;;
 	
 	--yael=*)   yaelprefix=${a#*=};;
-        --swig=*)   swig=${a#*=} ;;
-	--lapack=*) lapackldflags=${a#*=} ;;
-        --enable-arpack) usearpack=yes;;
-	--arpack=*) arpackldflags=${a#*=} ;;
-        --msse4)    cflags="$cflags -msse4 " ;;
-	--fortran-64bit-int) 
+    --swig=*)   swig=${a#*=} ;;
+    --noswig)   swig='' ;;
+    --lapack=*) lapackldflags=${a#*=} ;;
+    --enable-arpack) usearpack=yes;;
+    --arpack=*) arpackldflags=${a#*=} ;;
+    --msse4)    cflags="$cflags -msse4 " ;;
+    --fortran-64bit-int)
             lapackcflags="$lapackcflags -DFINTEGER=long" ;;       
 
 	--mac32)    
@@ -172,11 +173,15 @@ if [ -z "$swig" ]; then
   if which swig ; then
     swig=swig
   else 
-    echo "Error: no swig executable found. Provide one with --swig"
-    exit 1
+    echo "Warning: no swig executable found. Provide one with --swig to active python interface"
   fi
 fi
 
+if [ -z "$swig" ]; then
+    swig="no"
+else
+    swig="$swig -python"
+fi
 
 cat <<EOF | tee makefile.inc
 
@@ -193,8 +198,7 @@ YAELCONF=$conf
 YAELCFLAGS=-I$yaelinc
 YAELLDFLAGS=-L$yaellib -Wl,-rpath,$yaellib -lyael
 
-
-SWIG=$swig -python
+SWIG=$swig
 
 WRAPLDFLAGS=$wrapldflags
 LAPACKLDFLAGS=$lapackldflags
