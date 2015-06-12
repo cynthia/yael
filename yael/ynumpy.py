@@ -167,7 +167,7 @@ def fvecs_read(filename, nmax = -1, c_contiguous = True):
         fv = numpy.fromfile(filename, dtype = numpy.float32)
         if fv.size == 0:
             return numpy.zeros((0,0))            
-        dim = fv.view(numpy.int32)[0] 
+        dim = fv.view(numpy.int32)[0]
         assert dim>0
         fv = fv.reshape(-1,1+dim)
         if not all(fv.view(numpy.int32)[:,0]==dim):
@@ -351,6 +351,23 @@ def fisher(gmm_npy, v,
     yael.gmm_fisher(n, fvec_ref(v), gmm, flags, fvec_ref(fisher_out))
 
     return fisher_out
+
+
+def vlad(centroids, v):
+    _check_row_float32(v)
+    n, d = v.shape
+
+    _check_row_float32(centroids)
+    k, d2 = centroids.shape
+    assert d2 == d
+    
+    vlad_out = numpy.zeros((k, d), dtype = numpy.float32)
+    yael.vlad_compute(k, d, yael.numpy_to_fvec_ref(centroids),
+                      n, yael.numpy_to_fvec_ref(v),
+                      yael.numpy_to_fvec_ref(vlad_out))
+
+    return vlad_out
+
 
 def kmin(v, k): 
     """ return indices of the k smallest values of each line of an array"""

@@ -2,7 +2,6 @@
 
 include ../makefile.inc
 
-all: libyael.a libyael.$(SHAREDEXT) _yael.so __init__.py
 
 
 ifeq "$(USEARPACK)" "yes"
@@ -21,7 +20,10 @@ ifneq "$(SWIG)" "no"
   PYTHONWRAP = yael_wrap.o
   NUMPYCFLAGS =
   PYTHONLDFLAGS = 
+  PYTARGETS = _yael.so __init__.py
 endif
+
+all: libyael.a libyael.$(SHAREDEXT) $(PYTARGETS)
 
 #############################
 # Various  
